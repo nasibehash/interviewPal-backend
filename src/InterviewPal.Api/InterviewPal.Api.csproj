@@ -15,4 +15,8 @@
     <ProjectReference Include="..\InterviewPal.Infrastructure\InterviewPal.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="..\..\content\*.json" Link="content\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
