@@ -24,16 +24,16 @@
       ],
       "choices": [
         {
-          "text": "برای standalone بودن باید همیشه `standalone: true` نوشت"
+          "text": "برای اینکه کامپوننت standalone باشد باید همیشه `standalone: true` را صریحاً در متادیتا بنویسی"
         },
         {
-          "text": "standalone فقط برای کامپوننت‌های lazy-load معنی دارد"
+          "text": "standalone فقط برای کامپوننت‌هایی که lazy-load می‌شوند معنی دارد و بقیه به NgModule نیاز دارند"
         },
         {
-          "text": "هر کامپوننت حتماً باید در `declarations` یک `NgModule` ثبت شود"
+          "text": "هر کامپوننت حتماً باید در آرایه‌ی `declarations` یک `NgModule` ثبت شود تا قابل استفاده باشد"
         },
         {
-          "text": "کامپوننت‌ها به‌صورت پیش‌فرض standalone هستند و وابستگی‌هایشان را در آرایه‌ی `imports` خودشان اعلام می‌کنند، بدون نیاز به `NgModule`",
+          "text": "کامپوننت‌ها پیش‌فرض standalone هستند و وابستگی‌هایشان را در `imports` خودشان اعلام می‌کنند",
           "isCorrect": true
         }
       ]
@@ -56,16 +56,16 @@
       ],
       "choices": [
         {
-          "text": "`track` اختیاری است و اگر ننویسی خودکار index استفاده می‌شود"
+          "text": "`track` اختیاری است و اگر ننویسی Angular خودکار از index آیتم برای شناسایی و مقایسه‌ی آیتم‌ها استفاده می‌کند"
         },
         {
-          "text": "برای `@for` باید حتماً `CommonModule` را import کنی"
+          "text": "برای استفاده از `@for` باید حتماً `CommonModule` یا `NgFor` را در آرایه‌ی imports کامپوننت وارد کنی"
         },
         {
-          "text": "`@for` فقط روی آرایه کار می‌کند و روی Observable خطا می‌دهد"
+          "text": "`@for` فقط روی آرایه کار می‌کند و اگر منبع Observable باشد خطای کامپایل می‌دهد"
         },
         {
-          "text": "عبارت `track` اجباری است و برای شناسایی هر آیتم (ترجیحاً یک id یکتا) استفاده می‌شود؛ بلوک `@empty` هم برای لیست خالی وجود دارد",
+          "text": "`track` اجباری است و برای شناسایی آیتم‌ها (ترجیحاً با id یکتا) به کار می‌رود؛ `@empty` هم دارد",
           "isCorrect": true
         }
       ]
@@ -88,7 +88,7 @@
       ],
       "choices": [
         {
-          "text": "`[value]`, `(click)`, `((ngModel))`"
+          "text": "`[value]=\"x\"`, `(click)=\"fn()\"`, `((ngModel))=\"x\"`"
         },
         {
           "text": "`(value)=\"x\"`, `[click]=\"fn()\"`, `[ngModel]=\"x\"`"
@@ -98,7 +98,7 @@
           "isCorrect": true
         },
         {
-          "text": "`{{value}}`, `[click]`, `(ngModel)`"
+          "text": "`{{value}}`, `[click]=\"fn()\"`, `(ngModel)=\"x\"`"
         }
       ]
     },
@@ -154,17 +154,17 @@
       ],
       "choices": [
         {
-          "text": "`id = input.required<number>()` یک ورودی اجباری می‌سازد که به‌صورت `id()` خوانده می‌شود و `saved = output<string>()` خروجی است که با `saved.emit(...)` فعال می‌شود",
+          "text": "`id = input.required<number>()` ورودی اجباری است که با `id()` خوانده می‌شود و `output<string>()` با `emit` فعال می‌شود",
           "isCorrect": true
         },
         {
-          "text": "`output()` یک signal است و با `.set()` رویداد می‌فرستد"
+          "text": "`output()` یک signal است و برای ارسال رویداد باید روی آن `.set(value)` را صدا زد تا والد خبردار شود"
         },
         {
-          "text": "`input()` مقدار را مستقیم به‌صورت property ساده (بدون پرانتز) برمی‌گرداند"
+          "text": "`input()` مقدار را مستقیم به‌صورت یک property ساده و بدون نیاز به پرانتز برمی‌گرداند و مثل یک فیلد معمولی خوانده می‌شود"
         },
         {
-          "text": "ورودی را باید حتماً با `@Input()` و سپس تبدیل دستی به signal ساخت"
+          "text": "ورودی باید حتماً با `@Input()` تعریف شود و بعد به‌صورت دستی داخل یک signal جداگانه کپی و نگه‌داری شود"
         }
       ]
     },
@@ -186,17 +186,17 @@
       ],
       "choices": [
         {
-          "text": "سرویس در زمان build به‌صورت ثابت داخل bundle کپی می‌شود"
+          "text": "سرویس هنگام build به‌صورت ثابت داخل باندل هر کامپوننتی که از آن استفاده می‌کند کپی می‌شود"
         },
         {
-          "text": "یک نمونه‌ی singleton در injector ریشه‌ی برنامه ساخته می‌شود و اگر هیچ‌جا استفاده نشود tree-shake می‌شود",
+          "text": "یک نمونه‌ی singleton در injector ریشه ساخته می‌شود و اگر استفاده نشود tree-shake می‌شود",
           "isCorrect": true
         },
         {
-          "text": "برای هر کامپوننت یک نمونه‌ی جدید ساخته می‌شود"
+          "text": "به‌ازای هر کامپوننتی که آن را inject کند یک نمونه‌ی جدید و کاملاً مستقل از بقیه ساخته می‌شود"
         },
         {
-          "text": "سرویس فقط در ماژول ریشه (`AppModule`) قابل استفاده است"
+          "text": "سرویس فقط داخل `AppModule` قابل استفاده است و کامپوننت‌های standalone به آن دسترسی ندارند"
         }
       ]
     },
@@ -267,17 +267,17 @@
       ],
       "choices": [
         {
-          "text": "به Observable/Promise به‌صورت خودکار subscribe و هنگام destroy شدن unsubscribe می‌کند و view را برای بررسی علامت می‌زند",
+          "text": "خودکار subscribe و هنگام destroy شدن unsubscribe می‌کند و view را برای بررسی علامت می‌زند",
           "isCorrect": true
         },
         {
-          "text": "فقط برای درخواست‌های HTTP کار می‌کند"
+          "text": "فقط برای درخواست‌های HTTP کار می‌کند و روی Observableهای دیگر اثری ندارد"
         },
         {
-          "text": "باعث می‌شود Observable فقط یک‌بار در کل برنامه subscribe شود"
+          "text": "تضمین می‌کند Observable در کل برنامه فقط یک‌بار subscribe شود، حتی اگر چند بار استفاده شود"
         },
         {
-          "text": "مقدار Observable را به‌صورت synchronous و بدون subscribe می‌خواند"
+          "text": "مقدار Observable را همزمان و بدون هیچ subscribe‌ای مستقیم از منبع می‌خواند"
         }
       ]
     },
@@ -303,13 +303,13 @@
           "isCorrect": true
         },
         {
-          "text": "`{ path: 'admin', lazy: true, component: Admin }`"
+          "text": "`{ path: 'admin', lazy: true, component: Admin, chunk: 'admin', preload: true }`"
         },
         {
-          "text": "با `providedIn: 'lazy'` روی کامپوننت"
+          "text": "`{ path: 'admin', component: import('./admin').then(m => m.Admin), lazy: true }`"
         },
         {
-          "text": "`{ path: 'admin', component: import('./admin') }`"
+          "text": "`{ path: 'admin', loadModule: () => require('./admin'), lazy: true, chunk: 'admin' }`"
         }
       ]
     },
@@ -331,17 +331,17 @@
       ],
       "choices": [
         {
-          "text": "درخواست یک‌بار ارسال و نتیجه cache می‌شود"
+          "text": "درخواست یک‌بار ارسال می‌شود و نتیجه به‌صورت خودکار برای فراخوانی‌های بعدی cache می‌شود"
         },
         {
-          "text": "هیچ درخواستی ارسال نمی‌شود چون Observable سرد (cold) است و فقط با subscribe شروع می‌شود",
+          "text": "هیچ درخواستی ارسال نمی‌شود چون Observable سرد است و فقط با subscribe شروع می‌شود",
           "isCorrect": true
         },
         {
-          "text": "خطای کامپایل می‌دهد"
+          "text": "خطای کامپایل می‌دهد چون Observable باید حتماً با `subscribe` یا `async` pipe مصرف شود"
         },
         {
-          "text": "درخواست بلافاصله ارسال می‌شود و نتیجه دور ریخته می‌شود"
+          "text": "درخواست بلافاصله ارسال می‌شود ولی چون کسی subscribe نکرده نتیجه دور ریخته می‌شود"
         }
       ]
     },
@@ -363,17 +363,17 @@
       ],
       "choices": [
         {
-          "text": "یک متغیر عمومی در کلاس کامپوننت تعریف می‌کند"
+          "text": "یک متغیر عمومی در کلاس کامپوننت تعریف می‌کند که در تمام قالب‌های دیگر هم دیده می‌شود"
         },
         {
-          "text": "مثل `let` جاوااسکریپت اجازه‌ی مقداردهی مجدد در قالب می‌دهد"
+          "text": "مثل `let` جاوااسکریپت اجازه‌ی مقداردهی مجدد و تغییر مقدار در event handlerهای قالب را هم می‌دهد"
         },
         {
-          "text": "یک متغیر محلی فقط‌خواندنی در قالب می‌سازد که مقدارش هر بار خودکار از عبارت به‌روز می‌شود",
+          "text": "یک متغیر محلی فقط‌خواندنی در قالب می‌سازد که با هر تغییر عبارت خودکار به‌روز می‌شود",
           "isCorrect": true
         },
         {
-          "text": "فقط داخل `@for` قابل استفاده است"
+          "text": "فقط داخل بلوک `@for` قابل استفاده است و بیرون از حلقه تعریف نمی‌شود"
         }
       ]
     },
@@ -395,17 +395,17 @@
       ],
       "choices": [
         {
-          "text": "هیچ تفاوتی ندارند"
+          "text": "هیچ تفاوتی ندارند چون Angular نتیجه‌ی هر دو را به‌طور خودکار و برای همه‌ی رندرهای بعدی هم cache می‌کند"
         },
         {
-          "text": "چون متدها در قالب مجاز نیستند"
+          "text": "چون فراخوانی متد در قالب مجاز نیست و باید حتماً با pipe انجام شود وگرنه قالب اصلاً کامپایل نمی‌شود"
         },
         {
-          "text": "متد در هر change detection دوباره اجرا می‌شود ولی pure pipe فقط وقتی ورودی‌اش (با مقایسه‌ی reference) عوض شود اجرا می‌شود",
+          "text": "متد در هر change detection دوباره اجرا می‌شود، ولی pure pipe فقط وقتی reference ورودی عوض شود",
           "isCorrect": true
         },
         {
-          "text": "چون pipe ها همیشه async هستند"
+          "text": "چون pipeها همیشه به‌صورت async اجرا می‌شوند و متدها همیشه synchronous هستند"
         }
       ]
     },
@@ -427,16 +427,16 @@
       ],
       "choices": [
         {
-          "text": "`<router-outlet>` با نام‌گذاری"
+          "text": "`<router-outlet>` با نام‌گذاری جداگانه برای هر ناحیه و تعریف route جداگانه برای سربرگ و بدنه‌ی کارت"
         },
         {
-          "text": "چند کامپوننت تو در تو با `providers`"
+          "text": "چند کامپوننت تو در تو که هرکدام با `providers` جدا محتوا را به فرزند تزریق می‌کنند"
         },
         {
-          "text": "ورودی `@Input` از نوع HTML رشته‌ای و `innerHTML`"
+          "text": "دو ورودی `@Input` از نوع رشته‌ی HTML و نمایش آنها با `innerHTML` در بخش‌های مختلف Card به‌صورت جداگانه"
         },
         {
-          "text": "چند `<ng-content>` با `select` مثل `<ng-content select=\"[card-header]\" />` و یک `<ng-content />` پیش‌فرض",
+          "text": "چند `<ng-content>` با `select` (مثل `select=\"[card-header]\"`) به‌همراه یک `<ng-content />` پیش‌فرض",
           "isCorrect": true
         }
       ]
@@ -459,17 +459,17 @@
       ],
       "choices": [
         {
-          "text": "Reactive Forms فقط با RxJS کار می‌کنند و signal را پشتیبانی نمی‌کنند"
+          "text": "Reactive Forms فقط با RxJS کار می‌کنند و هیچ پشتیبانی از signal یا مدل‌های جدید ندارند"
         },
         {
-          "text": "Template-driven Forms اعتبارسنجی ندارند"
+          "text": "Template-driven Forms هیچ اعتبارسنجی داخلی ندارند و همه‌ی قواعد را باید به‌صورت دستی در کد نوشت"
         },
         {
-          "text": "در Reactive Forms مدل فرم (`FormGroup`/`FormControl`) صریحاً در کلاس ساخته و مدیریت می‌شود (تایپ‌دار، قابل تست و مناسب فرم‌های پویا)، ولی Template-driven بیشتر با دایرکتیوهایی مثل `ngModel` در قالب و برای فرم‌های ساده است",
+          "text": "Reactive Forms مدل را صریحاً در کلاس (`FormGroup`) و قابل تست می‌سازند؛ Template-driven بیشتر با `ngModel` در قالب است",
           "isCorrect": true
         },
         {
-          "text": "هر دو دقیقاً یکسانند و فقط اسمشان فرق دارد"
+          "text": "هر دو دقیقاً یکسانند و فقط از نظر نام‌گذاری، سینتکس و محل تعریف مدل با هم فرق دارند"
         }
       ]
     },
@@ -491,17 +491,17 @@
       ],
       "choices": [
         {
-          "text": "تعریف یک `ngOnInit` که `classList` را تغییر می‌دهد"
+          "text": "تعریف یک `ngOnInit` که با `classList` و `addEventListener` مستقیم المان میزبان را در DOM تغییر می‌دهد"
         },
         {
-          "text": "استفاده از property `host` در متادیتای `@Component`/`@Directive` مثل `host: { '[class.active]': 'active()', '(click)': 'toggle()' }`",
+          "text": "property `host` در متادیتا مثل `host: { '[class.active]': 'active()', '(click)': 'toggle()' }`",
           "isCorrect": true
         },
         {
-          "text": "فقط `@HostBinding` و `@HostListener` مجاز هستند"
+          "text": "فقط `@HostBinding` و `@HostListener` مجاز هستند و ثبت `host` در متادیتای کامپوننت اصلاً پشتیبانی نمی‌شود"
         },
         {
-          "text": "دستکاری `document.querySelector` در constructor"
+          "text": "دستکاری المان با `document.querySelector` در constructor قبل از رندر شدن کامپوننت و آماده شدن DOM"
         }
       ]
     },
@@ -540,17 +540,17 @@
       ],
       "choices": [
         {
-          "text": "بلافاصله بعد از ساخته شدن اجرا می‌شود و نتیجه را دائمی ذخیره می‌کند"
+          "text": "بلافاصله بعد از ساخته شدن اجرا می‌شود و نتیجه را برای همیشه بدون بازمحاسبه ذخیره می‌کند"
         },
         {
-          "text": "با هر تغییر هر signal برنامه دوباره اجرا می‌شود"
+          "text": "با تغییر هر signal برنامه، حتی signalهای کاملاً نامرتبط با آن، دوباره از نو و از ابتدا اجرا می‌شود"
         },
         {
-          "text": "مقدار را lazy (فقط هنگام خواندن) محاسبه و تا وقتی وابستگی‌ها تغییر نکنند cache می‌کند",
+          "text": "فقط هنگام خواندن محاسبه می‌شود و تا تغییر وابستگی‌ها نتیجه‌ی cache را برمی‌گرداند",
           "isCorrect": true
         },
         {
-          "text": "می‌تواند مستقیماً با `.set()` مقداردهی شود"
+          "text": "می‌تواند مستقیماً با `.set()` یا `.update()` مقداردهی شود مثل یک signal معمولی و قابل نوشتن دیگر"
         }
       ]
     },
@@ -572,16 +572,16 @@
       ],
       "choices": [
         {
-          "text": "برای بارگذاری داده از API هنگام شروع کامپوننت"
+          "text": "برای بارگذاری داده از API هنگام شروع کامپوننت و نوشتن نتیجه‌ی آن در یک signal دیگر با استفاده از `set`"
         },
         {
-          "text": "برای ساختن مقدار مشتق از چند signal به‌جای `computed`"
+          "text": "برای ساختن مقدار مشتق از چند signal دیگر و به‌روز نگه داشتن خودکار آن، به‌جای استفاده از `computed` و وابستگی‌ها"
         },
         {
-          "text": "برای جایگزینی `ngOnInit`"
+          "text": "برای جایگزین کردن کامل `ngOnInit` و انجام همه‌ی کارهای راه‌اندازی اولیه‌ی کامپوننت در همان لحظه"
         },
         {
-          "text": "برای side effectهایی که باید با تغییر signalها اجرا شوند (لاگ، sync با `localStorage`، دستکاری DOM/کتابخانه‌ی خارجی)، نه برای مشتق کردن state",
+          "text": "برای side effectها (لاگ، sync با `localStorage`، DOM یا کتابخانه‌ی بیرونی)، نه مشتق کردن state",
           "isCorrect": true
         }
       ]
@@ -604,17 +604,17 @@
       ],
       "choices": [
         {
-          "text": "یک Observable را به signal تبدیل می‌کند"
+          "text": "یک Observable را به signal تبدیل می‌کند و هنگام destroy شدن کامپوننت به‌طور خودکار unsubscribe می‌کند"
         },
         {
-          "text": "signalی که مقدارش از یک منبع مشتق می‌شود (مثل computed) ولی می‌توان آن را دستی هم نوشت؛ با تغییر منبع دوباره به مقدار مشتق برمی‌گردد",
+          "text": "signalی مشتق از یک منبع (مثل computed) که دستی هم قابل نوشتن است و با تغییر منبع ریست می‌شود",
           "isCorrect": true
         },
         {
-          "text": "دو signal مختلف را دائماً دوطرفه sync می‌کند"
+          "text": "دو signal مختلف را به‌صورت دوطرفه و دائمی با هم sync می‌کند تا همیشه دقیقاً مقدار یکسانی داشته باشند"
         },
         {
-          "text": "فقط یک alias برای `computed` است"
+          "text": "فقط یک alias برای `computed` است و هیچ قابلیت اضافه‌ای نسبت به آن ندارد"
         }
       ]
     },
@@ -668,17 +668,17 @@
       ],
       "choices": [
         {
-          "text": "با `setTimeout` و unsubscribe بعد از چند ثانیه"
+          "text": "با `setTimeout` و unsubscribe دستی بعد از چند ثانیه از ساخته شدن کامپوننت یا بعد از دریافت اولین مقدار"
         },
         {
-          "text": "با `takeUntilDestroyed()` (در injection context یا با دادن `DestroyRef`) یا تبدیل به signal/`async` pipe",
+          "text": "با `takeUntilDestroyed()` (همراه `DestroyRef`) یا تبدیل به signal و `async` pipe",
           "isCorrect": true
         },
         {
-          "text": "با ذخیره‌ی Observable در `window`"
+          "text": "با ذخیره‌ی Observable در `window` تا بعداً از بیرون کامپوننت و از هر جای برنامه بسته شود"
         },
         {
-          "text": "با `ngOnDestroy` خالی، چون Angular خودش همه‌ی subscribeها را می‌بندد"
+          "text": "با یک `ngOnDestroy` خالی، چون Angular خودش همه‌ی subscribeهای دستی را هنگام نابودی کامپوننت می‌بندد"
         }
       ]
     },
@@ -700,17 +700,17 @@
       ],
       "choices": [
         {
-          "text": "فقط بعد از اولین خواندن signal subscribe می‌کند"
+          "text": "فقط بعد از اولین خواندن signal subscribe می‌کند و تا آن موقع هیچ درخواستی به سرور نمی‌فرستد"
         },
         {
-          "text": "خطاهای Observable را ساکت نگه می‌دارد و مقدار قبلی را برمی‌گرداند"
+          "text": "خطاهای Observable را ساکت نگه می‌دارد و به‌جای throw کردن همیشه آخرین مقدار موفق را برمی‌گرداند"
         },
         {
-          "text": "فوراً subscribe می‌کند، با destroy شدن context خودکار unsubscribe می‌کند و اگر `initialValue` ندهی نوع نتیجه `T | undefined` است",
+          "text": "فوراً subscribe می‌کند، خودکار unsubscribe می‌کند و بدون `initialValue` نوع `T | undefined` است",
           "isCorrect": true
         },
         {
-          "text": "همیشه مقدار اولیه‌ی `null` دارد"
+          "text": "همیشه مقدار اولیه‌ی `null` دارد و نوع خروجی آن هرگز از `T | null` تغییر نمی‌کند، حتی با `initialValue`"
         }
       ]
     },
@@ -732,17 +732,17 @@
       ],
       "choices": [
         {
-          "text": "جایگزین `@if` است و فقط شرط را کندتر ارزیابی می‌کند"
+          "text": "جایگزین `@if` است و فقط شرط را با تأخیر و کندتر ارزیابی می‌کند تا رندر اولیه سریع‌تر شود"
         },
         {
-          "text": "همه‌ی درخواست‌های HTTP کامپوننت را عقب می‌اندازد"
+          "text": "همه‌ی درخواست‌های HTTP داخل کامپوننت را عقب می‌اندازد تا بعد از رندر اولیه اجرا شوند"
         },
         {
-          "text": "کد یک بخش قالب (کامپوننت‌ها/دایرکتیوها/pipeهای استفاده‌شده در آن) را در chunk جدا می‌گذارد و فقط با تحقق یک trigger (مثل `on viewport`) لود و رندر می‌کند",
+          "text": "کد بخشی از قالب را در chunk جدا می‌گذارد و فقط با تحقق یک trigger (مثل `on viewport`) لود و رندر می‌کند",
           "isCorrect": true
         },
         {
-          "text": "کامپوننت را فقط در SSR رندر می‌کند"
+          "text": "کامپوننت را فقط هنگام SSR رندر می‌کند و در مرورگر هرگز آن را نمایش نمی‌دهد"
         }
       ]
     },
@@ -764,16 +764,16 @@
       ],
       "choices": [
         {
-          "text": "با پرتاب یک `Error` به صفحه‌ی ورود می‌رود"
+          "text": "گارد یک `Error` پرتاب می‌کند و Angular خودکار کاربر را به صفحه‌ی ورود منتقل می‌کند"
         },
         {
-          "text": "گارد با `window.location.href` ریدایرکت می‌کند و `false` برمی‌گرداند"
+          "text": "گارد با `window.location.href` ریدایرکت می‌کند و بعد مقدار `false` را برمی‌گرداند"
         },
         {
-          "text": "گارد فقط `boolean` برمی‌گرداند و ریدایرکت غیرممکن است"
+          "text": "گارد فقط `boolean` برمی‌گرداند و ریدایرکت داخل خود گارد اصلاً امکان‌پذیر نیست"
         },
         {
-          "text": "تابع `CanActivateFn` مقدار `true` یا یک `UrlTree` (مثلاً `inject(Router).parseUrl('/login')`) برمی‌گرداند",
+          "text": "`CanActivateFn` مقدار `true` یا یک `UrlTree` (مثل `inject(Router).parseUrl('/login')`) برمی‌گرداند",
           "isCorrect": true
         }
       ]
@@ -813,17 +813,17 @@
       ],
       "choices": [
         {
-          "text": "یک `InjectionToken` تعریف می‌کنی و با `useValue` یا `useFactory` فراهمش می‌کنی (یا `factory` روی خود token)",
+          "text": "یک `InjectionToken` تعریف و با `useValue` یا `useFactory` (یا `factory` روی خود token) فراهمش می‌کنی",
           "isCorrect": true
         },
         {
-          "text": "هر رشته را می‌توان بدون تعریف token تزریق کرد"
+          "text": "هر رشته‌ی دلخواه را می‌توان بدون تعریف token و مستقیم با نام آن تزریق کرد"
         },
         {
-          "text": "مقدار را در `window` می‌گذاری"
+          "text": "مقدار را روی `window` می‌گذاری و در سرویس‌ها از همان‌جا می‌خوانی تا DI لازم نشود"
         },
         {
-          "text": "از یک `interface` به‌عنوان token استفاده می‌کنی چون در runtime هم وجود دارد"
+          "text": "از یک `interface` به‌عنوان token استفاده می‌کنی چون در runtime هم وجود دارد و مستقیم قابل تزریق است"
         }
       ]
     },
@@ -862,17 +862,17 @@
       ],
       "choices": [
         {
-          "text": "فقط با `FormGroup<any>` تایپ‌دار می‌شود"
+          "text": "فقط با `FormGroup<any>` تایپ‌دار می‌شود چون کنترل‌های فرد نوع مستقل نمی‌گیرند"
         },
         {
-          "text": "نوعش `any` است و نمی‌شود تایپ‌دار کرد"
+          "text": "نوعش `any` است و به‌خاطر ساختار پویای فرم نمی‌شود آن را تایپ‌دار کرد"
         },
         {
-          "text": "نوع مقدارش `string | null` است چون `reset()` مقدار را `null` می‌کند؛ با `nonNullable: true` یا `NonNullableFormBuilder` نوع `string` می‌شود",
+          "text": "نوع مقدارش `string | null` است چون `reset()` مقدار را `null` می‌کند؛ با `nonNullable: true` رفع می‌شود",
           "isCorrect": true
         },
         {
-          "text": "نوعش `string` است و هرگز `null` نمی‌شود"
+          "text": "نوعش `string` است و هرگز `null` نمی‌شود، حتی بعد از فراخوانی `reset()` روی فرم"
         }
       ]
     },
@@ -894,17 +894,17 @@
       ],
       "choices": [
         {
-          "text": "`Signal<ElementRef | undefined>`؛ بعد از رندر view مقدار می‌گیرد و می‌توان آن را در `computed`/`effect` خواند",
+          "text": "`Signal<ElementRef | undefined>` که بعد از رندر view مقدار می‌گیرد و در `computed`/`effect` قابل خواندن است",
           "isCorrect": true
         },
         {
-          "text": "خود `ElementRef` بلافاصله در constructor"
+          "text": "خود `ElementRef` که بلافاصله در constructor و قبل از رندر شدن view در دسترس است"
         },
         {
-          "text": "یک `Observable<ElementRef>`"
+          "text": "یک `Observable<ElementRef>` که باید با `subscribe` یا `async` pipe مصرف شود"
         },
         {
-          "text": "یک آرایه‌ی `ElementRef[]`"
+          "text": "یک آرایه‌ی `ElementRef[]` شامل همه‌ی المان‌های مطابق selector داخل view"
         }
       ]
     },
@@ -926,16 +926,16 @@
       ],
       "choices": [
         {
-          "text": "لازم نیست، Angular خودش متوجه می‌شود"
+          "text": "لازم نیست؛ Angular خودش با مقایسه‌ی محتوای اشیا و ساختار آنها متوجه جابه‌جایی آیتم‌ها می‌شود"
         },
         {
-          "text": "روی `Math.random()` تا همیشه به‌روز شود"
+          "text": "روی `Math.random()` تا هر بار همه‌ی آیتم‌ها به‌روز شوند و داده‌ی کهنه نماند"
         },
         {
-          "text": "روی `$index` چون سریع‌ترین است"
+          "text": "روی `$index` چون سریع‌ترین گزینه است و برای لیست‌هایی که قابل مرتب‌سازی یا حذف هستند هم کاملاً مناسب است"
         },
         {
-          "text": "روی شناسه‌ی یکتای پایدار آیتم (مثل `item.id`) تا Angular بتواند DOM را جابه‌جا کند نه بازسازی",
+          "text": "روی شناسه‌ی یکتا و پایدار (مثل `item.id`) تا Angular بتواند DOM را جابه‌جا کند نه بازسازی",
           "isCorrect": true
         }
       ]
@@ -975,17 +975,17 @@
       ],
       "choices": [
         {
-          "text": "باز هم `ngOnChanges` می‌نویسی چون با input() کار نمی‌کند"
+          "text": "باز هم `ngOnChanges` می‌نویسی چون `input()` با `computed` و `effect` سازگار نیست"
         },
         {
-          "text": "ورودی را در متغیر عمومی کپی می‌کنی"
+          "text": "ورودی را در متغیر عمومی کپی می‌کنی و با `setInterval` تغییر آن را بررسی می‌کنی"
         },
         {
-          "text": "از `computed()` (یا `linkedSignal`) روی خود signal ورودی استفاده می‌کنی و برای تبدیل نوع attribute از `transform` مثل `numberAttribute`",
+          "text": "از `computed()` روی خود signal ورودی و برای تبدیل نوع attribute از `transform` (مثل `numberAttribute`)",
           "isCorrect": true
         },
         {
-          "text": "از `setInterval` برای بررسی تغییر استفاده می‌کنی"
+          "text": "ورودی را به `@Input()` برمی‌گردانی چون signal input تبدیل مقدار را پشتیبانی نمی‌کند"
         }
       ]
     },
@@ -1041,17 +1041,17 @@
       ],
       "choices": [
         {
-          "text": "باعث می‌شوند اعتبارسنجی حذف شود"
+          "text": "باعث می‌شوند اعتبارسنجی فرم کاملاً حذف شود و تنها به بررسی سمت سرور تکیه شود"
         },
         {
-          "text": "فقط برای فرم‌های تک‌فیلدی مناسب‌اند"
+          "text": "فقط برای فرم‌های تک‌فیلدی مناسب‌اند و برای فرم‌های تودرتو و پیچیده باید همچنان از Reactive Forms استفاده کرد"
         },
         {
-          "text": "مدل داده خودش یک signal است و وضعیت فرم از آن به‌صورت reactive و type-safe مشتق می‌شود؛ قواعد اعتبارسنجی به‌صورت schema روی مدل تعریف می‌شوند، بدون `FormControl` جدا",
+          "text": "مدل داده خودش یک signal است و وضعیت فرم از آن reactive و type-safe مشتق می‌شود، بدون `FormControl` جدا",
           "isCorrect": true
         },
         {
-          "text": "فقط سرعت رندر HTML را بیشتر می‌کنند"
+          "text": "فقط سرعت رندر HTML را بیشتر می‌کنند و تغییری در مدل داده و اعتبارسنجی ایجاد نمی‌کنند"
         }
       ]
     },
@@ -1073,16 +1073,16 @@
       ],
       "choices": [
         {
-          "text": "جایگزین کامل `HttpClient` و interceptorها هستند"
+          "text": "جایگزین کامل `HttpClient` و interceptorها هستند و دیگر نیازی به آنها نیست"
         },
         {
-          "text": "درخواست را فقط یک‌بار در عمر برنامه اجرا می‌کنند و هرگز reload نمی‌شوند"
+          "text": "درخواست را فقط یک‌بار در عمر برنامه اجرا می‌کنند و بعد از آن هرگز دوباره reload نمی‌شوند"
         },
         {
-          "text": "فقط یک wrapper برای `setTimeout` هستند"
+          "text": "فقط یک wrapper ساده روی `setTimeout` هستند تا اجرای درخواست را به تعویق بیندازند"
         },
         {
-          "text": "درخواست/عملیات async را به‌صورت signal مدل می‌کنند (`value`, `status`, `error`, `isLoading`) و وقتی signalهای پارامترشان عوض شود دوباره بارگذاری (و اجرای قبلی را لغو) می‌کنند",
+          "text": "عملیات async را به‌صورت signal (`value`, `status`, `error`) مدل می‌کنند و با تغییر پارامترها دوباره بارگذاری می‌کنند",
           "isCorrect": true
         }
       ]
@@ -1139,17 +1139,17 @@
       ],
       "choices": [
         {
-          "text": "با `document.createElement` و `appendChild`"
+          "text": "با `document.createElement` و `appendChild` المان را می‌سازی و به DOM اضافه می‌کنی"
         },
         {
-          "text": "با `ViewContainerRef.createComponent` یا `NgComponentOutlet` و برای ورودی‌ها `componentRef.setInput('name', value)` (یا `ngComponentOutletInputs`)",
+          "text": "با `ViewContainerRef.createComponent` یا `NgComponentOutlet` و برای ورودی‌ها `componentRef.setInput(...)`",
           "isCorrect": true
         },
         {
-          "text": "مستقیماً `componentRef.instance.name = value` چون ورودی signal یک property ساده است"
+          "text": "مستقیماً `componentRef.instance.name = value` می‌نویسی چون ورودی signal فقط یک property ساده و قابل نوشتن است"
         },
         {
-          "text": "ورودی‌ها را فقط از طریق constructor می‌دهی"
+          "text": "ورودی‌ها را فقط از طریق constructor کامپوننت می‌دهی و بعد از ساخت قابل تغییر نیستند"
         }
       ]
     },
@@ -1188,17 +1188,17 @@
       ],
       "choices": [
         {
-          "text": "باید `FormControl` را extend کنی"
+          "text": "باید کلاس `FormControl` را extend کنی و متد `setValue` آن را override کنی"
         },
         {
-          "text": "اینترفیس `ControlValueAccessor` (`writeValue`, `registerOnChange`, `registerOnTouched`, و اختیاری `setDisabledState`) و ثبت آن با توکن `NG_VALUE_ACCESSOR`",
+          "text": "`ControlValueAccessor` (متدهای `writeValue`, `registerOnChange`, `registerOnTouched`) و ثبت با `NG_VALUE_ACCESSOR`",
           "isCorrect": true
         },
         {
           "text": "فقط یک `@Input() value` و `@Output() valueChange` کافی است و هیچ اینترفیسی لازم نیست"
         },
         {
-          "text": "فقط `ngOnChanges` را پیاده‌سازی می‌کنی"
+          "text": "فقط `ngOnChanges` را پیاده‌سازی می‌کنی تا مقدار فرم به کامپوننت منتقل شود"
         }
       ]
     },
@@ -1254,16 +1254,16 @@
       ],
       "choices": [
         {
-          "text": "چون `inject` فقط در سرویس‌های root کار می‌کند"
+          "text": "چون `inject` فقط در سرویس‌های ثبت‌شده در root کار می‌کند و در کامپوننت‌ها مجاز نیست"
         },
         {
-          "text": "این خطا فقط در حالت production رخ می‌دهد"
+          "text": "این خطا فقط در build production رخ می‌دهد و در حالت توسعه هیچ مشکلی ندارد"
         },
         {
-          "text": "چون باید حتماً با `new` صدا زده شود"
+          "text": "چون `inject()` باید حتماً با `new` و همراه یک injector جدید صدا زده شود"
         },
         {
-          "text": "چون `inject()` فقط در injection context (constructor، field initializer، factory) مجاز است؛ راه‌حل: در field بگیر یا با `runInInjectionContext(injector, ...)` اجرا کن",
+          "text": "چون `inject()` فقط در injection context (constructor، field initializer) مجاز است؛ با `runInInjectionContext` اجرا کن",
           "isCorrect": true
         }
       ]
@@ -1286,17 +1286,17 @@
       ],
       "choices": [
         {
-          "text": "اجرای دوباره‌ی کد در هر تغییر signal"
+          "text": "اجرای دوباره‌ی کد به‌ازای هر تغییر signal و هر تغییر در ورودی‌های کامپوننت"
         },
         {
-          "text": "جایگزین `ngOnDestroy` برای پاک‌سازی"
+          "text": "جایگزین `ngOnDestroy` برای پاک‌سازی منابع و لغو subscribeها هنگام نابود شدن کامپوننت و خروج از صفحه"
         },
         {
-          "text": "اجرای کد یک‌بار بعد از اینکه Angular DOM را رندر کرد و فقط در مرورگر؛ مناسب کار با DOM/کتابخانه‌های خارجی به‌صورت امن در حضور SSR",
+          "text": "اجرای یک‌باره‌ی کد بعد از رندر DOM و فقط در مرورگر؛ مناسب کار امن با DOM و کتابخانه‌ها در SSR",
           "isCorrect": true
         },
         {
-          "text": "اجرای کد قبل از constructor کامپوننت"
+          "text": "اجرای کد قبل از constructor کامپوننت تا وابستگی‌ها زودتر مقداردهی شوند"
         }
       ]
     },
@@ -1335,17 +1335,17 @@
       ],
       "choices": [
         {
-          "text": "فقط تگ `script` را حذف می‌کند"
+          "text": "فقط تگ `script` را از HTML حذف می‌کند و بقیه‌ی المان‌ها را دست‌نخورده می‌گذارد"
         },
         {
-          "text": "sanitization داخلی Angular را برای آن مقدار خاموش می‌کنی و مسئولیت جلوگیری از XSS کاملاً با توست",
+          "text": "sanitization داخلی Angular را برای آن مقدار خاموش می‌کنی و مسئولیت XSS با توست",
           "isCorrect": true
         },
         {
-          "text": "Angular مقدار را قوی‌تر پاک‌سازی می‌کند"
+          "text": "Angular مقدار را قوی‌تر و دقیق‌تر از حالت عادی پاک‌سازی و escape می‌کند و کاملاً امن‌ترش می‌سازد"
         },
         {
-          "text": "بی‌خطر است چون Angular همه چیز را escape می‌کند"
+          "text": "بی‌خطر است چون Angular بعد از آن هم همه‌ی مقدارها را به‌طور خودکار escape می‌کند"
         }
       ]
     },
