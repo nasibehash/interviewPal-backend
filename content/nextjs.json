@@ -1,0 +1,1402 @@
+{
+  "technology": {
+    "slug": "nextjs",
+    "name": "Next.js",
+    "currentVersion": "16",
+    "supportedFrom": "14"
+  },
+  "questions": [
+    {
+      "id": "nextjs-app-router-basics",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "در App Router کدام فایل‌ها یک route را قابل دسترسی می‌کنند و چه نقشی دارند؟",
+      "shortAnswer": "در `app/` مسیر را پوشه‌ها تعیین می‌کنند و فقط وقتی `page.tsx` (یا `route.ts`) در پوشه باشد آن مسیر قابل دسترسی می‌شود. این اجازه می‌دهد کامپوننت‌ها، تست‌ها و ابزارها کنار همان route (colocation) بمانند.",
+      "explanation": "```\napp/\n  layout.tsx            ← layout ریشه (اجباری، شامل <html> و <body>)\n  page.tsx              ← /\n  blog/\n    layout.tsx\n    page.tsx            ← /blog\n    [slug]/page.tsx     ← /blog/hello\n    _components/        ← پوشه‌ی private (با _ از routing حذف می‌شود)\n  (marketing)/about/page.tsx   ← /about  (route group، بدون اثر در URL)\n```\nفایل‌های ویژه: `loading.tsx`, `error.tsx`, `not-found.tsx`, `template.tsx`, `route.ts`, `default.tsx`. در Next 15/16، App Router مبتنی بر React 19 است و به‌صورت پیش‌فرض همه‌ی کامپوننت‌ها Server Component هستند.",
+      "commonMistake": "فکر اینکه هر فایل در `app/` یک route عمومی می‌سازد.",
+      "followUp": "تفاوت مهم App Router و Pages Router در مدل داده‌گیری چیست؟",
+      "estimatedSeconds": 55,
+      "minVersion": "14",
+      "tags": [
+        "app-router",
+        "routing",
+        "fundamentals"
+      ],
+      "choices": [
+        {
+          "text": "`page.tsx` صفحه‌ی route را می‌سازد و `layout.tsx` رابط مشترک را دور فرزندان می‌پیچد؛ صرفاً وجود پوشه یک route عمومی نمی‌سازد",
+          "isCorrect": true
+        },
+        {
+          "text": "`layout.tsx` فقط برای فایل‌های Pages Router است"
+        },
+        {
+          "text": "هر فایل داخل پوشه‌ی `app/` خودکار یک route عمومی است"
+        },
+        {
+          "text": "فقط `route.ts` می‌تواند صفحه رندر کند"
+        }
+      ]
+    },
+    {
+      "id": "nextjs-dynamic-routes-segments",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "تفاوت `[id]`، `[...slug]` و `[[...slug]]` در نام پوشه چیست؟",
+      "shortAnswer": "پارامترها به‌صورت شیء `params` به page و layout می‌رسند. در Next 15 به بعد `params` یک Promise است و باید await شود.",
+      "explanation": "```tsx\n// app/blog/[...slug]/page.tsx  →  /blog/a/b/c  ⇒  { slug: ['a','b','c'] }\nexport default async function Page({ params }: { params: Promise<{ slug: string[] }> }) {\n  const { slug } = await params;\n  return <p>{slug.join(' / ')}</p>;\n}\n```\n`[...slug]` برای `/blog` تنها match نمی‌شود (نیاز به حداقل یک بخش)؛ `[[...slug]]` می‌شود. برای مقداردهی اولیه‌ی مسیرهای شناخته‌شده در build از `generateStaticParams` استفاده می‌شود.",
+      "commonMistake": "نوشتن `params.slug` بدون await در Next 15/16 (خطا/هشدار).",
+      "followUp": "چطور برای مسیرهای دینامیک در زمان build صفحه‌ی استاتیک می‌سازی؟",
+      "estimatedSeconds": 55,
+      "minVersion": "14",
+      "tags": [
+        "routing",
+        "dynamic-routes",
+        "params"
+      ],
+      "choices": [
+        {
+          "text": "`[...slug]` مسیر پایه (`/blog`) را هم پوشش می‌دهد"
+        },
+        {
+          "text": "`[[...slug]]` فقط دقیقاً دو بخش را می‌پذیرد"
+        },
+        {
+          "text": "هر سه دقیقاً یکی‌اند"
+        },
+        {
+          "text": "`[id]` یک بخش، `[...slug]` یک یا چند بخش (catch-all)، و `[[...slug]]` صفر یا چند بخش (optional catch-all که خود مسیر پایه را هم می‌گیرد)",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "nextjs-layout-vs-template",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "تفاوت `layout.tsx` و `template.tsx` چیست؟",
+      "shortAnswer": "Layout برای عناصر ثابت (هدر، sidebar، providerها) عالی است چون رندر مجدد و remount ندارد. Template برای وقتی که می‌خواهی افکت/state در هر ناوبری از نو شروع شود (انیمیشن ورود، لاگ page view).",
+      "explanation": "layoutها تو در تو هستند و layout ریشه باید `<html>` و `<body>` را بسازد. layout نمی‌تواند به `searchParams` دسترسی داشته باشد چون بین ناوبری‌ها دوباره رندر نمی‌شود؛ برای آن از page یا Client Component با `useSearchParams` استفاده کن. در Next 16 با «layout deduplication» وقتی چند لینک با layout مشترک prefetch می‌شوند layout فقط یک‌بار دانلود می‌شود.",
+      "commonMistake": "انتظار اینکه layout با هر تغییر `searchParams` دوباره رندر شود.",
+      "followUp": "چرا نباید داده‌ی وابسته به `searchParams` را در layout خواند؟",
+      "estimatedSeconds": 50,
+      "minVersion": "14",
+      "tags": [
+        "layouts",
+        "routing",
+        "app-router"
+      ],
+      "choices": [
+        {
+          "text": "هر دو در هر ناوبری remount می‌شوند"
+        },
+        {
+          "text": "layout هنگام ناوبری بین صفحات فرزند حفظ می‌شود (state و DOM باقی می‌ماند) ولی template در هر ناوبری یک نمونه‌ی جدید می‌سازد و state ریست می‌شود",
+          "isCorrect": true
+        },
+        {
+          "text": "template فقط در Pages Router وجود دارد"
+        },
+        {
+          "text": "template حفظ می‌شود ولی layout هر بار دوباره ساخته می‌شود"
+        }
+      ]
+    },
+    {
+      "id": "nextjs-server-components-default",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "در App Router یک کامپوننت بدون هیچ directive چه نوعی است و برای استفاده از `useState` چه باید کرد؟",
+      "shortAnswer": "Server Componentها فقط روی سرور اجرا می‌شوند، می‌توانند async باشند، و JS آنها به مرورگر نمی‌رسد. Client Component برای تعامل، state و API مرورگر است.",
+      "explanation": "```tsx\n// Server (پیش‌فرض)\nexport default async function Page() {\n  const posts = await db.post.findMany();   // مستقیم DB\n  return <><PostList posts={posts} /><LikeButton /></>;\n}\n\n// LikeButton.tsx\n'use client';\nimport { useState } from 'react';\nexport function LikeButton() { const [n, setN] = useState(0); return <button onClick={() => setN(n + 1)}>{n}</button>; }\n```\nقاعده: `'use client'` را تا حد ممکن در برگ‌های درخت (فقط بخش تعاملی) بگذار تا باندل کلاینت کوچک بماند. `'use client'` مرز ماژول است و همه‌ی importهای آن فایل هم کلاینتی می‌شوند.",
+      "commonMistake": "گذاشتن `'use client'` بالای layout/page و از دست دادن مزیت Server Components.",
+      "followUp": "چه چیزی را می‌شود از Server Component به Client Component به‌عنوان prop داد؟",
+      "estimatedSeconds": 55,
+      "minVersion": "14",
+      "tags": [
+        "server-components",
+        "client-components",
+        "use-client"
+      ],
+      "choices": [
+        {
+          "text": "Server Component است؛ برای `useState`/`useEffect`/event handler باید در بالای فایل `'use client'` بنویسی تا Client Component شود",
+          "isCorrect": true
+        },
+        {
+          "text": "Server Component می‌تواند `useState` داشته باشد"
+        },
+        {
+          "text": "Client Component است و `'use server'` لازم است تا Server شود"
+        },
+        {
+          "text": "هر کامپوننت به‌طور خودکار هر دو نوع است"
+        }
+      ]
+    },
+    {
+      "id": "nextjs-link-navigation",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "چرا در Next.js برای ناوبری داخلی به‌جای `<a>` از `<Link>` استفاده می‌کنیم؟",
+      "shortAnswer": "`next/link` با Router Next.js یکپارچه است: فقط RSC payload لازم را می‌گیرد، layoutهای مشترک را حفظ می‌کند و مسیرهایی که در viewport هستند را prefetch می‌کند (در production).",
+      "explanation": "```tsx\nimport Link from 'next/link';\n<Link href=\"/blog/hello\" prefetch>مقاله</Link>\n\n'use client';\nimport { useRouter, usePathname } from 'next/navigation';   // نه next/router\nconst router = useRouter(); router.push('/dashboard');\n```\nدر App Router hooks از `next/navigation` می‌آیند (`useRouter`, `usePathname`, `useSearchParams`, `useParams`). در Next 16 روت‌یابی با «incremental prefetching» و layout deduplication بهینه شده تا فقط بخش‌های ناموجود در کش دوباره prefetch شوند.",
+      "commonMistake": "import کردن `useRouter` از `next/router` در App Router.",
+      "followUp": "prefetch در حالت dev هم کار می‌کند؟ چرا این در production معنی دارد؟",
+      "estimatedSeconds": 50,
+      "minVersion": "14",
+      "tags": [
+        "navigation",
+        "link",
+        "prefetch"
+      ],
+      "choices": [
+        {
+          "text": "`Link` باعث می‌شود صفحه هر بار کامل از سرور بارگیری شود"
+        },
+        {
+          "text": "`Link` فقط برای لینک‌های خارجی است"
+        },
+        {
+          "text": "`<a>` در Next.js کار نمی‌کند"
+        },
+        {
+          "text": "`Link` ناوبری سمت کلاینت (بدون reload کامل) و prefetch خودکار مسیرهای در دید را انجام می‌دهد",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "nextjs-loading-error-notfound",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "فایل‌های `loading.tsx`، `error.tsx` و `not-found.tsx` هرکدام چه می‌کنند؟",
+      "shortAnswer": "این فایل‌ها بر پایه‌ی Suspense و Error Boundary React ساخته شده‌اند و هر segment مرز خودش را دارد.",
+      "explanation": "```tsx\n// app/dashboard/error.tsx\n'use client';\nexport default function Error({ error, reset }: { error: Error; reset: () => void }) {\n  return <button onClick={reset}>تلاش مجدد</button>;\n}\n```\nنکته‌ها: `error.tsx` خطای همان segment و فرزندان را می‌گیرد ولی نه خطای `layout.tsx` هم‌سطح خودش (برای آن error در سطح بالاتر یا `global-error.tsx`). `notFound()` و `redirect()` با پرتاب خطای ویژه کار می‌کنند؛ نباید در `try/catch` بی‌قید بلعیده شوند. `loading.tsx` برای streaming باعث می‌شود shell سریع نمایش داده شود.",
+      "commonMistake": "گرفتن خطای `redirect()`/`notFound()` در `try/catch` و بی‌اثر شدن آنها.",
+      "followUp": "چرا `error.tsx` خطای layout هم‌سطح را نمی‌گیرد؟",
+      "estimatedSeconds": 55,
+      "minVersion": "14",
+      "tags": [
+        "error-handling",
+        "loading",
+        "suspense"
+      ],
+      "choices": [
+        {
+          "text": "`loading.tsx` جلوی رندر سمت سرور را می‌گیرد"
+        },
+        {
+          "text": "`error.tsx` باید Server Component باشد"
+        },
+        {
+          "text": "هر سه فقط در Pages Router کار می‌کنند"
+        },
+        {
+          "text": "`loading` فوراً UI انتظار (با Suspense خودکار) نشان می‌دهد، `error` خطای runtime آن segment را می‌گیرد (باید Client Component باشد) و `not-found` برای `notFound()` یا مسیر ناموجود است",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "nextjs-metadata-api",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "چطور title و meta تگ‌ها را برای SEO در App Router تنظیم می‌کنی؟",
+      "shortAnswer": "Metadata API نوع‌دار است و Next آن را در `<head>` تزریق می‌کند؛ merge بین layout و page هم را مدیریت می‌کند.",
+      "explanation": "```tsx\nexport async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {\n  const { slug } = await params;\n  const post = await getPost(slug);      // با cache()/dedupe همان داده‌ی صفحه\n  return { title: post.title, description: post.summary, openGraph: { images: [post.cover] } };\n}\n```\nفایل‌های ویژه: `sitemap.ts`, `robots.ts`, `opengraph-image.tsx`, `icon.tsx`. اگر داده‌ی `generateMetadata` و page یکی است، با `fetch` یکسان یا `React.cache` dedupe می‌شود تا دو بار به DB نخورد.",
+      "commonMistake": "استفاده از `next/head` در App Router (مخصوص Pages Router).",
+      "followUp": "چطور جلوی دوبار فراخوانی داده در `generateMetadata` و page را می‌گیری؟",
+      "estimatedSeconds": 50,
+      "minVersion": "14",
+      "tags": [
+        "metadata",
+        "seo",
+        "app-router"
+      ],
+      "choices": [
+        {
+          "text": "متادیتا در App Router پشتیبانی نمی‌شود"
+        },
+        {
+          "text": "فقط با ویرایش دستی `index.html`"
+        },
+        {
+          "text": "با نوشتن `<Head>` از `next/head` در هر Server Component"
+        },
+        {
+          "text": "با export کردن `metadata` (ثابت) یا تابع async `generateMetadata` (دینامیک) از page یا layout",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "nextjs-next-image-preload",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "`next/image` چه مزایایی دارد و در Next 16 برای تصویر LCP چه prop‌ای توصیه می‌شود؟",
+      "shortAnswer": "`<Image>` تصویر را به اندازه/فرمت مناسب (WebP/AVIF) تبدیل و cache می‌کند و با ابعاد مشخص از layout shift جلوگیری می‌کند. طبق مستندات Next 16، prop `priority` به نفع `preload` deprecated شده است.",
+      "explanation": "```tsx\n<Image src=\"/hero.jpg\" alt=\"قهرمان\" width={1200} height={600} preload sizes=\"100vw\" />\n```\n`sizes` برای تصاویر responsive/`fill` لازم است تا مرورگر srcset مناسب را انتخاب کند. تصویر بالای صفحه (LCP) را `preload` کن و بقیه lazy بمانند. برای تصاویر خارجی `images.remotePatterns` باید تنظیم شود. در Next 16 پیش‌فرض‌ها تغییر کرده‌اند: `minimumCacheTTL` برابر ۴ ساعت، `qualities` پیش‌فرض `[75]`، و مقدار `16` از `imageSizes` حذف شده است.",
+      "commonMistake": "استفاده از `<img>` معمولی برای تصاویر بزرگ و LCP کند، یا فراموش کردن `sizes` روی `fill`.",
+      "followUp": "چرا تعیین `width/height` (یا `fill` با parent مشخص) از CLS جلوگیری می‌کند؟",
+      "estimatedSeconds": 60,
+      "minVersion": "14",
+      "tags": [
+        "image",
+        "performance",
+        "lcp"
+      ],
+      "choices": [
+        {
+          "text": "تصویر را همیشه بدون بهینه‌سازی سرو می‌کند"
+        },
+        {
+          "text": "`priority` در Next 16 تنها روش است و `preload` وجود ندارد"
+        },
+        {
+          "text": "فقط برای تصاویر SVG است"
+        },
+        {
+          "text": "اندازه‌گیری/فرمت‌بندی خودکار، lazy loading و جلوگیری از CLS با width/height؛ برای تصویر LCP به‌جای `priority` (deprecated) از `preload` استفاده می‌شود",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "nextjs-env-vars-public",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "متغیر محیطی `NEXT_PUBLIC_API_URL` با `API_SECRET` چه تفاوتی دارد؟",
+      "shortAnswer": "Next مقدار `NEXT_PUBLIC_*` را هنگام build با مقدار literal جایگزین می‌کند، پس تغییر آن بعد از build اثری ندارد مگر دوباره build کنی. secretها نباید هرگز این پیشوند را بگیرند.",
+      "explanation": "فایل‌های `.env`, `.env.local`, `.env.production` بارگذاری می‌شوند (`.env.local` نباید commit شود). برای دسترسی امن به secret فقط در Server Component/Action/Route Handler بخوان و در ماژول‌های حساس `import 'server-only'` بگذار تا اگر اشتباهاً وارد کلاینت شود build بشکند. اگر به config قابل‌تغییر در runtime نیاز داری (یک image برای چند محیط)، مقدار را از سرور بخوان و به کلاینت پاس بده یا با API بگیر، نه با `NEXT_PUBLIC_`.",
+      "commonMistake": "گذاشتن secret با پیشوند `NEXT_PUBLIC_` و افشای آن.",
+      "followUp": "چطور یک Docker image واحد را برای محیط‌های مختلف با config متفاوت اجرا می‌کنی؟",
+      "estimatedSeconds": 50,
+      "minVersion": "14",
+      "tags": [
+        "env",
+        "security",
+        "configuration"
+      ],
+      "choices": [
+        {
+          "text": "`NEXT_PUBLIC_` فقط در runtime سرور خوانده می‌شود"
+        },
+        {
+          "text": "`API_SECRET` در باندل مرورگر قرار می‌گیرد"
+        },
+        {
+          "text": "هر دو به مرورگر ارسال می‌شوند"
+        },
+        {
+          "text": "متغیر با پیشوند `NEXT_PUBLIC_` در زمان build داخل باندل کلاینت inline می‌شود و عمومی است؛ بقیه فقط در سمت سرور در دسترس‌اند",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "nextjs-async-params-next15",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "در Next 15 و 16 چرا `const { id } = params` مستقیم در page مشکل دارد؟",
+      "codeSnippet": "// app/users/[id]/page.tsx\nexport default function Page({ params }: { params: { id: string } }) {\n  return <h1>{params.id}</h1>;\n}",
+      "codeLanguage": "tsx",
+      "shortAnswer": "Next.js برای اینکه بتواند صفحه را تا حد ممکن پیش‌رندر کند و داده‌ی وابسته به درخواست را جدا (streamed) کند، APIهای وابسته به request را async کرد: `cookies()`, `headers()`, `draftMode()`, `params`, `searchParams`. در Next 15 حالت همزمان با هشدار پشتیبانی می‌شد و در 16 کاملاً حذف شد.",
+      "explanation": "```tsx\nexport default async function Page({\n  params,\n  searchParams,\n}: {\n  params: Promise<{ id: string }>;\n  searchParams: Promise<{ q?: string }>;\n}) {\n  const { id } = await params;\n  const { q } = await searchParams;\n  ...\n}\n```\nدر Client Component از `use(params)` یا هوک‌های `useParams()` استفاده کن. codemod رسمی: `npx @next/codemod@canary upgrade latest` بسیاری از موارد را خودکار تبدیل می‌کند. تایپ‌های کمکی `PageProps`/`LayoutProps` هم برای نوع‌دهی راحت‌تر در نسخه‌های اخیر وجود دارد.",
+      "commonMistake": "ارتقا به 15/16 بدون اجرای codemod و رفع دستی صدها خطای `params`.",
+      "followUp": "چرا async شدن این APIها به پیش‌رندر (PPR) کمک می‌کند؟",
+      "estimatedSeconds": 55,
+      "minVersion": "15",
+      "tags": [
+        "params",
+        "async-apis",
+        "next-15"
+      ],
+      "choices": [
+        {
+          "text": "چون `params` و `searchParams` اکنون Promise هستند و باید `await params` شوند؛ لایه‌ی سازگاری همزمان در 16 حذف شده است",
+          "isCorrect": true
+        },
+        {
+          "text": "چون `params` حذف شده و باید از `window.location` خواند"
+        },
+        {
+          "text": "چون فقط در Client Component قابل دسترسی است"
+        },
+        {
+          "text": "هیچ مشکلی ندارد و هر دو روش مجازند"
+        }
+      ]
+    },
+    {
+      "id": "nextjs-route-handlers-basic",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "برای ساخت یک API endpoint در App Router چه می‌کنی؟",
+      "shortAnswer": "Route Handler از Web APIs استاندارد `Request`/`Response` (و کمکی `NextRequest`/`NextResponse`) استفاده می‌کند.",
+      "explanation": "```ts\n// app/api/posts/[id]/route.ts\nimport { NextResponse } from 'next/server';\n\nexport async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {\n  const { id } = await params;\n  const post = await db.post.find(id);\n  if (!post) return NextResponse.json({ error: 'not found' }, { status: 404 });\n  return NextResponse.json(post);\n}\n```\n`route.ts` و `page.tsx` در یک segment نمی‌توانند هم‌زمان باشند. از Next 15 متدهای GET به‌طور پیش‌فرض cache نمی‌شوند (قبلاً در 14 در شرایطی static/cached بودند). برای mutation از داخل خود اپ Server Actions معمولاً ساده‌تر است و Route Handler برای webhookها، کلاینت‌های خارجی و endpoint های عمومی مناسب‌تر است.",
+      "commonMistake": "نوشتن Route Handler برای هر mutation داخلی وقتی Server Action ساده‌تر و type-safe است.",
+      "followUp": "چه زمانی Route Handler را به Server Action ترجیح می‌دهی؟",
+      "estimatedSeconds": 55,
+      "minVersion": "14",
+      "tags": [
+        "route-handlers",
+        "api",
+        "app-router"
+      ],
+      "choices": [
+        {
+          "text": "در `page.tsx` تابع `getServerSideProps` می‌نویسی"
+        },
+        {
+          "text": "فایل `pages/api/x.ts` می‌سازی و در App Router هم همین کار می‌کند"
+        },
+        {
+          "text": "باید یک Express server جدا بالا بیاوری"
+        },
+        {
+          "text": "فایل `route.ts` با export توابع نام‌گذاری‌شده‌ی HTTP مثل `GET` و `POST` در پوشه‌ی مسیر می‌سازی",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "nextjs-client-search-params-suspense",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "چرا استفاده از `useSearchParams()` در Client Component بدون `<Suspense>` می‌تواند build را با خطا مواجه کند؟",
+      "shortAnswer": "`searchParams` در زمان build معلوم نیست. Suspense مرز بخش دینامیک را مشخص می‌کند تا بقیه‌ی صفحه استاتیک بماند.",
+      "explanation": "```tsx\n// page.tsx (Server)\n<Suspense fallback={<SearchSkeleton />}>\n  <SearchBar />        {/* Client Component که useSearchParams() دارد */}\n</Suspense>\n```\nاگر مقدار را فقط سمت سرور لازم داری از prop `searchParams` صفحه (Promise) استفاده کن. با Cache Components (Next 16) قاعده کلی این است که هر دسترسی به داده‌ی زمان درخواست (cookies, headers, searchParams) باید داخل مرز Suspense باشد یا خروجی cache‌شده به آن آرگومان داده شود.",
+      "commonMistake": "گذاشتن `useSearchParams` در layout/page بدون Suspense.",
+      "followUp": "راه‌حل جایگزین برای خواندن query فقط سمت سرور چیست؟",
+      "estimatedSeconds": 60,
+      "minVersion": "14",
+      "tags": [
+        "searchparams",
+        "suspense",
+        "static-rendering"
+      ],
+      "choices": [
+        {
+          "text": "چون `useSearchParams` مقدار را همیشه `null` می‌دهد"
+        },
+        {
+          "text": "چون `useSearchParams` فقط در Pages Router کار می‌کند"
+        },
+        {
+          "text": "چون باید فقط در Server Component استفاده شود"
+        },
+        {
+          "text": "چون صفحه برای پیش‌رندر استاتیک نیاز دارد بخش وابسته به query در زمان درخواست جدا شود؛ بدون Suspense کل صفحه به رندر کلاینتی سقوط می‌کند و Next خطای «Missing Suspense boundary» می‌دهد",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "nextjs-turbopack-default",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "درباره‌ی Turbopack در Next 16 کدام گزینه درست است؟",
+      "shortAnswer": "در Next 15 Turbopack برای dev پایدار شد و در Next 16 پیش‌فرض dev و build شد. بستن آن برای پروژه‌هایی که پلاگین webpack سفارشی دارند ممکن است لازم باشد (فلگ `--webpack`).",
+      "explanation": "مزایا: HMR و build سریع‌تر، کش فایل‌سیستمی برای شروع سریع‌تر dev در پروژه‌های بزرگ. اگر پروژه تنظیمات `webpack()` سفارشی در `next.config` دارد باید به معادل Turbopack (`turbopack` config، loaderها) مهاجرت کنی یا موقتاً با `next build --webpack` بسازی. ایده: قبل از ارتقا، build و تست‌ها را روی هر دو اجرا و تفاوت باندل را بررسی کن.",
+      "commonMistake": "ارتقا به 16 و تعجب از خطای build به‌خاطر تنظیمات webpack سفارشی.",
+      "followUp": "چه زمانی به webpack برمی‌گردی؟",
+      "estimatedSeconds": 45,
+      "minVersion": "16",
+      "tags": [
+        "turbopack",
+        "build",
+        "next-16"
+      ],
+      "choices": [
+        {
+          "text": "Turbopack در Next 16 حذف شد و webpack تنها گزینه است"
+        },
+        {
+          "text": "Turbopack فقط برای Pages Router است"
+        },
+        {
+          "text": "Turbopack به‌طور پیش‌فرض برای `next dev` و `next build` فعال و پایدار است و نیازی به `--turbopack` نیست",
+          "isCorrect": true
+        },
+        {
+          "text": "Turbopack هنوز فقط با پرچم `--turbopack` و فقط برای dev کار می‌کند"
+        }
+      ]
+    },
+    {
+      "id": "nextjs-client-boundary-props",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "کدام یک را نمی‌توان از Server Component به‌عنوان prop به Client Component داد؟",
+      "shortAnswer": "مرز Server/Client یک مرز شبکه است؛ props به فرمت RSC payload تبدیل می‌شوند. توابع، کلاس‌ها و اشیای غیرقابل serialize پشتیبانی نمی‌شوند.",
+      "explanation": "راه‌حل‌ها: منطق را در خود Client Component بنویس، یا تابع را به‌صورت Server Function (`'use server'`) پاس بده (که به‌صورت ارجاع فراخوانی RPC می‌شود)، یا JSX/Server Component را به‌صورت `children` بده (composition):\n```tsx\n<ClientModal>\n  <ServerRenderedContent />     {/* روی سرور رندر می‌شود، داخل کلاینت قرار می‌گیرد */}\n</ClientModal>\n```\nهمچنین فقط داده‌ی لازم را پاس بده (نه شیء کامل DB با فیلدهای حساس)؛ آنچه به prop می‌رود در payload به مرورگر می‌رسد.",
+      "commonMistake": "پاس دادن شیء کامل کاربر (شامل هش رمز) به Client Component.",
+      "followUp": "چرا پاس دادن `children` از Server به Client Component «مجاز» است؟",
+      "estimatedSeconds": 55,
+      "minVersion": "14",
+      "tags": [
+        "rsc",
+        "serialization",
+        "boundary"
+      ],
+      "choices": [
+        {
+          "text": "یک آرایه از اشیای ساده"
+        },
+        {
+          "text": "یک تابع معمولی (به‌جز Server Function با `'use server'`)، چون props باید قابل serialize شدن باشند",
+          "isCorrect": true
+        },
+        {
+          "text": "یک رشته"
+        },
+        {
+          "text": "یک `Date` یا `Map` و `Set` (توسط React قابل serialize هستند)"
+        }
+      ]
+    },
+    {
+      "id": "nextjs-next-font",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "`next/font` چه مشکلی را حل می‌کند؟",
+      "shortAnswer": "فایل فونت‌ها با بقیه‌ی asset ها serve می‌شوند و CSS مربوطه inline/بهینه است؛ برای فونت‌های فارسی می‌توان `subsets` مناسب یا `next/font/local` برای فونت‌های داخلی (مثل وزیر/ایران‌سنس) استفاده کرد.",
+      "explanation": "```tsx\nimport { Inter } from 'next/font/google';\nconst inter = Inter({ subsets: ['latin'], display: 'swap' });\n\nexport default function RootLayout({ children }: { children: React.ReactNode }) {\n  return <html lang=\"fa\" dir=\"rtl\" className={inter.className}><body>{children}</body></html>;\n}\n```\nمزایا: بدون سرور شخص ثالث (حریم خصوصی/سرعت)، preload خودکار زیرمجموعه‌ی استفاده‌شده و کاهش CLS. پکیج قدیمی `@next/font` در Next 15 حذف شد؛ از `next/font` داخلی استفاده کن.",
+      "commonMistake": "لود فونت با `<link>` گوگل و FOUT/CLS در صفحه.",
+      "followUp": "برای فونت‌های فارسی با `next/font/local` چه نکاتی داری؟",
+      "estimatedSeconds": 50,
+      "minVersion": "14",
+      "tags": [
+        "fonts",
+        "performance",
+        "cls"
+      ],
+      "choices": [
+        {
+          "text": "فونت را در زمان build دانلود و self-host می‌کند (بدون درخواست به Google در runtime) و با `size-adjust` جابه‌جایی layout هنگام لود فونت را کم می‌کند",
+          "isCorrect": true
+        },
+        {
+          "text": "فقط فونت‌های سیستمی را پشتیبانی می‌کند"
+        },
+        {
+          "text": "هیچ اثری روی CLS ندارد"
+        },
+        {
+          "text": "فونت را از CDN گوگل در هر درخواست می‌گیرد"
+        }
+      ]
+    },
+    {
+      "id": "nextjs-rendering-strategies",
+      "level": "Mid",
+      "type": "Conceptual",
+      "text": "استراتژی‌های رندر (SSG، SSR، ISR، CSR و PPR) در Next.js چه تفاوتی دارند و امروز چطور انتخاب می‌شوند؟",
+      "shortAnswer": "SSG: صفحه در build ساخته می‌شود. SSR: در هر درخواست. ISR: استاتیک با بازسازی دوره‌ای/on-demand. CSR: در مرورگر با fetch. PPR: بخش استاتیک shell همان لحظه و بخش‌های پویا با Suspense استریم می‌شوند. در App Router مدل ذهنی امروز به‌جای انتخاب «برای کل صفحه» به «برای هر بخش» تبدیل شده است.",
+      "explanation": "در مدل قدیمی (14/15) رندر استاتیک/دینامیک بر اساس استفاده از APIهای دینامیک (`cookies()`, `headers()`, `searchParams`) یا تنظیمات `dynamic`/`revalidate` تعیین می‌شد. در Next 16 با `cacheComponents: true`، PPR رفتار پیش‌فرض است: \n- محتوای قابل پیش‌بینی و `use cache` وارد static shell می‌شود.\n- بخش وابسته به درخواست داخل `<Suspense>` در runtime استریم می‌شود.\n- مقادیر تصادفی/زمان با `connection()` و Suspense.\n\nراهنمای انتخاب: محتوای عمومی و کم‌تغییر ← cache/static؛ داده‌ی شخصی‌سازی‌شده ← Suspense + دینامیک؛ داده‌ی کاملاً کلاینتی و تعاملی (داشبورد) ← Client Component با کتابخانه‌ی کش. مهم‌ترین معیار: LCP/TTFB و تازگی داده‌ی لازم.",
+      "commonMistake": "انتخاب SSR برای کل سایت به‌خاطر «همیشه تازه» بودن، که TTFB و هزینه را بالا می‌برد.",
+      "followUp": "چطور تصمیم می‌گیری یک بخش «cache» شود یا «dynamic»؟",
+      "estimatedSeconds": 150,
+      "minVersion": "14",
+      "tags": [
+        "rendering",
+        "ppr",
+        "ssr-ssg-isr"
+      ]
+    },
+    {
+      "id": "nextjs-caching-14-vs-15",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "چه تغییری در پیش‌فرض کش بین Next 14 و Next 15 رخ داد؟",
+      "shortAnswer": "تیم Next.js پس از بازخورد جامعه رفتار «cache به‌صورت پیش‌فرض» را که غافلگیرکننده بود برعکس کرد: در 15، cache باید صریح فعال شود.",
+      "explanation": "در 14: `fetch(url)` معادل `cache: 'force-cache'` بود. در 15:\n```ts\nawait fetch(url);                                   // پیش‌فرض: no-store\nawait fetch(url, { cache: 'force-cache' });         // صریحاً cache\nawait fetch(url, { next: { revalidate: 3600, tags: ['posts'] } });\nexport const dynamic = 'force-static';              // برای GET route handler\n```\nدر 16 مدل جدید «Cache Components» مبتنی بر `'use cache'` جایگزین آن مکانیزم‌های پراکنده شد و پرچم‌های آزمایشی `dynamicIO`/`ppr` به `cacheComponents` تبدیل شدند. پس هنگام مهاجرت کد قدیمی که به cache پیش‌فرض فرض می‌کرد را بازبینی کن.",
+      "commonMistake": "فرض اینکه fetch همچنان در 15+ به‌طور خودکار cache می‌شود.",
+      "followUp": "در Next 16 چه چیزی جای `fetch cache` و `unstable_cache` را گرفت؟",
+      "estimatedSeconds": 70,
+      "minVersion": "15",
+      "tags": [
+        "caching",
+        "next-15",
+        "fetch"
+      ],
+      "choices": [
+        {
+          "text": "در 15 همه چیز پیش‌فرض بیشتر cache می‌شود"
+        },
+        {
+          "text": "در 14 هیچ‌چیز cache نمی‌شد و در 15 همه چیز می‌شود"
+        },
+        {
+          "text": "هیچ تغییری رخ نداد"
+        },
+        {
+          "text": "در 14 درخواست‌های `fetch` به‌طور پیش‌فرض cache می‌شدند ولی در 15 دیگر به‌طور پیش‌فرض cache نمی‌شوند؛ همچنین GET Route Handlerها و segmentهای صفحه در Client Router Cache دیگر به‌طور پیش‌فرض کش نمی‌شوند",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "nextjs-use-cache-directive",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "`'use cache'` در Next 16 چه کاری می‌کند و چه پیش‌نیازی دارد؟",
+      "shortAnswer": "`'use cache'` در سطح تابع، کامپوننت یا فایل قابل استفاده است. کش شدن به خروجی serialize‌شده وابسته است و داخل آن نمی‌توان مستقیم به APIهای وابسته به درخواست (cookies/headers) دسترسی داشت؛ مقدارها را از بیرون به‌صورت آرگومان بده.",
+      "explanation": "```tsx\nimport { cacheLife, cacheTag } from 'next/cache';\n\nasync function getPosts() {\n  'use cache';\n  cacheLife('hours');\n  cacheTag('posts');\n  return db.post.findMany();\n}\n```\nطبق مستندات، هر `use cache` را با یک `cacheLife` جفت کن. انواع: `'use cache'` (پیش‌فرض، حافظه‌ی instance)، `'use cache: remote'` (کش پایدار مشترک بین instanceها) و `'use cache: private'` (برای داده‌ی وابسته به runtime، در مرورگر). آرگومان‌هایی مثل `userId` بخشی از کلید می‌شوند، پس داده‌ی یک کاربر برای دیگری برنمی‌گردد. با `cacheTag` می‌توان هدفمند invalidate کرد.",
+      "commonMistake": "خواندن `cookies()` داخل تابع `use cache` به‌جای پاس دادن مقدار آن به‌عنوان آرگومان.",
+      "followUp": "چرا آرگومان‌ها بخشی از کلید cache می‌شوند و این چه کمکی می‌کند؟",
+      "estimatedSeconds": 75,
+      "minVersion": "16",
+      "tags": [
+        "use-cache",
+        "caching",
+        "cache-components"
+      ],
+      "choices": [
+        {
+          "text": "جایگزین `'use client'` است"
+        },
+        {
+          "text": "نتیجه‌ی تابع یا کامپوننت async را cache می‌کند (آرگومان‌ها بخشی از کلید cache‌اند)؛ باید `cacheComponents: true` در `next.config` فعال باشد و بهتر است با `cacheLife` طول عمر را مشخص کنی",
+          "isCorrect": true
+        },
+        {
+          "text": "فقط در Client Component کار می‌کند"
+        },
+        {
+          "text": "نتیجه را برای همیشه و بدون امکان invalidation cache می‌کند"
+        }
+      ]
+    },
+    {
+      "id": "nextjs-revalidate-vs-update-tag",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "`updateTag` و `revalidateTag` در Next 16 چه فرقی دارند؟",
+      "shortAnswer": "در Next 16 امضای `revalidateTag(tag: string, profile: string | { expire?: number })` عوض شد و آرگومان دوم (مثل `'max'`) لازم است. `updateTag` برای وقتی است که کاربر باید تغییر خودش را فوراً ببیند (مثلاً بعد از ساخت پست).",
+      "explanation": "```ts\n'use server';\nimport { updateTag, revalidateTag } from 'next/cache';\n\nexport async function createPost(fd: FormData) {\n  const post = await db.post.create({ data: { title: String(fd.get('title')) } });\n  updateTag('posts');                 // کاربر فوراً پست جدید را می‌بیند\n}\n\n// webhook از CMS (Route Handler)\nexport async function POST() {\n  revalidateTag('posts', 'max');      // اجازه‌ی stale-while-revalidate\n  return Response.json({ ok: true });\n}\n```\nهمچنین `refresh()` (از `next/cache`) داخل Server Action فقط کش router کلاینت را refresh می‌کند (برای داده‌ی غیرکش‌شده). `revalidatePath` هم برای پاک کردن بر اساس مسیر وجود دارد.",
+      "commonMistake": "صدا زدن `revalidateTag('x')` با یک آرگومان (امضای قدیمی) در Next 16.",
+      "followUp": "چه زمانی stale-while-revalidate برای کاربر مناسب و چه زمانی مضر است؟",
+      "estimatedSeconds": 70,
+      "minVersion": "16",
+      "tags": [
+        "revalidation",
+        "server-actions",
+        "next-16"
+      ],
+      "choices": [
+        {
+          "text": "`updateTag` فقط در Server Action و برای «خواندن نوشته‌های خود» است (cache فوراً منقضی می‌شود و درخواست بعدی منتظر داده‌ی تازه می‌ماند)، ولی `revalidateTag(tag, profile)` می‌تواند در Server Action و Route Handler استفاده شود و با پروفایل `'max'` stale-while-revalidate دارد",
+          "isCorrect": true
+        },
+        {
+          "text": "`updateTag` در Route Handler هم کار می‌کند ولی `revalidateTag` فقط در کلاینت"
+        },
+        {
+          "text": "`revalidateTag` آرگومان دوم ندارد"
+        },
+        {
+          "text": "هر دو دقیقاً یکی‌اند و `revalidateTag` حذف شد"
+        }
+      ]
+    },
+    {
+      "id": "nextjs-server-actions-basics",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "Server Action چیست و چطور در فرم استفاده می‌شود؟",
+      "shortAnswer": "Server Action زیر پوسته یک درخواست POST است. فریمورک endpoint، serialize و مدیریت cache invalidation را انجام می‌دهد.",
+      "explanation": "```tsx\n// app/actions.ts\n'use server';\nimport { revalidatePath } from 'next/cache';\nexport async function addTodo(formData: FormData) {\n  await db.todo.create({ data: { title: String(formData.get('title')) } });\n  revalidatePath('/todos');\n}\n\n// page.tsx\n<form action={addTodo}><input name=\"title\" /><button>افزودن</button></form>\n```\nدر Client Component از `useActionState` برای state نتیجه/خطا و `useFormStatus` برای pending و `useOptimistic` برای UI خوش‌بینانه استفاده کن. برای خواندن داده (GET) Server Action مناسب نیست چون به‌صورت سریالی اجرا می‌شود؛ خواندن را در Server Component یا Route Handler انجام بده. هر action یک endpoint عمومی است و باید احراز هویت/اعتبارسنجی داشته باشد.",
+      "commonMistake": "استفاده از Server Action برای fetch داده‌ی نمایشی (اجرای سریالی و بدون cache).",
+      "followUp": "چرا Server Actionها به‌صورت پیش‌فرض یکی‌یکی (serially) اجرا می‌شوند؟",
+      "estimatedSeconds": 70,
+      "minVersion": "14",
+      "tags": [
+        "server-actions",
+        "forms",
+        "mutations"
+      ],
+      "choices": [
+        {
+          "text": "تابعی که فقط در مرورگر اجرا می‌شود و به `fetch` نیاز دارد"
+        },
+        {
+          "text": "تابع async با `'use server'` که روی سرور اجرا و از فرم (`<form action={fn}>`) یا کلاینت صدا زده می‌شود؛ فرم بدون JS هم کار می‌کند (progressive enhancement)",
+          "isCorrect": true
+        },
+        {
+          "text": "نمی‌توان از آن در Client Component استفاده کرد"
+        },
+        {
+          "text": "فقط برای خواندن داده (GET) است"
+        }
+      ]
+    },
+    {
+      "id": "nextjs-generate-static-params",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "`generateStaticParams` چه کاری می‌کند و اگر پارامتری خارج از لیست آمد چه می‌شود؟",
+      "shortAnswer": "مثل `getStaticPaths` قدیمی است. برای محتوای کم‌تغییر (وبلاگ، مستندات، محصولات) TTFB عالی می‌دهد.",
+      "explanation": "```tsx\nexport async function generateStaticParams() {\n  const posts = await getAllPosts();\n  return posts.map(p => ({ slug: p.slug }));\n}\nexport const dynamicParams = true;   // پیش‌فرض\n```\nبرای سایت‌های بزرگ فقط پرمخاطب‌ترین‌ها را پیش‌رندر کن و بقیه on-demand بمانند تا زمان build کنترل شود. با Cache Components (16)، مسیرهای ناشناخته می‌توانند shell را فوراً بگیرند و بعد در پس‌زمینه به‌روز و cache شوند (ISR مدرن). آرگومان‌های `generateStaticParams` می‌توانند از segment والد ارث ببرند.",
+      "commonMistake": "پیش‌رندر ده‌ها هزار صفحه در build و کند شدن deploy.",
+      "followUp": "`dynamicParams = false` چه زمانی مناسب است؟",
+      "estimatedSeconds": 60,
+      "minVersion": "14",
+      "tags": [
+        "ssg",
+        "generate-static-params",
+        "isr"
+      ],
+      "choices": [
+        {
+          "text": "مسیرهای دینامیک را در runtime رندر نمی‌کند و همیشه 404 می‌دهد"
+        },
+        {
+          "text": "فقط برای Pages Router است"
+        },
+        {
+          "text": "پارامترها را به‌صورت تصادفی می‌سازد"
+        },
+        {
+          "text": "لیست مقدارهای پارامتر دینامیک را برای پیش‌رندر در build برمی‌گرداند؛ مقدارهای خارج از لیست به‌طور پیش‌فرض در اولین درخواست (on-demand) رندر و cache می‌شوند مگر `dynamicParams = false` باشد که 404 می‌دهد",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "nextjs-streaming-suspense",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "چطور با Next.js بخش کند صفحه را بدون بلاک کردن کل صفحه نمایش می‌دهی؟",
+      "shortAnswer": "Streaming با React Suspense: shell سریع و بخش‌های کند وقتی آماده شدند استریم می‌شوند؛ کاربر زودتر محتوای مفید می‌بیند (TTFB/FCP بهتر).",
+      "explanation": "```tsx\nexport default function Page() {\n  return (\n    <>\n      <Header />                              {/* فوراً */}\n      <Suspense fallback={<FeedSkeleton />}>\n        <Feed />                              {/* async و کند */}\n      </Suspense>\n    </>\n  );\n}\n```\nبرای جلوگیری از waterfall، درخواست‌های مستقل را موازی شروع کن (`Promise.all`) یا داده را داخل کامپوننت‌هایی بگیر که خودشان جدا Suspense دارند. fallback باید هم‌اندازه‌ی محتوا باشد تا CLS ایجاد نشود. بدون Cache Components، هر دسترسی دینامیک باعث دینامیک شدن کل route می‌شود مگر داخل Suspense باشد.",
+      "commonMistake": "waterfall: await پشت‌سرهم برای درخواست‌های مستقل.",
+      "followUp": "چطور waterfall در Server Components را تشخیص و رفع می‌کنی؟",
+      "estimatedSeconds": 60,
+      "minVersion": "14",
+      "tags": [
+        "streaming",
+        "suspense",
+        "performance"
+      ],
+      "choices": [
+        {
+          "text": "از `setTimeout` در Server Component استفاده می‌کنی"
+        },
+        {
+          "text": "فقط با CSR کامل ممکن است"
+        },
+        {
+          "text": "آن بخش را داخل `<Suspense fallback={...}>` می‌گذاری (یا `loading.tsx` برای کل segment) تا HTML بقیه‌ی صفحه بلافاصله استریم شود و بخش کند بعداً جایگزین شود",
+          "isCorrect": true
+        },
+        {
+          "text": "کل صفحه را با `await Promise.all` منتظر همه‌ی داده‌ها می‌گذاری"
+        }
+      ]
+    },
+    {
+      "id": "nextjs-parallel-intercepting-routes",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "Parallel routes (`@slot`) و Intercepting routes برای چه سناریویی استفاده می‌شوند؟",
+      "shortAnswer": "Slotهای موازی با پوشه‌ی `@name` تعریف و به‌صورت prop به layout داده می‌شوند. Intercepting با نام‌گذاری مثل `(.)photo/[id]` مسیر را «رهگیری» می‌کند.",
+      "explanation": "```tsx\n// app/layout.tsx\nexport default function Layout({ children, modal }: { children: React.ReactNode; modal: React.ReactNode }) {\n  return <>{children}{modal}</>;\n}\n// app/@modal/(.)photo/[id]/page.tsx  ← مودال هنگام ناوبری کلاینتی\n// app/photo/[id]/page.tsx            ← صفحه‌ی کامل هنگام رفرش/لینک مستقیم\n```\nتغییر مهم Next 16: همه‌ی slotهای موازی باید فایل `default.js` صریح داشته باشند وگرنه build شکست می‌خورد. برای بستن مودال از `router.back()` استفاده می‌شود. این الگو URL قابل اشتراک، دکمه‌ی back درست و SEO-friendly بودن را با هم می‌دهد.",
+      "commonMistake": "فراموش کردن `default.tsx` برای slot که در ناوبری‌های hard/soft باعث 404 یا شکست build می‌شود.",
+      "followUp": "چرا `default.tsx` برای slotها لازم است؟",
+      "estimatedSeconds": 65,
+      "minVersion": "14",
+      "tags": [
+        "parallel-routes",
+        "intercepting-routes",
+        "routing"
+      ],
+      "choices": [
+        {
+          "text": "Intercepting routes مسیر را برای همیشه عوض می‌کنند"
+        },
+        {
+          "text": "هر دو فقط برای انیمیشن‌اند"
+        },
+        {
+          "text": "Parallel routes باعث اجرای موازی درخواست‌های شبکه در مرورگر می‌شوند"
+        },
+        {
+          "text": "Parallel برای رندر هم‌زمان چند بخش مستقل در یک layout (مثل داشبورد) و Intercepting برای نمایش یک route داخل context فعلی (مثل مودال عکس با URL قابل اشتراک) در حالی که رفرش همان route را کامل نمایش می‌دهد",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "nextjs-middleware-to-proxy",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "در Next 16 `middleware.ts` چه شد؟",
+      "shortAnswer": "نام `proxy` مرز شبکه‌ای بودن آن را واضح‌تر می‌کند. برای مهاجرت codemod وجود دارد: `npx @next/codemod@canary middleware-to-proxy .`",
+      "explanation": "```ts\n// proxy.ts (کنار app/ یا داخل src/)\nimport { NextResponse, type NextRequest } from 'next/server';\n\nexport function proxy(request: NextRequest) {\n  if (!request.cookies.has('session') && request.nextUrl.pathname.startsWith('/dashboard')) {\n    return NextResponse.redirect(new URL('/login', request.url));\n  }\n  return NextResponse.next();\n}\nexport const config = { matcher: ['/dashboard/:path*'] };\n```\nکاربردها: redirect/rewrite، header، بررسی سریع و خوش‌بینانه‌ی session، A/B، i18n. نباید برای دریافت داده‌ی سنگین یا تنها لایه‌ی امنیتی استفاده شود؛ بررسی واقعی مجوز باید در Data Access Layer و Server Action/Route Handler باشد. طبق مستندات، برای انتقال اطلاعات به اپ از header، cookie، rewrite، redirect یا URL استفاده کن نه global مشترک.",
+      "commonMistake": "تکیه‌ی کامل امنیت بر proxy/middleware و نبود چک مجوز در خود داده.",
+      "followUp": "چرا proxy برای احراز هویت «کامل» کافی نیست؟",
+      "estimatedSeconds": 60,
+      "minVersion": "16",
+      "tags": [
+        "proxy",
+        "middleware",
+        "next-16"
+      ],
+      "choices": [
+        {
+          "text": "حذف شد و دیگر هیچ جایگزینی ندارد"
+        },
+        {
+          "text": "فقط روی edge runtime کار می‌کند"
+        },
+        {
+          "text": "به `server.ts` تغییر نام داد"
+        },
+        {
+          "text": "convention آن به `proxy.ts` (تابع `proxy`) تغییر نام داد و فقط روی runtime Node.js اجرا می‌شود؛ `middleware` منسوخ شده است",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "nextjs-cookies-headers-dynamic",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "استفاده از `await cookies()` یا `await headers()` در Next چه اثری دارد؟",
+      "shortAnswer": "این APIها async شده‌اند تا Next.js بتواند بخش‌های وابسته به request را از بخش‌های استاتیک جدا کند.",
+      "explanation": "```tsx\nasync function Greeting() {\n  const theme = (await cookies()).get('theme')?.value ?? 'light';\n  return <p>{theme}</p>;\n}\nexport default function Page() {\n  return <Suspense fallback={<p>...</p>}><Greeting /></Suspense>;\n}\n```\nاگر می‌خواهی نتیجه‌ای که به cookie وابسته است cache شود، مقدار را استخراج و به تابع `use cache` به‌عنوان آرگومان بده تا جزء کلید شود. نوشتن cookie فقط در Server Action یا Route Handler مجاز است (نه در طول رندر Server Component).",
+      "commonMistake": "نوشتن `cookies().set()` داخل رندر یک Server Component.",
+      "followUp": "چرا set کردن cookie در رندر مجاز نیست؟ (streaming و header قبلاً ارسال شده)",
+      "estimatedSeconds": 60,
+      "minVersion": "15",
+      "tags": [
+        "cookies",
+        "dynamic-rendering",
+        "suspense"
+      ],
+      "choices": [
+        {
+          "text": "تأثیری ندارد و همیشه استاتیک می‌ماند"
+        },
+        {
+          "text": "باعث می‌شود صفحه هرگز cache نشود حتی بخش‌های نامرتبط"
+        },
+        {
+          "text": "فقط در Route Handler مجاز است"
+        },
+        {
+          "text": "آن بخش را به داده‌ی زمان درخواست وابسته می‌کند؛ در مدل جدید باید داخل مرز `<Suspense>` باشد تا بقیه‌ی صفحه بتواند پیش‌رندر شود",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "nextjs-auth-patterns-next",
+      "level": "Mid",
+      "type": "Conceptual",
+      "text": "احراز هویت و مجوز را در اپ Next.js (App Router) چطور طراحی می‌کنی؟",
+      "shortAnswer": "session را با cookie امن (`httpOnly`, `secure`, `sameSite`) نگه می‌دارم، بررسی احراز هویت/مجوز را در یک Data Access Layer سمت سرور متمرکز می‌کنم و آن را در هر Server Component/Action/Route Handler که داده می‌خواند یا تغییر می‌دهد فراخوانی می‌کنم. proxy فقط برای redirect سریع و خوش‌بینانه است، نه تنها مانع امنیتی. کتابخانه‌های آماده‌ای مثل Auth.js/Better Auth یا سرویس‌های identity می‌توانند به‌جای پیاده‌سازی دستی استفاده شوند.",
+      "explanation": "نمونه‌ی DAL:\n```ts\nimport 'server-only';\nimport { cache } from 'react';\n\nexport const verifySession = cache(async () => {\n  const token = (await cookies()).get('session')?.value;\n  const session = await decrypt(token);\n  if (!session) redirect('/login');\n  return session;\n});\n\nexport async function getInvoice(id: string) {\n  const { userId } = await verifySession();\n  const invoice = await db.invoice.find(id);\n  if (invoice.ownerId !== userId) throw new Error('Forbidden');   // جلوگیری از IDOR\n  return toDTO(invoice);        // فقط فیلدهای لازم\n}\n```\nاصول: چک مجوز کنار داده (نه فقط در UI/layout)؛ چون layoutها هنگام ناوبری دوباره رندر نمی‌شوند، چک فقط در layout کافی نیست؛ خروجی را به DTO مینیمال تبدیل کن؛ token را در localStorage نگه نداری؛ rate limit و CSRF (Origin check برای Actions) را درنظر بگیر.",
+      "commonMistake": "چک احراز هویت فقط در layout و فرض اینکه صفحه‌های فرزند امن‌اند.",
+      "followUp": "IDOR چیست و چطور با DAL جلویش را می‌گیری؟",
+      "estimatedSeconds": 130,
+      "minVersion": "14",
+      "tags": [
+        "authentication",
+        "security",
+        "data-access-layer"
+      ]
+    },
+    {
+      "id": "nextjs-server-only-taint",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "پکیج `server-only` چه کمکی می‌کند؟",
+      "shortAnswer": "مرز Server/Client بدون ابزار می‌تواند ناخواسته شکسته شود (مثلاً import یک helper که secret می‌خواند). `server-only` یک «قفل زمان build» است.",
+      "explanation": "```ts\n// lib/db.ts\nimport 'server-only';\nexport const db = createClient(process.env.DATABASE_URL!);\n```\nمعادل برای کد کلاینتی `client-only` است. لایه‌ی دفاعی دیگر API آزمایشی `experimental_taintObjectReference/taintUniqueValue` در React است که اشیا/مقادیر خاص را از رفتن به کلاینت منع می‌کند. هیچ‌کدام جایگزین طراحی درست (DAL و DTO) نیستند.",
+      "commonMistake": "تکیه بر `server-only` به‌جای کنترل داده‌ای که به prop می‌رود.",
+      "followUp": "taint API چه مشکلی را می‌پوشاند و چرا آزمایشی است؟",
+      "estimatedSeconds": 45,
+      "minVersion": "14",
+      "tags": [
+        "security",
+        "server-only",
+        "boundary"
+      ],
+      "choices": [
+        {
+          "text": "ماژول را به‌صورت خودکار cache می‌کند"
+        },
+        {
+          "text": "ماژول را روی edge اجرا می‌کند"
+        },
+        {
+          "text": "اگر ماژولی که `import 'server-only'` دارد اشتباهاً در Client Component import شود، build با خطا می‌شکند و از افشای کد/secret جلوگیری می‌شود",
+          "isCorrect": true
+        },
+        {
+          "text": "فقط برای جلوگیری از SSR است"
+        }
+      ]
+    },
+    {
+      "id": "nextjs-client-composition-children",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "چرا پاس دادن Server Component به‌عنوان `children` به یک Client Component کار می‌کند؟",
+      "shortAnswer": "import کردن یک Server Component داخل فایل `'use client'` آن را کلاینتی می‌کند؛ ولی اگر از بیرون به‌عنوان prop/children برسد، رندرش روی سرور می‌ماند.",
+      "explanation": "```tsx\n// Server Component\n<Modal>              {/* Modal یک Client Component است */}\n  <UserProfile />     {/* Server Component با دسترسی مستقیم DB */}\n</Modal>\n```\nاین الگو اجازه می‌دهد پوسته‌ی تعاملی (مودال، تب، آکاردئون) کلاینتی و محتوای سنگین سرور-رندر بماند. همین ایده برای Context Providerها هم در layout استفاده می‌شود: Provider را Client Component کن و `children` را از بیرون بگیر.",
+      "commonMistake": "import کردن Server Component داخل فایل کلاینتی و ناخواسته کلاینتی شدن آن.",
+      "followUp": "Provider سراسری (مثل theme) را در layout ریشه چطور می‌گذاری؟",
+      "estimatedSeconds": 55,
+      "minVersion": "14",
+      "tags": [
+        "composition",
+        "client-components",
+        "rsc"
+      ],
+      "choices": [
+        {
+          "text": "این کار ممکن نیست و خطا می‌دهد"
+        },
+        {
+          "text": "چون Next.js آن را کلاینتی می‌کند"
+        },
+        {
+          "text": "چون Client Component می‌تواند Server Component را import کند و اجرا کند"
+        },
+        {
+          "text": "چون `children` روی سرور رندر می‌شود و به‌صورت RSC payload به‌عنوان «شکاف» به Client Component داده می‌شود؛ Client Component لازم نیست خودش آن را import کند",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "nextjs-next-dynamic-import",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "`next/dynamic` را کی استفاده می‌کنی و `ssr: false` کجا مجاز است؟",
+      "shortAnswer": "`next/dynamic` روی `React.lazy` + Suspense ساخته شده و باندل را تقسیم می‌کند. برای کتابخانه‌هایی که به `window` وابسته‌اند (نقشه، ادیتور) `ssr: false` استفاده می‌شود.",
+      "explanation": "```tsx\n'use client';\nimport dynamic from 'next/dynamic';\nconst Map = dynamic(() => import('./Map'), { ssr: false, loading: () => <p>...</p> });\n```\n`ssr: false` در Server Component خطا می‌دهد چون Server Component نمی‌تواند پیش‌رندر را حذف کند. توجه: lazy کردن بخش above-the-fold بدون فایده و حتی مضر است. در App Router همچنین خود Server Components و مرز `'use client'` تا حد زیادی code-splitting را خودکار می‌کنند.",
+      "commonMistake": "استفاده از `ssr: false` در Server Component.",
+      "followUp": "چه ریسکی دارد که یک کتابخانه‌ی سنگین را با `ssr: false` بگیریم؟ (SEO، CLS)",
+      "estimatedSeconds": 55,
+      "minVersion": "14",
+      "tags": [
+        "dynamic-import",
+        "code-splitting",
+        "ssr"
+      ],
+      "choices": [
+        {
+          "text": "`next/dynamic` جایگزین `useEffect` است"
+        },
+        {
+          "text": "برای lazy-load کامپوننت‌های سنگین یا وابسته به مرورگر؛ `ssr: false` فقط داخل Client Component مجاز است",
+          "isCorrect": true
+        },
+        {
+          "text": "`ssr: false` فقط در Server Component کار می‌کند"
+        },
+        {
+          "text": "کامپوننت دینامیک همیشه در SSR رندر می‌شود"
+        }
+      ]
+    },
+    {
+      "id": "nextjs-error-handling-next",
+      "level": "Mid",
+      "type": "Conceptual",
+      "text": "مدیریت خطا در Next.js App Router چطور لایه‌بندی می‌شود؟",
+      "shortAnswer": "خطای مورد انتظار (اعتبارسنجی فرم، 404) را به‌صورت مقدار برگردان یا با `notFound()`/`redirect()` مدیریت کن؛ خطای غیرمنتظره در رندر را با `error.tsx` (مرز هر segment) و در سطح ریشه با `global-error.tsx`. برای Server Action خطاهای مورد انتظار را به‌صورت state برگردان (`useActionState`) نه throw.",
+      "explanation": "```tsx\nexport async function createUser(prev: State, fd: FormData): Promise<State> {\n  const parsed = schema.safeParse(Object.fromEntries(fd));\n  if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors };   // مورد انتظار\n  try { await db.user.create(...); } catch { return { message: 'ذخیره ناموفق بود' }; }\n  redirect('/users');      // خارج از try/catch! چون خودش یک خطای ویژه پرتاب می‌کند\n}\n```\nنکات: `redirect()` و `notFound()` با throw کار می‌کنند و نباید در `try/catch` گرفته شوند (یا باید دوباره throw شوند)؛ `error.tsx` باید Client Component باشد و `reset()` دارد؛ خطاهای سرور در production پیام عمومی و `digest` می‌دهند (جزئیات لاگ سمت سرور)؛ برای ثبت خطا در `instrumentation.ts` می‌توان `onRequestError` را تعریف کرد تا به سرویس مانیتورینگ ارسال شود.",
+      "commonMistake": "صدا زدن `redirect()` داخل `try` و گرفتن خطای ویژه‌اش با `catch`.",
+      "followUp": "`digest` در پیام خطای production چیست؟",
+      "estimatedSeconds": 120,
+      "minVersion": "14",
+      "tags": [
+        "error-handling",
+        "server-actions",
+        "monitoring"
+      ]
+    },
+    {
+      "id": "nextjs-after-api",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "`after()` (از `next/server`) برای چه کاری است؟",
+      "shortAnswer": "`after` کارهای غیرحیاتی را بعد از پایان response (یا streaming) زمان‌بندی می‌کند؛ در Next 15.1 پایدار شد.",
+      "explanation": "```tsx\nimport { after } from 'next/server';\n\nexport default async function Page() {\n  const data = await getData();\n  after(async () => {\n    await logPageView();      // بعد از ارسال پاسخ\n  });\n  return <View data={data} />;\n}\n```\nدر Server Component، Server Action، Route Handler و proxy قابل استفاده است. نمی‌توان به APIهای وابسته به request مثل `cookies()` بعد از ارسال پاسخ در همه‌ی محیط‌ها تکیه کرد (مقدار را قبل از `after` بخوان). در محیط‌های serverless مدت اجرا محدود است؛ برای کار سنگین از صف/job استفاده کن.",
+      "commonMistake": "انتظار اینکه کار داخل `after` تضمین‌شده و بی‌محدودیت زمانی اجرا شود.",
+      "followUp": "چه فرقی بین `after` و ارسال کار به یک صف (queue) دارد؟",
+      "estimatedSeconds": 55,
+      "minVersion": "15",
+      "tags": [
+        "after",
+        "performance",
+        "next-15"
+      ],
+      "choices": [
+        {
+          "text": "جایگزین `useEffect` در Client Component"
+        },
+        {
+          "text": "اجرای کد قبل از رندر صفحه"
+        },
+        {
+          "text": "لغو درخواست‌های در حال اجرا"
+        },
+        {
+          "text": "اجرای کاری بعد از اتمام ارسال پاسخ به کاربر (لاگ، analytics، sync) بدون به تأخیر انداختن پاسخ",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "nextjs-static-metadata-files",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "چطور `sitemap.xml` و `robots.txt` را در App Router می‌سازی؟",
+      "shortAnswer": "فایل‌های متادیتا (`sitemap`, `robots`, `manifest`, `icon`, `opengraph-image`, `twitter-image`) به‌صورت convention پشتیبانی می‌شوند و می‌توانند async و دینامیک باشند.",
+      "explanation": "```ts\n// app/sitemap.ts\nimport type { MetadataRoute } from 'next';\nexport default async function sitemap(): Promise<MetadataRoute.Sitemap> {\n  const posts = await getAllPosts();\n  return posts.map(p => ({ url: `https://example.com/blog/${p.slug}`, lastModified: p.updatedAt }));\n}\n```\nفایل استاتیک در `public/` هم مجاز است (ساده‌ترین برای محتوای ثابت). برای سایت‌های بزرگ چند sitemap با `generateSitemaps` بساز. `opengraph-image.tsx` می‌تواند تصویر OG را با JSX (ImageResponse) تولید کند.",
+      "commonMistake": "نوشتن sitemap دستی که با محتوای واقعی ناهماهنگ می‌شود.",
+      "followUp": "چه زمانی sitemap را به چند فایل می‌شکنی؟",
+      "estimatedSeconds": 45,
+      "minVersion": "14",
+      "tags": [
+        "seo",
+        "sitemap",
+        "metadata"
+      ],
+      "choices": [
+        {
+          "text": "با فایل‌های ویژه‌ی `app/sitemap.ts` و `app/robots.ts` که آبجکت/آرایه‌ی نوع‌دار برمی‌گردانند و Next خروجی XML/متن را تولید می‌کند",
+          "isCorrect": true
+        },
+        {
+          "text": "با `next/head`"
+        },
+        {
+          "text": "فقط با قرار دادن فایل دستی در `public/` و هیچ روش دیگری"
+        },
+        {
+          "text": "باید یک Route Handler با `Content-Type` دستی نوشت و راه دیگری نیست"
+        }
+      ]
+    },
+    {
+      "id": "nextjs-route-vs-layout-data",
+      "level": "Mid",
+      "type": "Conceptual",
+      "text": "داده را در Server Component کجا می‌گیری؟ در layout یا page یا فرزند؟ چطور از تکرار و waterfall جلوگیری می‌کنی؟",
+      "shortAnswer": "داده را نزدیک جایی که استفاده می‌شود بگیر (colocation) و از فراخوانی تکراری با dedupe جلوگیری کن: `fetch` یکسان در یک رندر memoize می‌شود و برای DB/ORM از `React.cache` استفاده می‌شود. درخواست‌های مستقل را موازی شروع کن و بخش‌های کند را در Suspense بگذار.",
+      "explanation": "نکات:\n- **Waterfall**: `const a = await getA(); const b = await getB();` ترتیبی است. بهتر: `const [a, b] = await Promise.all([getA(), getB()])`، یا شروع promiseها و await کردن جداگانه، یا جدا کردن به کامپوننت‌های فرزند با Suspense.\n- **Layout داده‌ی وابسته به route را نگیر**: layoutها در ناوبری دوباره رندر نمی‌شوند و به `searchParams` دسترسی ندارند.\n- **DAL**: توابع داده را مرکزی و با `server-only` و DTO بنویس.\n- **Preload pattern**: یک تابع `preload(id)` که بدون await صدا زده می‌شود تا داده زودتر شروع شود.\n- در Client Components برای داده‌ی تعاملی از کتابخانه‌ی کش (TanStack Query/SWR) یا `use` با promise پاس‌داده‌شده از سرور استفاده کن.\n\nهدف: کمترین رفت‌وبرگشت شبکه/DB و کمترین payload به کلاینت.",
+      "commonMistake": "گرفتن داده‌ی همه‌ی صفحه در یک جا و await پشت‌سرهم بدون توجه به وابستگی‌ها.",
+      "followUp": "`React.cache` و fetch memoization چه فرقی دارند؟",
+      "estimatedSeconds": 130,
+      "minVersion": "14",
+      "tags": [
+        "data-fetching",
+        "performance",
+        "waterfall"
+      ]
+    },
+    {
+      "id": "nextjs-cache-components-ppr",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "Cache Components و PPR در Next 16 چیست و چطور مدل رندر را تغییر می‌دهد؟",
+      "shortAnswer": "با `cacheComponents: true`، Next 16 مدل «استاتیک یا دینامیک برای کل route» را کنار می‌گذارد: هر route یک static shell (HTML + RSC payload پیش‌رندر) دارد که شامل محتوای استاتیک و خروجی `'use cache'` است، و بخش‌های وابسته به درخواست داخل `<Suspense>` در runtime استریم می‌شوند. این همان Partial Prerendering است که اکنون رفتار پیش‌فرض این مدل است.",
+      "explanation": "قواعد ذهنی:\n1. **قابل پیش‌بینی** (import، محاسبه‌ی خالص) → خودکار در shell.\n2. **نیاز به cache** (داده‌ی مشترک) → `'use cache'` + `cacheLife` + `cacheTag`.\n3. **وابسته به request** (`cookies`, `headers`, `searchParams`) یا **تصادفی/زمان** (`Math.random`, `Date.now`) → داخل `<Suspense>` و برای تصادفی/زمان با `await connection()`.\n\n```tsx\nexport default function Page() {\n  return (\n    <>\n      <StaticHeader />                    {/* shell */}\n      <CachedPosts />                     {/* use cache → داخل shell */}\n      <Suspense fallback={<Skeleton />}>\n        <UserPanel />                     {/* runtime: cookies() */}\n      </Suspense>\n    </>\n  );\n}\n```\nمزیت: TTFB شبیه استاتیک با محتوای شخصی‌سازی‌شده. هزینه‌ها: آموزش تیم، لزوم طراحی مرز Suspense و کلیدهای cache، و اینکه پرچم‌های قدیمی `experimental.ppr`/`dynamicIO` حذف شدند و segment configهایی مثل `export const dynamic` با این مدل ناسازگار یا بی‌معنی می‌شوند. مهاجرت را تدریجی و با اندازه‌گیری انجام بده.",
+      "commonMistake": "ترکیب مدل قدیمی (`export const revalidate/dynamic`) با Cache Components و انتظار رفتار قبلی.",
+      "followUp": "چرا مقادیر تصادفی/زمان در shell مشکل می‌سازند و `connection()` چه می‌کند؟",
+      "estimatedSeconds": 160,
+      "minVersion": "16",
+      "tags": [
+        "ppr",
+        "cache-components",
+        "next-16"
+      ]
+    },
+    {
+      "id": "nextjs-legacy-caching-layers",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "لایه‌های cache در Next.js 14 و تغییرات بعدی را توضیح بده. چرا مدل قدیمی مشکل‌ساز بود؟",
+      "shortAnswer": "در 14 چهار لایه: Request Memoization (dedupe fetchهای یکسان در یک رندر)، Data Cache (نتیجه‌ی fetch بین درخواست‌ها و deploys)، Full Route Cache (HTML/RSC payload مسیرهای استاتیک) و Router Cache (کلاینت). مشکل: پیش‌فرض «cache همه‌چیز»، روابط ضمنی بین لایه‌ها و ناتوانی در پیش‌بینی اینکه یک صفحه استاتیک است یا دینامیک، که باگ‌های «داده‌ی کهنه» تولید می‌کرد.",
+      "explanation": "مسیر تغییر:\n- **Next 15**: `fetch` و GET Route Handler دیگر پیش‌فرض cache نمی‌شوند و Router Cache برای segmentهای صفحه `staleTime` صفر پیش‌فرض دارد؛ cache باید صریح فعال شود.\n- **Next 16**: مدل صریح و یکپارچه‌ی `'use cache'` (Cache Components) با `cacheLife`/`cacheTag`، و APIهای `updateTag`, `refresh`, `revalidateTag(tag, profile)`. `unstable_cache` و segment configهای پراکنده جایگاه پیشین را از دست دادند (در مدل جدید).\n\nنتیجه‌ی عملی برای مصاحبه: بدانی «چه چیزی، کجا و چقدر cache می‌شود» را در هر نسخه‌ای که تیم استفاده می‌کند بپرسی/بخوانی، چون رفتار پیش‌فرض بین 14/15/16 فرق دارد. هنگام دیباگ داده‌ی کهنه: (۱) لایه‌ی درست را پیدا کن (memoization/data/route/router)، (۲) tag و مسیر invalidation را بررسی کن، (۳) در dev و production جداگانه تست کن چون dev بسیاری از cacheها را غیرفعال می‌کند.",
+      "commonMistake": "ندانستن اینکه رفتار پیش‌فرض cache بین نسخه‌ها فرق دارد و کپی کردن راه‌حل‌های قدیمی از اینترنت.",
+      "followUp": "چطور تشخیص می‌دهی یک صفحه‌ی داده‌کهنه به‌خاطر Router Cache است یا Data Cache؟",
+      "estimatedSeconds": 150,
+      "minVersion": "14",
+      "tags": [
+        "caching",
+        "history",
+        "debugging"
+      ]
+    },
+    {
+      "id": "nextjs-server-actions-security-next",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "درباره‌ی امنیت Server Actions در Next.js کدام گزینه درست است؟",
+      "shortAnswer": "طبق مستندات امنیتی Next: هر Server Action باید خودش هویت و مجوز را بررسی کند؛ چک در سطح صفحه به action تسری ندارد. Next دقیقاً برای جلوگیری از افشا closure را با کلید مخصوص build رمزنگاری می‌کند و از مقایسه‌ی Origin/Host برای CSRF استفاده می‌کند (با `allowedOrigins` برای reverse proxy).",
+      "explanation": "نکات کاربردی:\n- ورودی را با schema (Zod) اعتبارسنجی کن؛ `formData` از کلاینت قابل جعل است.\n- مالکیت منبع را چک کن (IDOR): `invoice.ownerId === session.userId`.\n- Actionهای استفاده‌نشده dead-code-eliminate می‌شوند ولی فرض کن هر action export‌شده با POST مستقیم قابل فراخوانی است.\n- برای رمزنگاری closure در چند instance (self-host) باید `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` یکسان تنظیم شود تا بین deployها و instanceها سازگار بماند.\n- Rate limit و لاگ audit برای عملیات حساس.\n- ورودی/خروجی را حداقلی نگه دار؛ فقط DTO لازم.\n- نسخه‌ی Next/React را به‌روز نگه دار؛ آسیب‌پذیری‌های امنیتی متعددی در پروتکل RSC/Server Actions گزارش و وصله شده‌اند.",
+      "commonMistake": "تکیه بر اینکه «UI فقط به کاربران مجاز نمایش داده می‌شود» و حذف چک مجوز.",
+      "followUp": "چرا در self-hosting با چند instance کلید رمزنگاری Server Actions باید یکسان باشد؟",
+      "estimatedSeconds": 100,
+      "minVersion": "14",
+      "tags": [
+        "server-actions",
+        "security",
+        "csrf"
+      ],
+      "choices": [
+        {
+          "text": "Server Actionهای استفاده‌نشده‌ی export‌شده هرگز قابل فراخوانی نیستند"
+        },
+        {
+          "text": "اگر صفحه‌ی حاوی فرم محافظت‌شده باشد، action هم خودکار محافظت‌شده است"
+        },
+        {
+          "text": "closure variableها به‌صورت plain-text به مرورگر می‌روند"
+        },
+        {
+          "text": "هر action باید مستقل احراز هویت/مجوز و اعتبارسنجی ورودی داشته باشد؛ Next متغیرهای closure را رمزنگاری و Origin را با Host مقایسه می‌کند (CSRF) ولی این جایگزین چک مجوز نیست",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "nextjs-self-hosting-deploy",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "اپ Next.js را چطور self-host می‌کنی و چه مسائل عملیاتی وجود دارد؟",
+      "shortAnswer": "با `output: 'standalone'` یک پوشه‌ی minimal شامل فقط وابستگی‌های لازم و `server.js` تولید می‌شود که در Docker/Node اجرا می‌شود. پشت reverse proxy (Nginx) و CDN قرار می‌گیرد. برای چند instance باید کش، ISR و کلید Server Actions هماهنگ شوند.",
+      "explanation": "نکات:\n1. **Docker**: multi-stage build، کپی `.next/standalone`, `.next/static`, `public`؛ کاربر غیر root؛ `NODE_ENV=production`.\n2. **کش مشترک**: cache پیش‌فرض ISR/`use cache` روی دیسک/حافظه‌ی همان instance است؛ برای چند instance از `cacheHandler`/`cacheHandlers` (Redis/S3) استفاده کن تا revalidation همه‌جا اعمال شود.\n3. **CDN**: header‌های `Cache-Control` مسیرهای استاتیک (`/_next/static` ایمن‌تر برای cache طولانی چون hash دارند)؛ مراقب پاسخ‌های شخصی‌سازی‌شده باش.\n4. **Config runtime**: `NEXT_PUBLIC_*` در build inline می‌شود؛ برای config قابل تغییر در runtime از env سمت سرور استفاده کن.\n5. **Health/Graceful shutdown**، لاگ ساختاریافته، `instrumentation.ts` برای OpenTelemetry.\n6. **Node/TS نسخه‌ی حداقل** برای Next 16: Node 20.9+.\n7. **Image optimization** در مقیاس بالا CPU می‌خواهد؛ سرویس جداگانه/loader سفارشی یا CDN (مثل Cloudflare) را بسنج.\n\nجایگزین‌ها: پلتفرم مدیریت‌شده (Vercel) که این موارد را خودکار می‌کند، یا Adapter های پلتفرم‌های دیگر.",
+      "commonMistake": "اجرای چند instance با کش جداگانه و دیدن داده‌ی متفاوت بین کاربران.",
+      "followUp": "چطور revalidateTag را بین چند instance هماهنگ می‌کنی؟",
+      "estimatedSeconds": 150,
+      "minVersion": "14",
+      "tags": [
+        "deployment",
+        "docker",
+        "self-hosting"
+      ]
+    },
+    {
+      "id": "nextjs-react-compiler-next",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "پشتیبانی React Compiler در Next 16 چه وضعیتی دارد؟",
+      "shortAnswer": "طبق مستندات ارتقا به 16، React Compiler stable و built-in است ولی opt-in. کامپایلر memoization را در build اضافه می‌کند و به کد سازگار با قواعد React نیاز دارد. فعال کردن آن ممکن است زمان build را (به‌خاطر Babel) افزایش دهد.",
+      "explanation": "```ts\n// next.config.ts\nconst nextConfig: NextConfig = { reactCompiler: true };\nexport default nextConfig;\n```\nراهبرد: اول روی بخشی از پروژه یا در CI با معیار (Profiler/Lighthouse) بسنج؛ اگر کامپوننتی مشکل داشت می‌توانی `\"use no memo\"` بگذاری؛ `eslint-plugin-react-hooks` قواعد کامپایلر را چک می‌کند. توقع نداشته باش کامپایلر الگوریتم کند یا معماری state نامناسب را درست کند.",
+      "commonMistake": "فرض اینکه با فعال کردن کامپایلر دیگر نیازی به نوشتن کد خالص و بدون mutate نیست.",
+      "followUp": "در چه شرایطی کامپایلر یک کامپوننت را «skip» می‌کند؟",
+      "estimatedSeconds": 60,
+      "minVersion": "16",
+      "tags": [
+        "react-compiler",
+        "next-16",
+        "performance"
+      ],
+      "choices": [
+        {
+          "text": "فقط با Pages Router کار می‌کند"
+        },
+        {
+          "text": "پشتیبانی داخلی پایدار است ولی به‌صورت پیش‌فرض فعال نیست؛ با گزینه‌ی `reactCompiler: true` در `next.config` (و نصب `babel-plugin-react-compiler`) فعال می‌شود",
+          "isCorrect": true
+        },
+        {
+          "text": "در Next 16 پشتیبانی نمی‌شود"
+        },
+        {
+          "text": "به‌طور خودکار برای همه‌ی پروژه‌ها روشن است"
+        }
+      ]
+    },
+    {
+      "id": "nextjs-upgrade-to-16",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "مهاجرت از Next 14 به 16 را چطور برنامه‌ریزی می‌کنی؟",
+      "shortAnswer": "مرحله‌ای: اول 14 → 15 (React 19، async APIها، پیش‌فرض‌های cache)، تست کامل، سپس 15 → 16 (proxy، Turbopack، Cache Components اختیاری، تغییرات image و parallel routes). از codemodهای رسمی استفاده می‌کنم و هر مرحله را جدا merge و مستقر می‌کنم.",
+      "explanation": "چک‌لیست:\n- **پیش‌نیازها**: Node 20.9+، TypeScript 5.1+، مرورگرهای مدرن (Chrome/Edge/Firefox 111+، Safari 16.4+).\n- **codemod**: `npx @next/codemod@canary upgrade latest` (async APIs، تغییر نام‌ها).\n- **React 19**: `useFormState` → `useActionState`، ref به‌عنوان prop، حذف propTypes/defaultProps.\n- **Async APIs**: `cookies()/headers()/draftMode()/params/searchParams` همه await.\n- **Caching**: بازبینی هر `fetch`/route handler که به cache پیش‌فرض تکیه می‌کرد؛ `revalidateTag(tag, profile)`؛ `dynamicIO`/`ppr` → `cacheComponents`.\n- **middleware → proxy** (`npx @next/codemod@canary middleware-to-proxy .`) و runtime فقط Node.\n- **Parallel routes**: افزودن `default.js` برای همه‌ی slotها.\n- **Image**: پیش‌فرض‌های جدید (`minimumCacheTTL`، `qualities`، `imageSizes`) و `priority` → `preload`.\n- **حذف‌ها**: AMP، `next lint` (از ESLint/Biome مستقیم استفاده کن)، `serverRuntimeConfig/publicRuntimeConfig`.\n- **Turbopack**: بررسی webpack config سفارشی؛ در صورت نیاز `--webpack` موقت.\n\nبعد از هر مرحله: تست e2e، مقایسه‌ی باندل/Web Vitals، و رول‌اوت تدریجی.",
+      "commonMistake": "پرش مستقیم از 14 به 16 و رفع همزمان صدها خطا بدون قابلیت bisect.",
+      "followUp": "چطور رگرسیون کش را بعد از ارتقا تشخیص می‌دهی؟",
+      "estimatedSeconds": 150,
+      "minVersion": "16",
+      "tags": [
+        "upgrade",
+        "migration",
+        "next-16"
+      ]
+    },
+    {
+      "id": "nextjs-web-vitals-next",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "برای بهبود Core Web Vitals در یک اپ Next.js چه کارهایی می‌کنی؟",
+      "shortAnswer": "اول اندازه‌گیری (Lighthouse/CrUX، `useReportWebVitals`، RUM)، بعد اقدام بر اساس معیار: LCP (تصویر/فونت/TTFB)، INP (JS اجرا در main thread) و CLS (ابعاد و فونت).",
+      "explanation": "راهکارها:\n- **LCP**: `next/image` با `preload` برای تصویر اصلی و `sizes` درست؛ `next/font`؛ کاهش TTFB با cache/PPR/CDN؛ streaming.\n- **INP**: کم کردن JS کلاینت (Server Components، `'use client'` در برگ‌ها)، lazy-load بخش‌های سنگین (`next/dynamic`, Suspense)، `useTransition` برای به‌روزرسانی‌های سنگین، `next/script` با `strategy=\"lazyOnload\"/\"afterInteractive\"` برای اسکریپت‌های ثالث.\n- **CLS**: ابعاد تصویر/iframe، fallback هم‌اندازه‌ی Suspense، و `next/font`.\n- **باندل**: `@next/bundle-analyzer`، حذف وابستگی‌های بزرگ، import مستقیم (جلوگیری از barrel)، `optimizePackageImports`.\n- **شبکه**: فشرده‌سازی (brotli)، HTTP caching، preconnect به دامنه‌های ثالث.\n\nآزمایش‌ها را در production build اجرا کن (dev مبنای درست نیست) و بودجه‌ی کارایی در CI بگذار.",
+      "commonMistake": "بهینه‌سازی در حالت dev و بدون دیتای واقعی کاربران.",
+      "followUp": "INP با LCP چه فرقی دارد و کدام به JS اجراشده مربوط‌تر است؟",
+      "estimatedSeconds": 130,
+      "minVersion": "14",
+      "tags": [
+        "performance",
+        "web-vitals",
+        "optimization"
+      ]
+    },
+    {
+      "id": "nextjs-react-cache-dedupe-next",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "برای اینکه یک query دیتابیس (بدون fetch) در `generateMetadata`، layout و page فقط یک‌بار اجرا شود چه می‌کنی؟",
+      "shortAnswer": "fetch memoization خودکار فقط برای `fetch` است. برای ORM/DB از `cache()` React استفاده کن. این cache به یک درخواست محدود است.",
+      "explanation": "```ts\nimport { cache } from 'react';\nexport const getPost = cache(async (slug: string) => db.post.findUnique({ where: { slug } }));\n\n// generateMetadata و Page هر دو getPost(slug) را صدا می‌زنند؛ فقط یک query اجرا می‌شود\n```\nاگر کش بین درخواست‌ها می‌خواهی از `'use cache'` (Next 16) استفاده کن. آرگومان‌ها باید primitive یا reference یکسان باشند؛ ساختن شیء جدید در هر فراخوانی dedupe را بی‌اثر می‌کند. `useMemo` در Server Component وجود ندارد چون hookها فقط در Client Component کار می‌کنند.",
+      "commonMistake": "پاس دادن شیء literal جدید به تابع cache‌شده و بی‌اثر شدن dedupe.",
+      "followUp": "تفاوت `React.cache` و `'use cache'` چیست؟",
+      "estimatedSeconds": 55,
+      "minVersion": "14",
+      "tags": [
+        "cache",
+        "data-fetching",
+        "dedupe"
+      ],
+      "choices": [
+        {
+          "text": "تابع را با `React.cache` می‌پیچی تا در همان رندر سرور برای آرگومان‌های یکسان memoize شود",
+          "isCorrect": true
+        },
+        {
+          "text": "با `localStorage` cache می‌کنی"
+        },
+        {
+          "text": "غیرممکن است و باید سه بار query شود"
+        },
+        {
+          "text": "از `useMemo` داخل Server Component استفاده می‌کنی"
+        }
+      ]
+    },
+    {
+      "id": "nextjs-i18n-next",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "i18n و RTL (مثلاً فارسی) را در اپ Next.js App Router چطور پیاده می‌کنی؟",
+      "shortAnswer": "App Router قابلیت i18n routing داخلی مثل Pages Router ندارد؛ معمولاً یک segment دینامیک `[locale]` در ریشه‌ی `app/`، تشخیص زبان در `proxy.ts` (از header `Accept-Language`/cookie) و بارگذاری پیام‌ها سمت سرور (مثلاً با `next-intl`) استفاده می‌شود. برای RTL در `<html>` مقادیر `lang` و `dir` تنظیم می‌شوند.",
+      "explanation": "```tsx\n// app/[locale]/layout.tsx\nexport default async function LocaleLayout({ children, params }: { children: React.ReactNode; params: Promise<{ locale: string }> }) {\n  const { locale } = await params;\n  const dir = locale === 'fa' ? 'rtl' : 'ltr';\n  return <html lang={locale} dir={dir}><body>{children}</body></html>;\n}\nexport function generateStaticParams() { return [{ locale: 'fa' }, { locale: 'en' }]; }\n```\nنکات: SEO با `alternates.languages` (hreflang) در metadata؛ فرمت اعداد/تاریخ با `Intl` (تقویم جلالی: `Intl.DateTimeFormat('fa-IR-u-ca-persian')`)؛ CSS با ویژگی‌های logical (`margin-inline-start`) به‌جای `left/right`؛ فونت مناسب؛ پیام‌ها را در Server Component بخوان تا باندل کلاینت بزرگ نشود؛ لینک‌ها را locale-aware بساز.",
+      "commonMistake": "استفاده از `left/right` در CSS و شکستن ظاهر در حالت RTL.",
+      "followUp": "چرا ویژگی‌های logical در CSS برای RTL بهتر از `left/right` هستند؟",
+      "estimatedSeconds": 90,
+      "minVersion": "14",
+      "tags": [
+        "i18n",
+        "rtl",
+        "routing"
+      ]
+    },
+    {
+      "id": "nextjs-testing-nextjs",
+      "level": "Senior",
+      "type": "ShortAnswer",
+      "text": "استراتژی تست یک اپ Next.js (App Router) را چطور تعریف می‌کنی؟",
+      "shortAnswer": "تست واحد برای منطق خالص، hookها و Client Componentها (Vitest/Jest + Testing Library)؛ Server Componentهای async را با تست یکپارچه/e2e (Playwright) پوشش می‌دهم چون ابزارهای تست واحد فعلاً از رندر async پشتیبانی محدودی دارند؛ شبکه را در سطح مرز با MSW mock می‌کنم و Server Actionها را مستقیم به‌عنوان توابع async تست می‌کنم.",
+      "explanation": "ترکیب پیشنهادی:\n- **unit**: توابع DAL، validatorها (Zod)، utilityها، reducerها.\n- **component**: Client Componentها با Testing Library (`getByRole`)، فرم‌ها و تعاملات.\n- **Server Actions**: import و صدا زدن مستقیم با mock کردن DB/`next/headers`؛ چک مجوز و خطاها.\n- **e2e (Playwright)**: مسیرهای حیاتی (login، checkout)، Server Components، cache/revalidation و redirectها در build production (`next build && next start`).\n- **contract/API**: تست Route Handlerها با ساخت `Request` و بررسی `Response`.\n- **بصری/دسترسی‌پذیری**: axe در e2e، Lighthouse در CI.\n\nنکته: e2e را روی build production اجرا کن چون رفتار cache/streaming در dev فرق دارد. تست‌ها را سریع و پایدار نگه دار؛ e2e فقط برای ریسک‌های اصلی.",
+      "commonMistake": "تلاش برای تست Server Component async با ابزار سنتی و دیدن خطاهای پیچیده به‌جای استفاده از e2e.",
+      "followUp": "چرا e2e را روی `next start` اجرا می‌کنیم نه `next dev`؟",
+      "estimatedSeconds": 100,
+      "minVersion": "14",
+      "tags": [
+        "testing",
+        "playwright",
+        "quality"
+      ]
+    },
+    {
+      "id": "nextjs-router-cache-prefetch-16",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "«Layout deduplication» و «incremental prefetching» در Next 16 چه کاری می‌کنند؟",
+      "shortAnswer": "در مستندات ارتقا به 16 به‌عنوان بهبودهای routing ذکر شده‌اند: prefetch هوشمندتر و مشترک‌گذاری layout بین routeها.",
+      "explanation": "پیامدها: تعداد زیاد `<Link>` در صفحه (مثلاً لیست محصولات) دیگر layout را چندبار prefetch نمی‌کند؛ بار شبکه و سرور کم می‌شود. همچنان می‌توانی با prop `prefetch` رفتار را کنترل کنی. مراقب مسیرهای دینامیک و شخصی‌سازی‌شده باش که ممکن است prefetch گران داشته باشند. برای اندازه‌گیری، Network tab و Web Vitals (INP/LCP ناوبری) را قبل/بعد مقایسه کن.",
+      "commonMistake": "فرض اینکه prefetch «مجانی» است و روی هزاران لینک بدون محدودیت اعمال کردن.",
+      "followUp": "چه زمانی `prefetch={false}` روی `Link` مناسب است؟",
+      "estimatedSeconds": 55,
+      "minVersion": "16",
+      "tags": [
+        "prefetch",
+        "router",
+        "next-16"
+      ],
+      "choices": [
+        {
+          "text": "prefetch را کاملاً غیرفعال می‌کند"
+        },
+        {
+          "text": "همه‌ی صفحات سایت را در اولین ورود دانلود می‌کند"
+        },
+        {
+          "text": "وقتی چند لینک با layout مشترک prefetch می‌شوند layout فقط یک‌بار دانلود می‌شود و فقط بخش‌های ناموجود در کش دوباره prefetch می‌شوند؛ نتیجه: ناوبری سریع‌تر با ترافیک کمتر، بدون تغییر کد",
+          "isCorrect": true
+        },
+        {
+          "text": "فقط برای Pages Router کار می‌کند"
+        }
+      ]
+    },
+    {
+      "id": "nextjs-instrumentation-observability",
+      "level": "Senior",
+      "type": "ShortAnswer",
+      "text": "Observability (لاگ، تریس، خطا) را در Next.js چطور راه‌اندازی می‌کنی؟",
+      "shortAnswer": "فایل `instrumentation.ts` در ریشه با تابع `register()` که یک‌بار هنگام شروع سرور اجرا می‌شود (برای OpenTelemetry/مانیتورینگ) و `onRequestError` که همه‌ی خطاهای سرور را می‌گیرد و به Sentry/Datadog می‌فرستد. لاگ ساختاریافته (JSON) با correlation id، و `useReportWebVitals` برای معیارهای کلاینت.",
+      "explanation": "```ts\n// instrumentation.ts\nexport async function register() {\n  if (process.env.NEXT_RUNTIME === 'nodejs') {\n    await import('./instrumentation.node');    // راه‌اندازی OpenTelemetry SDK\n  }\n}\nexport async function onRequestError(err: unknown, request: { path: string; method: string }, context: { routerKind: string; routePath: string }) {\n  await reportError(err, { path: request.path, route: context.routePath });\n}\n```\nنکات: runtime را (`nodejs`/`edge`) بررسی کن چون همه‌ی کتابخانه‌ها روی edge کار نمی‌کنند؛ داده‌ی شخصی کاربر را لاگ نکن؛ برای Server Actions و Route Handlerها trace span مجزا بساز؛ نمونه‌برداری (sampling) برای کنترل هزینه.",
+      "commonMistake": "لاگ کردن اطلاعات حساس (توکن، PII) در خطاها.",
+      "followUp": "چرا در `register()` باید `NEXT_RUNTIME` را چک کرد؟",
+      "estimatedSeconds": 90,
+      "minVersion": "14",
+      "tags": [
+        "observability",
+        "opentelemetry",
+        "monitoring"
+      ]
+    },
+    {
+      "id": "nextjs-static-export-limits",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "با `output: 'export'` (static export) چه محدودیت‌هایی دارید؟",
+      "shortAnswer": "Static export یک پوشه‌ی `out/` می‌سازد که روی هر hosting استاتیک (S3، GitHub Pages، CDN) قابل سرو است.",
+      "explanation": "مناسب برای: سایت‌های مستندات/بازاریابی و داشبوردهای کاملاً کلاینتی. برای داده‌ی پویا از fetch سمت کلاینت (یا API جدا) استفاده کن. `next/image` باید با `unoptimized: true` یا loader سفارشی (CDN) استفاده شود. مسیرهای دینامیک باید با `generateStaticParams` کاملاً شناخته باشند (`dynamicParams: false` مؤثر). هر چیزی که به سرور Node نیاز دارد (auth مبتنی بر cookie سمت سرور، Server Actions، cache) خارج از این مدل است. اگر بعداً به سرور نیاز شد باید معماری را تغییر دهی؛ پس قبل از انتخاب نیازها را بسنج.",
+      "commonMistake": "انتخاب static export و بعد نیاز به Server Action/ISR در همان پروژه.",
+      "followUp": "چه زمانی static export را به deployment با سرور ترجیح می‌دهی؟",
+      "estimatedSeconds": 60,
+      "minVersion": "14",
+      "tags": [
+        "static-export",
+        "deployment",
+        "hosting"
+      ],
+      "choices": [
+        {
+          "text": "خروجی فقط HTML/JS/CSS استاتیک است؛ Server Actions، Route Handlerهای دینامیک، ISR/revalidation، proxy، و رندر در زمان درخواست پشتیبانی نمی‌شوند و تصاویر باید بدون optimizer پیش‌فرض سرو شوند",
+          "isCorrect": true
+        },
+        {
+          "text": "فقط Pages Router را پشتیبانی می‌کند"
+        },
+        {
+          "text": "ISR در آن فعال‌تر است"
+        },
+        {
+          "text": "همه‌ی قابلیت‌های سرور مثل قبل کار می‌کنند"
+        }
+      ]
+    },
+    {
+      "id": "nextjs-nextjs-project-structure",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "ساختار پروژه‌ی Next.js بزرگ را چطور سازمان‌دهی می‌کنی؟",
+      "shortAnswer": "بر اساس feature/domain به‌جای نوع فایل، با colocation کنار route، پوشه‌های private (`_components`) برای جلوگیری از route شدن، route groups (`(marketing)`, `(app)`) برای layoutهای مختلف بدون اثر در URL، و لایه‌ی مرکزی داده/دامنه (DAL) که فقط سمت سرور است.",
+      "explanation": "نمونه:\n```\nsrc/\n  app/\n    (public)/…          layout عمومی\n    (app)/dashboard/…   layout احراز‌هویت‌شده\n    api/…               Route Handlerها (webhook)\n  features/\n    billing/\n      components/  actions.ts  queries.ts  schema.ts\n  lib/\n    dal/  (server-only)  auth/  db/\n  components/ui/        کامپوننت‌های مشترک\n```\nاصول: مرز server/client روشن (فقط برگ‌های تعاملی `'use client'`)، توابع mutation در `actions.ts` با `'use server'` و اعتبارسنجی، schema مشترک (Zod) بین فرم و action، مسیرها و tagهای cache به‌صورت ثابت‌های متمرکز، قانون ESLint برای مرزهای import، و تست‌های colocated. برای monorepo (چند اپ) از Turborepo/Nx و پکیج‌های مشترک `ui` و `config` استفاده کن.",
+      "commonMistake": "ساختار نوع‌محور سراسری (`components/`, `hooks/`, `utils/`) که با رشد پروژه وابستگی‌ها را گم می‌کند.",
+      "followUp": "route group چه فرقی با private folder دارد؟",
+      "estimatedSeconds": 110,
+      "minVersion": "14",
+      "tags": [
+        "architecture",
+        "project-structure",
+        "app-router"
+      ]
+    },
+    {
+      "id": "nextjs-global-css-modules",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "در App Router استایل سراسری و استایل محدود به کامپوننت را چطور اعمال می‌کنی؟",
+      "shortAnswer": "در Next.js می‌توان فایل CSS را مستقیم import کرد؛ CSS Module نام کلاس‌ها را محلی (hash‌شده) می‌کند و تداخل نام نمی‌سازد.",
+      "explanation": "```tsx\n// app/layout.tsx\nimport './globals.css';\n\n// components/Button.tsx\nimport styles from './Button.module.css';\nexport const Button = () => <button className={styles.primary}>ok</button>;\n```\nگزینه‌های دیگر: Tailwind CSS (رایج و با Server Components سازگار)، CSS-in-JS مبتنی بر runtime که با Server Components مشکل دارد (نیاز به Client Component و تنظیمات registry) و بهتر است از راه‌حل‌های zero-runtime استفاده شود. برای RTL از ویژگی‌های logical (`margin-inline-start`) استفاده کن.",
+      "commonMistake": "استفاده از کتابخانه‌ی CSS-in-JS runtime در Server Component و گرفتن خطا.",
+      "followUp": "چرا CSS-in-JS مبتنی بر runtime با Server Components مشکل دارد؟",
+      "estimatedSeconds": 45,
+      "minVersion": "14",
+      "tags": [
+        "css",
+        "styling",
+        "app-router"
+      ],
+      "choices": [
+        {
+          "text": "هر کامپوننت باید استایل خودش را با `<style>` inline بنویسد"
+        },
+        {
+          "text": "CSS سراسری (مثل `globals.css` یا Tailwind) را در layout ریشه import می‌کنی و برای استایل محدود به کامپوننت از CSS Modules (`X.module.css`) استفاده می‌کنی",
+          "isCorrect": true
+        },
+        {
+          "text": "CSS سراسری فقط از طریق تگ `<link>` در `public/` ممکن است"
+        },
+        {
+          "text": "CSS Modules در App Router پشتیبانی نمی‌شود"
+        }
+      ]
+    },
+    {
+      "id": "nextjs-runtime-edge-vs-node",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "انتخاب بین runtime Node.js و Edge در Next.js را چطور می‌سنجی؟",
+      "shortAnswer": "Edge runtime زیرمجموعه‌ای از Web APIs است (بدون `fs`، بسیاری از native addonها و اتصال مستقیم TCP)، ولی به کاربر نزدیک‌تر و استارت سریع‌تر دارد. اگر دیتابیس در یک region است، اجرای edge در جای دور از DB اغلب کندتر می‌شود (round trip بیشتر).",
+      "explanation": "معیارها:\n- وابستگی‌ها: ORM/درایورها و کتابخانه‌ها با Edge سازگارند؟\n- محل داده: DB تک‌region یا توزیع‌شده (HTTP-based driver، edge cache)?\n- نوع کار: redirect/rewrite سبک، A/B، geo ← مناسب edge؛ رندر سنگین/DB ← Node.\n- هزینه و محدودیت‌های اندازه/زمان اجرا.\n- در Next 16: proxy فقط Node؛ قابلیت Cache Components و برخی ویژگی‌ها ممکن است روی edge محدودیت داشته باشند؛ سازگاری را در مستندات نسخه‌ی هدف بررسی کن.\n\nبا اندازه‌گیری تصمیم بگیر (TTFB واقعی از چند منطقه)، نه با فرض.",
+      "commonMistake": "انتقال همه‌چیز به edge و شکستن وابستگی‌ها یا کندتر شدن به‌خاطر فاصله تا دیتابیس.",
+      "followUp": "چرا edge نزدیک کاربر ولی دور از دیتابیس ممکن است کندتر شود؟",
+      "estimatedSeconds": 80,
+      "minVersion": "14",
+      "tags": [
+        "runtime",
+        "edge",
+        "architecture"
+      ],
+      "choices": [
+        {
+          "text": "پیش‌فرض Node.js است چون همه‌ی APIها و کتابخانه‌ها را دارد؛ Edge فقط وقتی که تأخیر جغرافیایی بسیار مهم است و کد به APIهای محدود Web-standard بسنده می‌کند. در Next 16 proxy فقط روی Node اجرا می‌شود",
+          "isCorrect": true
+        },
+        {
+          "text": "Node.js در Next.js پشتیبانی نمی‌شود"
+        },
+        {
+          "text": "Edge همیشه سریع‌تر و بی‌هزینه است و باید پیش‌فرض باشد"
+        },
+        {
+          "text": "Edge همه‌ی پکیج‌های Node (fs، اتصال مستقیم TCP دیتابیس) را پشتیبانی می‌کند"
+        }
+      ]
+    },
+    {
+      "id": "nextjs-cms-webhook-revalidation",
+      "level": "Senior",
+      "type": "ShortAnswer",
+      "text": "محتوا از CMS می‌آید؛ چطور بعد از انتشار، صفحات را بدون build مجدد به‌روز می‌کنی؟",
+      "shortAnswer": "در CMS یک webhook تنظیم می‌کنم که به یک Route Handler اپ می‌رود. Handler ابتدا امضای درخواست (HMAC/secret) را تأیید می‌کند و بعد `revalidateTag('cms', 'max')` (یا `revalidatePath`) را صدا می‌زند تا cache مرتبط باطل شود. داده‌های صفحه با `'use cache'` + `cacheTag('cms')` یا fetch با `next: { tags: ['cms'] }` برچسب خورده‌اند.",
+      "explanation": "```ts\n// app/api/revalidate/route.ts\nimport { revalidateTag } from 'next/cache';\nimport crypto from 'node:crypto';\n\nexport async function POST(req: Request) {\n  const body = await req.text();\n  const sig = req.headers.get('x-signature') ?? '';\n  const expected = crypto.createHmac('sha256', process.env.WEBHOOK_SECRET!).update(body).digest('hex');\n  const a = Buffer.from(sig), b = Buffer.from(expected);\n  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {\n    return new Response('unauthorized', { status: 401 });\n  }\n  revalidateTag('cms', 'max');\n  return Response.json({ revalidated: true });\n}\n```\nنکات: مقایسه‌ی امضا با `timingSafeEqual` (طول دو بافر باید برابر باشد وگرنه throw می‌کند و به 500 می‌رسد؛ در کد بالا اول طول چک شده)؛ endpoint بدون احراز هویت، خطرناک است؛ با پروفایل `'max'` کاربران محتوای قدیمی را تا آماده شدن نسخه‌ی جدید می‌بینند (SWR)؛ اگر تازگی فوری لازم است از `{ expire: 0 }` استفاده کن؛ برای چند instance باید cache handler مشترک باشد؛ `updateTag` فقط در Server Action کار می‌کند نه Route Handler.",
+      "commonMistake": "نوشتن endpoint revalidate بدون تأیید امضا که هر کسی بتواند cache را پاک کند.",
+      "followUp": "چرا به‌جای `===` از `timingSafeEqual` برای مقایسه‌ی امضا استفاده می‌کنیم؟",
+      "estimatedSeconds": 100,
+      "minVersion": "15",
+      "tags": [
+        "revalidation",
+        "webhooks",
+        "cms"
+      ]
+    }
+  ]
+}
