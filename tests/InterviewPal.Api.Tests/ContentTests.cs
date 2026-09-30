@@ -58,6 +58,32 @@ public class ContentTests
         }
     }
 
+    /// <summary>
+    /// Guards against the classic multiple-choice tell: if the correct option is (almost) always the longest one,
+    /// learners can pass without knowing the material. With four options chance level is 25%.
+    /// </summary>
+    [Fact]
+    public void Correct_choice_is_not_predictable_by_length()
+    {
+        foreach (var file in ContentSeeder.LoadFiles(ContentDirectory()))
+        {
+            var candidates = file.Questions
+                .Where(q => q.Choices.Count >= 3 && q.Choices.Max(c => c.Text.Length) >= 40)
+                .ToList();
+            Assert.NotEmpty(candidates);
+
+            var uniqueLongest = candidates.Count(q =>
+            {
+                var longest = q.Choices.Max(c => c.Text.Length);
+                return q.Choices.Count(c => c.Text.Length == longest) == 1 &&
+                       q.Choices.Single(c => c.Text.Length == longest).IsCorrect;
+            });
+
+            var share = (double)uniqueLongest / candidates.Count;
+            Assert.InRange(share, 0.08, 0.45);
+        }
+    }
+
     [Fact]
     public void Every_question_declares_the_version_it_applies_from()
     {
