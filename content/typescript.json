@@ -2,7 +2,8 @@
   "technology": {
     "slug": "typescript",
     "name": "TypeScript",
-    "currentVersion": "7.0"
+    "currentVersion": "7.0",
+    "supportedFrom": "5.9"
   },
   "questions": [
     {

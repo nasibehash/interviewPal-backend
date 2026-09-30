@@ -16,7 +16,7 @@ public class QuestionService(IQuestionRepository questions)
             {
                 var byLevel = Enum.GetValues<Level>()
                     .ToDictionary(l => l.ToString(), l => counts.GetValueOrDefault((t.Slug, l)));
-                return new TechnologyDto(t.Slug, t.Name, t.CurrentVersion, byLevel.Values.Sum(), byLevel);
+                return new TechnologyDto(t.Slug, t.Name, t.CurrentVersion, t.SupportedFrom, byLevel.Values.Sum(), byLevel);
             })
             .ToList();
     }

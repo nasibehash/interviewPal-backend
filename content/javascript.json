@@ -2,7 +2,8 @@
   "technology": {
     "slug": "javascript",
     "name": "JavaScript",
-    "currentVersion": "ES2026"
+    "currentVersion": "ES2026",
+    "supportedFrom": "ES2024"
   },
   "questions": [
     {

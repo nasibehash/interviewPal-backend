@@ -1,5 +1,5 @@
 {
-  "technology": { "slug": "sample", "name": "Sample", "currentVersion": "1" },
+  "technology": { "slug": "sample", "name": "Sample", "currentVersion": "3", "supportedFrom": "1" },
   "questions": [
     {
       "id": "sample-mcq-junior", "level": "Junior", "type": "MultipleChoice",

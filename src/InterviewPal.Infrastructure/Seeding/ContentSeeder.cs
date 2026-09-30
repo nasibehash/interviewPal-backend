@@ -60,6 +60,7 @@ public class ContentSeeder(AppDbContext db, ILogger<ContentSeeder> logger)
 
         tech.Name = file.Technology.Name;
         tech.CurrentVersion = file.Technology.CurrentVersion;
+        tech.SupportedFrom = file.Technology.SupportedFrom;
 
         var existing = await db.Questions.Include(q => q.Choices)
             .Where(q => q.TechnologySlug == tech.Slug).ToDictionaryAsync(q => q.Id, ct);

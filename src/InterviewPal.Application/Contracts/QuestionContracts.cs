@@ -7,6 +7,7 @@ public record TechnologyDto(
     string Slug,
     string Name,
     string? CurrentVersion,
+    string? SupportedFrom,
     int QuestionCount,
     IReadOnlyDictionary<string, int> CountByLevel);
 

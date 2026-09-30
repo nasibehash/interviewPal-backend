@@ -39,6 +39,8 @@ public class ApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         var techs = await GetJson("/api/technologies");
         var sample = techs.EnumerateArray().Single(t => t.GetProperty("slug").GetString() == "sample");
         Assert.Equal(3, sample.GetProperty("questionCount").GetInt32());
+        Assert.Equal("1", sample.GetProperty("supportedFrom").GetString());
+        Assert.Equal("3", sample.GetProperty("currentVersion").GetString());
         Assert.Equal(1, sample.GetProperty("countByLevel").GetProperty("Junior").GetInt32());
     }
 

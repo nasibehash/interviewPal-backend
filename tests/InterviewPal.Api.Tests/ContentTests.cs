@@ -40,6 +40,18 @@ public class ContentTests
     }
 
     [Fact]
+    public void Every_technology_declares_the_version_window_it_covers()
+    {
+        var files = ContentSeeder.LoadFiles(ContentDirectory());
+        Assert.NotEmpty(files);
+        foreach (var file in files)
+        {
+            Assert.False(string.IsNullOrWhiteSpace(file.Technology.CurrentVersion), $"{file.Technology.Slug} has no currentVersion");
+            Assert.False(string.IsNullOrWhiteSpace(file.Technology.SupportedFrom), $"{file.Technology.Slug} has no supportedFrom");
+        }
+    }
+
+    [Fact]
     public void Every_question_declares_the_version_it_applies_from()
     {
         foreach (var file in ContentSeeder.LoadFiles(ContentDirectory()))

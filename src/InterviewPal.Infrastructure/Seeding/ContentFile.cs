@@ -12,6 +12,7 @@ public class ContentTechnology
     public required string Slug { get; set; }
     public required string Name { get; set; }
     public string? CurrentVersion { get; set; }
+    public string? SupportedFrom { get; set; }
 }
 
 public class ContentQuestion

@@ -18,6 +18,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(t => t.Slug).HasMaxLength(50);
             e.Property(t => t.Name).HasMaxLength(100);
             e.Property(t => t.CurrentVersion).HasMaxLength(20);
+            e.Property(t => t.SupportedFrom).HasMaxLength(20);
         });
 
         b.Entity<Question>(e =>
