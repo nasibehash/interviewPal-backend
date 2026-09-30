@@ -1,0 +1,1461 @@
+{
+  "technology": {
+    "slug": "javascript",
+    "name": "JavaScript",
+    "currentVersion": "ES2026"
+  },
+  "questions": [
+    {
+      "id": "javascript-var-let-const-scope",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "کدام گزینه درباره‌ی تفاوت `var` و `let` درست است؟",
+      "shortAnswer": "`var` فقط به function (یا global) محدود است و به `{}` اهمیتی نمی‌دهد؛ `let` و `const` به نزدیک‌ترین بلوک محدودند.",
+      "explanation": "```js\nif (true) {\n  var a = 1;\n  let b = 2;\n}\nconsole.log(a); // 1\nconsole.log(b); // ReferenceError\n```\n`let` هم hoist می‌شود ولی تا خط تعریفش در «Temporal Dead Zone» است. `var` هم اگر در سطح global (اسکریپت کلاسیک) تعریف شود property روی `window` می‌شود، ولی `let`/`const` نه.",
+      "commonMistake": "گفتن اینکه «let hoist نمی‌شود». درست‌ترش این است: hoist می‌شود ولی قبل از مقداردهی قابل دسترسی نیست (TDZ).",
+      "followUp": "`const` دقیقاً چه چیزی را ثابت می‌کند؟",
+      "estimatedSeconds": 50,
+      "minVersion": "ES2015",
+      "tags": [
+        "scope",
+        "var-let-const",
+        "hoisting"
+      ],
+      "choices": [
+        {
+          "text": "هر دو block-scoped هستند و فقط `var` اجازه‌ی redeclare می‌دهد"
+        },
+        {
+          "text": "`let` به‌صورت خودکار روی `window` هم تعریف می‌شود"
+        },
+        {
+          "text": "`let` اصلاً hoist نمی‌شود ولی `var` می‌شود"
+        },
+        {
+          "text": "`var` به function scope محدود است و `let` به block scope",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "javascript-hoisting-tdz",
+      "level": "Junior",
+      "type": "CodeOutput",
+      "text": "خروجی این کد چیست؟",
+      "codeSnippet": "console.log(a);\nvar a = 1;\nconsole.log(b);\nlet b = 2;",
+      "codeLanguage": "javascript",
+      "shortAnswer": "`var a` بالای scope hoist می‌شود و با `undefined` مقداردهی اولیه می‌شود؛ ولی `let b` قبل از خط تعریفش در TDZ است و خواندنش خطا می‌دهد.",
+      "explanation": "Declaration هر دو hoist می‌شوند، اما فقط `var` بلافاصله initialize می‌شود (با `undefined`). `let`/`const`/`class` تا رسیدن اجرا به خط تعریف initialize نمی‌شوند و هر دسترسی قبلش `ReferenceError` است. همین باعث می‌شود باگ‌های «استفاده قبل از تعریف» زودتر و واضح‌تر پیدا شوند.",
+      "commonMistake": "فکر می‌کنند مقدار `1` هم hoist می‌شود. فقط declaration hoist می‌شود، نه assignment.",
+      "followUp": "توابع function declaration در مقایسه با function expression چطور hoist می‌شوند؟",
+      "estimatedSeconds": 45,
+      "minVersion": "ES2015",
+      "tags": [
+        "hoisting",
+        "tdz",
+        "var-let-const"
+      ],
+      "choices": [
+        {
+          "text": "`1` و `2` چاپ می‌شوند"
+        },
+        {
+          "text": "همان خط اول `ReferenceError` می‌دهد"
+        },
+        {
+          "text": "هر دو `undefined` چاپ می‌شوند"
+        },
+        {
+          "text": "اولی `undefined` چاپ می‌شود و دومی `ReferenceError` می‌دهد",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "javascript-equality-loose-vs-strict",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "نتیجه‌ی `0 == '0'` و `0 === '0'` به ترتیب چیست؟",
+      "shortAnswer": "`==` قبل از مقایسه type coercion انجام می‌دهد (رشته‌ی `'0'` به عدد تبدیل می‌شود) ولی `===` نوع را هم مقایسه می‌کند.",
+      "explanation": "در پروژه‌ها معمولاً `===` پیش‌فرض است چون قواعد coercion غافلگیرکننده‌اند (مثلاً `[] == false` برابر `true` است). استثنای رایج و قابل قبول: `x == null` که هم `null` و هم `undefined` را می‌گیرد.",
+      "commonMistake": "گفتن اینکه `==` «فقط مقدار را مقایسه می‌کند». در واقع نوع را تبدیل می‌کند و بعد مقایسه می‌کند.",
+      "followUp": "`NaN === NaN` چیست و چطور NaN را درست تشخیص می‌دهی؟",
+      "estimatedSeconds": 40,
+      "minVersion": "ES2015",
+      "tags": [
+        "equality",
+        "coercion",
+        "basics"
+      ],
+      "choices": [
+        {
+          "text": "`false` و `false`"
+        },
+        {
+          "text": "`true` و `false`",
+          "isCorrect": true
+        },
+        {
+          "text": "`false` و `true`"
+        },
+        {
+          "text": "`true` و `true`"
+        }
+      ]
+    },
+    {
+      "id": "javascript-typeof-null",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "`typeof null` چه چیزی برمی‌گرداند؟",
+      "shortAnswer": "`typeof null === 'object'` از اولین نسخه‌ی JavaScript مانده و به‌خاطر سازگاری با کدهای قدیمی اصلاح نشده است.",
+      "explanation": "برای تشخیص null باید مستقیم `value === null` را چک کرد. برای تشخیص «شیء واقعی» هم باید null را کنار گذاشت: `typeof v === 'object' && v !== null`. آرایه هم `typeof` برابر `'object'` دارد؛ برای آن `Array.isArray` را بزن.",
+      "commonMistake": "نوشتن `typeof x === 'object'` برای تشخیص شیء بدون کنترل null.",
+      "followUp": "چطور بین آرایه، شیء ساده و null تمایز می‌گذاری؟",
+      "estimatedSeconds": 35,
+      "minVersion": "ES2015",
+      "tags": [
+        "types",
+        "typeof",
+        "basics"
+      ],
+      "choices": [
+        {
+          "text": "`\"boolean\"`"
+        },
+        {
+          "text": "`\"object\"` (یک باگ تاریخی که برای سازگاری حفظ شده)",
+          "isCorrect": true
+        },
+        {
+          "text": "`\"undefined\"`"
+        },
+        {
+          "text": "`\"null\"`"
+        }
+      ]
+    },
+    {
+      "id": "javascript-falsy-values",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "کدام مقدار در JavaScript **falsy نیست**؟",
+      "shortAnswer": "Falsy ها فقط اینها هستند: `false`, `0`, `-0`, `0n`, `''`, `null`, `undefined`, `NaN` (و `document.all` در مرورگر). هر شیء، حتی `[]` و `{}`، truthy است.",
+      "explanation": "به همین دلیل `if ([])` اجرا می‌شود ولی `[] == false` هم `true` است (چون `[]` با coercion به `''` و بعد `0` تبدیل می‌شود). این دو با هم تناقضی ندارند: یکی تبدیل به boolean است و دیگری مقایسه‌ی loose.",
+      "commonMistake": "فکر می‌کنند آرایه یا شیء خالی falsy است و برای چک خالی بودن آرایه `if (arr)` می‌نویسند؛ باید `arr.length === 0` چک شود.",
+      "followUp": "تفاوت `||` و `??` با توجه به مقادیر falsy چیست؟",
+      "estimatedSeconds": 40,
+      "minVersion": "ES2015",
+      "tags": [
+        "falsy",
+        "truthy",
+        "basics"
+      ],
+      "choices": [
+        {
+          "text": "`[]` (آرایه‌ی خالی)",
+          "isCorrect": true
+        },
+        {
+          "text": "`NaN`"
+        },
+        {
+          "text": "`-0`"
+        },
+        {
+          "text": "`0n` (BigInt صفر)"
+        }
+      ]
+    },
+    {
+      "id": "javascript-map-filter-reduce",
+      "level": "Junior",
+      "type": "ShortAnswer",
+      "text": "`map`، `filter` و `reduce` را با یک مثال کوتاه توضیح بده.",
+      "shortAnswer": "`map` هر عنصر را تبدیل می‌کند و آرایه‌ای هم‌طول می‌سازد. `filter` فقط عناصری را که شرط را پاس کنند نگه می‌دارد. `reduce` کل آرایه را با یک accumulator به یک مقدار (عدد، شیء، آرایه…) تبدیل می‌کند. هیچ‌کدام آرایه‌ی اصلی را تغییر نمی‌دهند.",
+      "explanation": "```js\nconst orders = [{ price: 10, paid: true }, { price: 25, paid: false }, { price: 5, paid: true }];\n\nconst prices = orders.map(o => o.price);            // [10, 25, 5]\nconst paid   = orders.filter(o => o.paid);          // 2 آیتم\nconst total  = orders.reduce((sum, o) => sum + o.price, 0); // 40\n```\nنکته: همیشه مقدار اولیه‌ی `reduce` را بده، وگرنه روی آرایه‌ی خالی `TypeError` می‌گیری. از `map` برای side-effect استفاده نکن؛ برای آن `forEach` یا `for...of` مناسب‌تر است.",
+      "commonMistake": "استفاده از `map` فقط برای پیمایش و نادیده گرفتن آرایه‌ی خروجی.",
+      "followUp": "چطور با یک `reduce` هم filter و هم map انجام می‌دهی؟ آیا این کار خوانا است؟",
+      "estimatedSeconds": 90,
+      "minVersion": "ES2015",
+      "tags": [
+        "array",
+        "functional",
+        "basics"
+      ]
+    },
+    {
+      "id": "javascript-closure-basic",
+      "level": "Junior",
+      "type": "Conceptual",
+      "text": "Closure چیست و یک کاربرد واقعی از آن بگو.",
+      "shortAnswer": "Closure یعنی یک تابع به متغیرهای scope بیرونی خودش دسترسی داشته باشد، حتی بعد از اینکه اجرای آن scope تمام شده. کاربردها: private state، factory function، و callbackهایی که مقدار زمان ساختشان را به خاطر می‌سپارند.",
+      "explanation": "```js\nfunction createCounter() {\n  let count = 0;            // از بیرون قابل دسترسی نیست\n  return () => ++count;\n}\nconst next = createCounter();\nnext(); // 1\nnext(); // 2\n```\nتابع برگشتی به `count` «قفل» شده است. هر بار `createCounter()` صدا شود یک closure مستقل با `count` جداگانه ساخته می‌شود. هزینه: تا وقتی closure زنده است، متغیرهایی که به آن ارجاع دارد آزاد نمی‌شوند (مراقب نشت حافظه باش).",
+      "commonMistake": "فکر می‌کنند closure یک «کپی» از مقدار متغیر می‌گیرد. در واقع به خود متغیر (reference) دسترسی دارد و تغییرات بعدی را هم می‌بیند.",
+      "followUp": "مشکل کلاسیک closure داخل حلقه‌ی `for` با `var` چیست؟",
+      "estimatedSeconds": 120,
+      "minVersion": "ES2015",
+      "tags": [
+        "closure",
+        "scope",
+        "functions"
+      ]
+    },
+    {
+      "id": "javascript-this-in-methods",
+      "level": "Junior",
+      "type": "CodeOutput",
+      "text": "خروجی این کد در strict mode چیست؟",
+      "codeSnippet": "'use strict';\nconst user = {\n  name: 'Sara',\n  hi() { return this.name; },\n};\nconst fn = user.hi;\nconsole.log(user.hi());\nconsole.log(fn());",
+      "codeLanguage": "javascript",
+      "shortAnswer": "مقدار `this` به «نحوه‌ی صدا زدن» تابع بستگی دارد، نه جایی که تعریف شده. `user.hi()` روی `user` صدا زده شده پس `this === user`؛ ولی `fn()` یک call ساده است و در strict mode `this` برابر `undefined` می‌شود.",
+      "explanation": "قواعد `this` به ترتیب: `new` ← `call/apply/bind` ← صدا زدن به‌صورت `obj.method()` ← call ساده (`undefined` در strict، `globalThis` در sloppy). Arrow function `this` خودش را ندارد و از scope بیرونی می‌گیرد. ماژول‌های ES و کدهای داخل `class` همیشه strict هستند.",
+      "commonMistake": "پاس دادن متد به عنوان callback (مثلاً `button.onclick = obj.method` یا `setTimeout(obj.method)`) و تعجب از اینکه `this` گم شده است.",
+      "followUp": "چند راه برای ثابت نگه داشتن `this` در callback بگو.",
+      "estimatedSeconds": 60,
+      "minVersion": "ES2015",
+      "tags": [
+        "this",
+        "functions",
+        "scope"
+      ],
+      "choices": [
+        {
+          "text": "`undefined` و `undefined`"
+        },
+        {
+          "text": "`Sara` و بعد `TypeError` (چون `this` در `fn()` برابر `undefined` است)",
+          "isCorrect": true
+        },
+        {
+          "text": "`Sara` و `Sara`"
+        },
+        {
+          "text": "`Sara` و `undefined`"
+        }
+      ]
+    },
+    {
+      "id": "javascript-arrow-vs-regular",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "کدام گزینه درباره‌ی arrow function درست است؟",
+      "shortAnswer": "Arrow function `this` را lexical (از scope اطراف) می‌گیرد؛ `call/apply/bind` نمی‌توانند آن را عوض کنند. همچنین `arguments`، `prototype` و `new.target` ندارد.",
+      "explanation": "به همین دلیل arrow برای callbackهای داخل متد عالی است (`this` کلاس/شیء حفظ می‌شود) ولی برای «متد شیء» یا constructor مناسب نیست:\n```js\nconst counter = {\n  n: 0,\n  inc: () => { this.n++; } // this اینجا counter نیست!\n};\n```\nGenerator با arrow ممکن نیست و باید `function*` استفاده کنی.",
+      "commonMistake": "استفاده از arrow function برای متدهای شیء یا prototype و انتظار داشتن `this` درست.",
+      "followUp": "در یک event handler از DOM چه زمانی arrow و چه زمانی function معمولی می‌نویسی؟",
+      "estimatedSeconds": 50,
+      "minVersion": "ES2015",
+      "tags": [
+        "arrow-functions",
+        "this",
+        "functions"
+      ],
+      "choices": [
+        {
+          "text": "می‌شود با `bind` مقدار `this` آن را تغییر داد"
+        },
+        {
+          "text": "می‌تواند به‌عنوان generator (`function*`) نوشته شود"
+        },
+        {
+          "text": "`this` آن همیشه به شیء global اشاره می‌کند"
+        },
+        {
+          "text": "`this` و `arguments` مخصوص خودش را ندارد و نمی‌شود آن را با `new` صدا زد",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "javascript-spread-rest",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "در `function f(a, ...rest) {}` اگر `f(1, 2, 3)` صدا زده شود، مقدار `rest` چیست؟",
+      "shortAnswer": "`...rest` (rest parameter) بقیه‌ی آرگومان‌ها را در یک آرایه‌ی واقعی جمع می‌کند. `...` در سمت دیگر (صدا زدن یا literal) spread است و برعکس، عناصر را باز می‌کند.",
+      "explanation": "```js\nconst merged = [...a, ...b];             // spread آرایه\nconst copy   = { ...obj, extra: 1 };     // spread شیء (کپی سطحی)\nconst { id, ...others } = user;          // rest در destructuring\n```\nهر دو کپی **سطحی** هستند. برخلاف `arguments`، rest یک آرایه‌ی واقعی است و متدهای آرایه را دارد و در arrow function هم کار می‌کند.",
+      "commonMistake": "فکر می‌کنند spread یک deep copy می‌سازد؛ اشیای تو در تو هنوز به‌اشتراک گذاشته می‌شوند.",
+      "followUp": "ترتیب در `{ ...a, ...b }` وقتی کلید تکراری دارند چه اثری دارد؟",
+      "estimatedSeconds": 40,
+      "minVersion": "ES2015",
+      "tags": [
+        "spread",
+        "rest",
+        "functions"
+      ],
+      "choices": [
+        {
+          "text": "`2`"
+        },
+        {
+          "text": "`[1, 2, 3]`"
+        },
+        {
+          "text": "شیء `arguments`"
+        },
+        {
+          "text": "`[2, 3]` (یک آرایه‌ی واقعی)",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "javascript-destructuring-defaults",
+      "level": "Junior",
+      "type": "CodeOutput",
+      "text": "خروجی چیست؟",
+      "codeSnippet": "const { a = 10, b = 20 } = { a: undefined, b: null };\nconsole.log(a, b);",
+      "codeLanguage": "javascript",
+      "shortAnswer": "مقدار پیش‌فرض در destructuring فقط وقتی اعمال می‌شود که مقدار دقیقاً `undefined` باشد؛ `null` جایگزین نمی‌شود.",
+      "explanation": "پس `a` که `undefined` بود مقدار `10` گرفت ولی `b` که `null` بود همان `null` ماند. همین قاعده برای default parameter توابع هم صادق است. اگر می‌خواهی `null` هم جایگزین شود از `??` استفاده کن: `const b = obj.b ?? 20`.",
+      "commonMistake": "فرض اینکه `null` هم مثل `undefined` باعث استفاده از default می‌شود.",
+      "followUp": "destructuring تو در تو با default چطور نوشته می‌شود و چه ریسکی دارد؟",
+      "estimatedSeconds": 45,
+      "minVersion": "ES2015",
+      "tags": [
+        "destructuring",
+        "default-values",
+        "basics"
+      ],
+      "choices": [
+        {
+          "text": "`10 null`",
+          "isCorrect": true
+        },
+        {
+          "text": "`undefined null`"
+        },
+        {
+          "text": "`10 20`"
+        },
+        {
+          "text": "`10 undefined`"
+        }
+      ]
+    },
+    {
+      "id": "javascript-primitive-vs-reference",
+      "level": "Junior",
+      "type": "CodeOutput",
+      "text": "خروجی چیست؟",
+      "codeSnippet": "const a = { n: 1 };\nconst b = a;\nb.n = 2;\n\nlet x = 1;\nlet y = x;\ny = 2;\n\nconsole.log(a.n, x);",
+      "codeLanguage": "javascript",
+      "shortAnswer": "primitiveها (عدد، رشته، boolean, …) با مقدار کپی می‌شوند ولی اشیاء با reference: `a` و `b` به یک شیء اشاره می‌کنند.",
+      "explanation": "`const b = a` شیء را کپی نمی‌کند، فقط یک reference دیگر می‌سازد؛ تغییر از طریق `b` در `a` هم دیده می‌شود. `let y = x` عدد را کپی می‌کند پس `y = 2` روی `x` اثری ندارد. برای کپی شیء از spread (سطحی) یا `structuredClone` (عمیق) استفاده کن.",
+      "commonMistake": "فکر اینکه `const` جلوی تغییر محتوای شیء را می‌گیرد. `const` فقط جلوی تخصیص مجدد خود متغیر را می‌گیرد.",
+      "followUp": "وقتی شیء را به تابع پاس می‌دهی، «pass by reference» است یا «pass by value»؟",
+      "estimatedSeconds": 45,
+      "minVersion": "ES2015",
+      "tags": [
+        "reference",
+        "primitives",
+        "basics"
+      ],
+      "choices": [
+        {
+          "text": "`1 2`"
+        },
+        {
+          "text": "`2 1`",
+          "isCorrect": true
+        },
+        {
+          "text": "`2 2`"
+        },
+        {
+          "text": "`1 1`"
+        }
+      ]
+    },
+    {
+      "id": "javascript-optional-chaining-nullish",
+      "level": "Junior",
+      "type": "CodeOutput",
+      "text": "خروجی چیست؟",
+      "codeSnippet": "const cfg = { retries: 0, name: '' };\nconsole.log(cfg.retries || 3, cfg.retries ?? 3, cfg.timeout?.ms);",
+      "codeLanguage": "javascript",
+      "shortAnswer": "`||` هر مقدار falsy (از جمله `0`) را رد می‌کند ولی `??` فقط `null` و `undefined` را. `?.` هم اگر مقدار قبلی nullish باشد کل عبارت را با `undefined` کوتاه می‌کند و خطا نمی‌دهد.",
+      "explanation": "`cfg.retries || 3` چون `0` falsy است به `3` می‌رسد که معمولاً باگ است (کاربر عمداً `0` گذاشته). برای مقدارهای پیش‌فرض تقریباً همیشه `??` درست‌تر است. `cfg.timeout?.ms` چون `timeout` وجود ندارد `undefined` می‌دهد، نه `TypeError`.",
+      "commonMistake": "استفاده از `||` برای default که مقدار `0`، `''` یا `false` را هم بی‌اثر می‌کند.",
+      "followUp": "`a?.b.c` و `a?.b?.c` چه فرقی دارند؟",
+      "estimatedSeconds": 45,
+      "minVersion": "ES2020",
+      "tags": [
+        "optional-chaining",
+        "nullish-coalescing",
+        "operators"
+      ],
+      "choices": [
+        {
+          "text": "`3 0 undefined`",
+          "isCorrect": true
+        },
+        {
+          "text": "`3 0 null`"
+        },
+        {
+          "text": "`3 3 TypeError`"
+        },
+        {
+          "text": "`0 0 undefined`"
+        }
+      ]
+    },
+    {
+      "id": "javascript-for-in-vs-for-of",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "تفاوت `for...in` و `for...of` چیست؟",
+      "shortAnswer": "`for...in` کلیدها (string) را برمی‌گرداند و prototype chain را هم می‌بیند؛ `for...of` از پروتکل iterator استفاده می‌کند و روی آرایه، رشته، Map، Set، generator و … کار می‌کند.",
+      "explanation": "```js\nfor (const i in ['a', 'b']) console.log(i);   // '0', '1'\nfor (const v of ['a', 'b']) console.log(v);   // 'a', 'b'\n```\nروی آرایه از `for...in` استفاده نکن (ترتیب و propertyهای اضافه‌ی prototype). برای شیء ساده معمولاً `Object.entries(obj)` با `for...of` بهتر است.",
+      "commonMistake": "استفاده از `for...in` روی آرایه.",
+      "followUp": "شیء ساده iterable نیست؛ چطور می‌شود آن را با `for...of` پیمایش کرد؟",
+      "estimatedSeconds": 45,
+      "minVersion": "ES2015",
+      "tags": [
+        "loops",
+        "iterables",
+        "basics"
+      ],
+      "choices": [
+        {
+          "text": "`for...of` فقط روی آرایه کار می‌کند"
+        },
+        {
+          "text": "`for...in` روی مقدارها و `for...of` روی کلیدها پیمایش می‌کند"
+        },
+        {
+          "text": "هر دو یکی هستند و فقط سینتکسشان فرق دارد"
+        },
+        {
+          "text": "`for...in` روی کلیدهای enumerable شیء (شامل ارثی‌ها) و `for...of` روی مقدارهای یک iterable پیمایش می‌کند",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "javascript-json-stringify-gotchas",
+      "level": "Junior",
+      "type": "CodeOutput",
+      "text": "نتیجه‌ی این کد چیست؟",
+      "codeSnippet": "console.log(JSON.stringify({\n  a: undefined,\n  b: () => 1,\n  c: NaN,\n  d: new Date(0),\n}));",
+      "codeLanguage": "javascript",
+      "shortAnswer": "`JSON.stringify` مقدارهای `undefined` و تابع را در شیء حذف می‌کند، `NaN`/`Infinity` را به `null` تبدیل می‌کند و Date را با `toJSON` به رشته‌ی ISO درمی‌آورد.",
+      "explanation": "داخل آرایه، `undefined` و تابع به `null` تبدیل می‌شوند (نه حذف). `BigInt` باعث `TypeError` می‌شود و ساختار دایره‌ای هم `TypeError` می‌دهد. Map و Set به `{}` تبدیل می‌شوند. به همین دلیل `JSON.parse(JSON.stringify(x))` روش امنی برای deep clone نیست.",
+      "commonMistake": "استفاده از JSON round-trip برای کپی عمیق و از دست دادن Date، undefined، Map و Set.",
+      "followUp": "چطور یک کلاس را با `toJSON` سفارشی سریالایز می‌کنی؟",
+      "estimatedSeconds": 60,
+      "minVersion": "ES2015",
+      "tags": [
+        "json",
+        "serialization",
+        "basics"
+      ],
+      "choices": [
+        {
+          "text": "`{\"c\":null,\"d\":\"1970-01-01T00:00:00.000Z\"}`",
+          "isCorrect": true
+        },
+        {
+          "text": "`{\"a\":null,\"b\":null,\"c\":null,\"d\":0}`"
+        },
+        {
+          "text": "`{\"c\":NaN,\"d\":0}`"
+        },
+        {
+          "text": "یک `TypeError` می‌دهد"
+        }
+      ]
+    },
+    {
+      "id": "javascript-array-sort-default",
+      "level": "Junior",
+      "type": "CodeOutput",
+      "text": "خروجی چیست؟",
+      "codeSnippet": "console.log([10, 9, 1, 100].sort());",
+      "codeLanguage": "javascript",
+      "shortAnswer": "`sort()` بدون comparator عناصر را به **رشته** تبدیل می‌کند و به ترتیب حروف (lexicographic) مرتب می‌کند؛ پس `'10' < '9'`.",
+      "explanation": "برای مرتب‌سازی عددی باید comparator بدهی: `arr.sort((a, b) => a - b)`. `sort` آرایه‌ی اصلی را **in-place** تغییر می‌دهد؛ اگر نسخه‌ی جدید می‌خواهی از `toSorted()` (ES2023) استفاده کن. `sort` از ES2019 به بعد stable است.",
+      "commonMistake": "فرض اینکه `sort()` روی اعداد، عددی مرتب می‌کند.",
+      "followUp": "چرا `(a, b) => a > b` به‌عنوان comparator اشتباه است؟",
+      "estimatedSeconds": 40,
+      "minVersion": "ES2015",
+      "tags": [
+        "array",
+        "sort",
+        "gotchas"
+      ],
+      "choices": [
+        {
+          "text": "`[1, 9, 10, 100]`"
+        },
+        {
+          "text": "`[100, 10, 9, 1]`"
+        },
+        {
+          "text": "`[1, 10, 100, 9]`",
+          "isCorrect": true
+        },
+        {
+          "text": "`[9, 100, 10, 1]`"
+        }
+      ]
+    },
+    {
+      "id": "javascript-event-loop-order",
+      "level": "Mid",
+      "type": "CodeOutput",
+      "text": "ترتیب چاپ خروجی‌ها چیست؟",
+      "codeSnippet": "console.log('1');\nsetTimeout(() => console.log('2'), 0);\nPromise.resolve().then(() => console.log('3'));\nqueueMicrotask(() => console.log('4'));\nconsole.log('5');",
+      "codeLanguage": "javascript",
+      "shortAnswer": "اول کد synchronous اجرا می‌شود (`1`, `5`)، بعد کل صف microtask (promise و `queueMicrotask` به ترتیب ثبت: `3`, `4`)، و در نهایت اولین macrotask یعنی `setTimeout` (`2`).",
+      "explanation": "Event loop: یک macrotask (مثلاً کل اسکریپت یا یک callback تایمر) اجرا می‌شود ← صف microtask تا خالی شدن کامل اجرا می‌شود ← (در مرورگر) شاید render ← macrotask بعدی. `setTimeout(fn, 0)` یعنی «حداقل بعد از این macrotask و پس از خالی شدن microtaskها»، نه «فوراً». یک نتیجه‌ی مهم: microtaskهای بازگشتی بی‌پایان می‌توانند event loop را گرسنه (starve) کنند.",
+      "commonMistake": "فکر اینکه `setTimeout(..., 0)` قبل از `Promise.then` اجرا می‌شود.",
+      "followUp": "در Node.js `process.nextTick` کجای این ترتیب قرار می‌گیرد؟",
+      "estimatedSeconds": 75,
+      "minVersion": "ES2015",
+      "tags": [
+        "event-loop",
+        "microtask",
+        "async"
+      ],
+      "choices": [
+        {
+          "text": "`1 2 3 4 5`"
+        },
+        {
+          "text": "`1 5 2 3 4`"
+        },
+        {
+          "text": "`1 3 4 5 2`"
+        },
+        {
+          "text": "`1 5 3 4 2`",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "javascript-promise-all-vs-allsettled",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "اگر یکی از promiseها reject شود، `Promise.all` و `Promise.allSettled` چه رفتاری دارند؟",
+      "shortAnswer": "`Promise.all` fail-fast است (و باقی promiseها را cancel نمی‌کند، فقط نتیجه‌شان نادیده گرفته می‌شود). `allSettled` هیچ‌وقت reject نمی‌شود و وضعیت همه را گزارش می‌دهد.",
+      "explanation": "| متد | چه زمانی resolve | چه زمانی reject |\n|---|---|---|\n| `all` | همه fulfilled | اولین reject |\n| `allSettled` | همه تمام شدند | هرگز |\n| `race` | اولین تمام‌شده (fulfilled یا rejected) | اگر اولی reject باشد |\n| `any` | اولین fulfilled | همه reject شوند (`AggregateError`) |\n\n`allSettled` برای وقتی مناسب است که خطای یک درخواست نباید بقیه را از بین ببرد (مثلاً بارگذاری چند widget مستقل داشبورد).",
+      "commonMistake": "فکر اینکه `Promise.all` بقیه‌ی درخواست‌ها را لغو می‌کند؛ لغو واقعی فقط با `AbortController` ممکن است.",
+      "followUp": "چه فرقی است بین `Promise.race` و `Promise.any`؟",
+      "estimatedSeconds": 60,
+      "minVersion": "ES2020",
+      "tags": [
+        "promises",
+        "async",
+        "concurrency"
+      ],
+      "choices": [
+        {
+          "text": "`allSettled` هیچ‌وقت resolve نمی‌شود اگر یکی reject شود"
+        },
+        {
+          "text": "`all` بلافاصله با اولین خطا reject می‌شود؛ `allSettled` صبر می‌کند و آرایه‌ی `{status, value|reason}` برای همه برمی‌گرداند",
+          "isCorrect": true
+        },
+        {
+          "text": "`all` صبر می‌کند تا همه تمام شوند ولی `allSettled` fail-fast است"
+        },
+        {
+          "text": "هر دو با اولین خطا reject می‌شوند"
+        }
+      ]
+    },
+    {
+      "id": "javascript-async-await-error-handling",
+      "level": "Mid",
+      "type": "Conceptual",
+      "text": "در `async/await` خطاها را چطور مدیریت می‌کنی و چه اشتباهات رایجی وجود دارد؟",
+      "shortAnswer": "`await` روی promise rejected باعث throw می‌شود، پس با `try/catch` گرفته می‌شود. دو اشتباه رایج: `await` گذاشتن پشت هم برای کارهای مستقل (کندی) و فراموش کردن `await`/`return` که باعث unhandled rejection یا خطای گم‌شده می‌شود.",
+      "explanation": "```js\n// کند: ترتیبی\nconst user = await getUser();\nconst posts = await getPosts();\n\n// سریع: موازی\nconst [user2, posts2] = await Promise.all([getUser(), getPosts()]);\n\n// خطای گم‌شده: بدون await، catch هرگز خطا را نمی‌گیرد\ntry {\n  fetchData();          // ❌ promise رها شده\n  await fetchData();    // ✅\n} catch (e) { /* ... */ }\n```\nهمچنین: `forEach(async ...)` منتظر callbackها نمی‌ماند؛ از `for...of` (ترتیبی) یا `Promise.all(arr.map(...))` (موازی) استفاده کن. یک `async function` همیشه promise برمی‌گرداند و throw داخلش به reject تبدیل می‌شود.",
+      "commonMistake": "`array.forEach(async item => await ...)` و انتظار اینکه بعد از آن همه‌چیز تمام شده باشد.",
+      "followUp": "چطور تعداد درخواست‌های همزمان را محدود می‌کنی (concurrency limit)؟",
+      "estimatedSeconds": 150,
+      "minVersion": "ES2017",
+      "tags": [
+        "async-await",
+        "error-handling",
+        "promises"
+      ]
+    },
+    {
+      "id": "javascript-closure-in-loop",
+      "level": "Mid",
+      "type": "CodeOutput",
+      "text": "خروجی این کد چیست؟",
+      "codeSnippet": "for (var i = 0; i < 3; i++) setTimeout(() => console.log(i), 0);\nfor (let j = 0; j < 3; j++) setTimeout(() => console.log(j), 0);",
+      "codeLanguage": "javascript",
+      "shortAnswer": "`var i` یک متغیر واحد برای کل تابع است؛ تا وقتی callbackها اجرا می‌شوند حلقه تمام شده و `i === 3`. `let j` در هر iteration یک binding جدید می‌سازد.",
+      "explanation": "قبل از `let` راه‌حل IIFE بود: `(function(i){ setTimeout(() => console.log(i)) })(i)`. امروز `let` در `for` به‌طور خاص برای هر iteration یک کپی تازه از متغیر می‌سازد (per-iteration binding) که closureها آن را به‌درستی می‌گیرند.",
+      "commonMistake": "گفتن اینکه `let` «سریع‌تر است» یا «hoist نمی‌شود»؛ اصل ماجرا per-iteration binding است.",
+      "followUp": "اگر `let` را قبل از حلقه تعریف کنیم (`let i; for (i = 0; ...)`) چه می‌شود؟",
+      "estimatedSeconds": 60,
+      "minVersion": "ES2015",
+      "tags": [
+        "closure",
+        "loops",
+        "var-let-const"
+      ],
+      "choices": [
+        {
+          "text": "`3 3 3` و بعد `0 1 2`",
+          "isCorrect": true
+        },
+        {
+          "text": "`0 1 2` و بعد `3 3 3`"
+        },
+        {
+          "text": "`3 3 3` و بعد `3 3 3`"
+        },
+        {
+          "text": "`0 1 2` و بعد `0 1 2`"
+        }
+      ]
+    },
+    {
+      "id": "javascript-prototype-chain",
+      "level": "Mid",
+      "type": "Conceptual",
+      "text": "Prototype chain چگونه کار می‌کند و `class` در JavaScript چه ربطی به آن دارد؟",
+      "shortAnswer": "هر شیء یک لینک داخلی `[[Prototype]]` دارد. وقتی property پیدا نشود، موتور زنجیره را تا رسیدن به `null` بالا می‌رود. `class` فقط syntax ساده‌تر روی همین مکانیزم است: متدها روی `Class.prototype` قرار می‌گیرند و `extends` زنجیره را وصل می‌کند.",
+      "explanation": "```js\nclass Animal { speak() { return '...'; } }\nclass Dog extends Animal { }\n\nconst d = new Dog();\nd.speak();                                   // از Animal.prototype\nObject.getPrototypeOf(d) === Dog.prototype;  // true\nObject.getPrototypeOf(Dog.prototype) === Animal.prototype; // true\n```\n`obj.hasOwnProperty`/`Object.hasOwn(obj, key)` فقط property خود شیء را می‌بیند نه ارثی‌ها. `Object.create(null)` شیئی بدون prototype می‌سازد (مناسب دیکشنری خام). خواندن property از زنجیره انجام می‌شود ولی **نوشتن** معمولاً روی خود شیء property جدید می‌سازد (shadowing).",
+      "commonMistake": "فکر اینکه `class` در JS شبیه class در Java/C# است و کپی‌کننده‌ی رفتار است؛ در واقع delegation از طریق زنجیره است.",
+      "followUp": "تفاوت `__proto__` با `prototype` چیست؟",
+      "estimatedSeconds": 150,
+      "minVersion": "ES2015",
+      "tags": [
+        "prototype",
+        "oop",
+        "classes"
+      ]
+    },
+    {
+      "id": "javascript-call-apply-bind",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "کدام گزینه درباره‌ی `call`، `apply` و `bind` درست است؟",
+      "shortAnswer": "`fn.call(ctx, a, b)`، `fn.apply(ctx, [a, b])`، و `const bound = fn.bind(ctx, a)` که بعداً با بقیه‌ی آرگومان‌ها صدا زده می‌شود (partial application).",
+      "explanation": "یادآور: **C**all = **C**omma-separated، **A**pply = **A**rray. تابع bind شده را دوباره bind کردن اثری ندارد (`this` اولین bind می‌ماند) ولی با `new` صدا زدن `this` bind شده را نادیده می‌گیرد. امروز با spread، `apply` تقریباً بی‌مصرف شده: `fn.call(ctx, ...args)`.",
+      "commonMistake": "جابه‌جا کردن نقش `call` و `apply`.",
+      "followUp": "`this` در تابعی که دو بار `bind` شده کدام است؟",
+      "estimatedSeconds": 50,
+      "minVersion": "ES2015",
+      "tags": [
+        "this",
+        "functions",
+        "bind"
+      ],
+      "choices": [
+        {
+          "text": "`call` و `apply` تابع را همان لحظه اجرا می‌کنند (آرگومان‌ها جدا یا در آرایه) و `bind` تابع جدیدی با `this` ثابت برمی‌گرداند",
+          "isCorrect": true
+        },
+        {
+          "text": "`bind` تابع را همان لحظه اجرا می‌کند و `call` تابع جدید می‌سازد"
+        },
+        {
+          "text": "هر سه تابع جدید برمی‌گردانند"
+        },
+        {
+          "text": "`apply` آرگومان‌ها را جدا از هم می‌گیرد و `call` آرایه می‌گیرد"
+        }
+      ]
+    },
+    {
+      "id": "javascript-structured-clone",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "کدام گزینه درباره‌ی `structuredClone(value)` درست است؟",
+      "shortAnswer": "`structuredClone` یک deep copy با الگوریتم structured clone است (همان مکانیزم `postMessage`) و در مرورگرهای مدرن و Node/Deno/Bun در دسترس است.",
+      "explanation": "پشتیبانی می‌کند: Date، RegExp، Map، Set، ArrayBuffer/typed arrays، Error، ارجاع دایره‌ای. پشتیبانی نمی‌کند: تابع، DOM node، property descriptor/getter (مقدار می‌گیرد)، و **prototype** نمونه‌ی کلاس را از دست می‌دهد (نتیجه یک شیء ساده می‌شود). برای انتقال بدون کپی می‌توان `transfer` داد (مثلاً ArrayBuffer).",
+      "commonMistake": "استفاده از `JSON.parse(JSON.stringify(x))` و از دست دادن Date، Map، Set و `undefined`.",
+      "followUp": "اگر شیء تو نمونه‌ی یک کلاس با متد باشد، بعد از `structuredClone` چه می‌شود؟",
+      "estimatedSeconds": 60,
+      "minVersion": "ES2022",
+      "tags": [
+        "copy",
+        "structured-clone",
+        "objects"
+      ],
+      "choices": [
+        {
+          "text": "فقط یک کپی سطحی می‌سازد، مثل spread"
+        },
+        {
+          "text": "Date، Map، Set و ساختارهای دایره‌ای را درست کپی می‌کند ولی با تابع خطای `DataCloneError` می‌دهد",
+          "isCorrect": true
+        },
+        {
+          "text": "توابع را هم کپی می‌کند ولی Date را به رشته تبدیل می‌کند"
+        },
+        {
+          "text": "`prototype` و متدهای کلاس را هم حفظ می‌کند"
+        }
+      ]
+    },
+    {
+      "id": "javascript-debounce-vs-throttle",
+      "level": "Mid",
+      "type": "ShortAnswer",
+      "text": "Debounce و throttle چه فرقی دارند و هرکدام را کجا استفاده می‌کنی؟",
+      "shortAnswer": "Debounce صدا زدن را تا «آرام شدن» رویدادها به تأخیر می‌اندازد (فقط آخرین بار اجرا می‌شود): مناسب search-as-you-type. Throttle حداکثر یک اجرا در هر بازه‌ی زمانی را مجاز می‌کند: مناسب scroll، resize و drag.",
+      "explanation": "```js\nfunction debounce(fn, ms) {\n  let t;\n  return (...args) => {\n    clearTimeout(t);\n    t = setTimeout(() => fn(...args), ms);\n  };\n}\n```\nدو ایده‌ی کلیدی: یک closure برای نگه داشتن تایمر و `clearTimeout` برای ریست. نسخه‌های واقعی گزینه‌های `leading/trailing` و متد `cancel` دارند. برای انیمیشن/scroll بهتر است از `requestAnimationFrame` یا `IntersectionObserver` استفاده کنی تا throttle دستی.",
+      "commonMistake": "پیاده‌سازی debounce با یک تایمر مشترک بین همه‌ی صدازدن‌ها یا فراموش کردن `this`/آرگومان‌ها.",
+      "followUp": "در React/Angular debounce را کجا و چطور نگه می‌داری که با هر render دوباره ساخته نشود؟",
+      "estimatedSeconds": 120,
+      "minVersion": "ES2015",
+      "tags": [
+        "performance",
+        "closure",
+        "patterns"
+      ]
+    },
+    {
+      "id": "javascript-object-groupby",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "`Object.groupBy(items, fn)` (ES2024) چه چیزی برمی‌گرداند؟",
+      "shortAnswer": "نتیجه یک null-prototype object است. اگر کلید غیر string (مثلاً شیء) لازم داشتی از `Map.groupBy` استفاده کن که یک `Map` می‌دهد.",
+      "explanation": "```js\nconst people = [{ n: 'a', age: 20 }, { n: 'b', age: 30 }, { n: 'c', age: 20 }];\nObject.groupBy(people, p => p.age);\n// { 20: [a, c], 30: [b] }   (کلیدها string می‌شوند)\nMap.groupBy(people, p => p.age > 25); // Map { false => [a, c], true => [b] }\n```\nقبلاً برای این کار باید `reduce` یا lodash `groupBy` می‌نوشتیم. چون prototype ندارد، کلیدهایی مثل `toString` یا `__proto__` مشکلی درست نمی‌کنند.",
+      "commonMistake": "انتظار اینکه نتیجه‌ی `Object.groupBy` متدهایی مثل `hasOwnProperty` داشته باشد (ندارد؛ از `Object.hasOwn` استفاده کن).",
+      "followUp": "چه زمانی `Map.groupBy` را به `Object.groupBy` ترجیح می‌دهی؟",
+      "estimatedSeconds": 55,
+      "minVersion": "ES2024",
+      "tags": [
+        "es2024",
+        "array",
+        "grouping"
+      ],
+      "choices": [
+        {
+          "text": "یک `Map` از کلیدها به آرایه‌ها"
+        },
+        {
+          "text": "یک شیء بدون prototype که کلیدهایش خروجی `fn` و مقدارهایش آرایه‌ی آیتم‌های همان گروه است",
+          "isCorrect": true
+        },
+        {
+          "text": "همان آرایه را مرتب و in-place گروه‌بندی می‌کند"
+        },
+        {
+          "text": "یک آرایه از جفت‌های `[key, items]`"
+        }
+      ]
+    },
+    {
+      "id": "javascript-promise-withresolvers",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "`Promise.withResolvers()` (ES2024) چه مشکلی را حل می‌کند؟",
+      "shortAnswer": "خروجی `{ promise, resolve, reject }` است؛ وقتی سرنخ تکمیل کار جای دیگری از کد است (event، صف، ...) دیگر لازم نیست متغیر بیرونی بسازی.",
+      "explanation": "قبل:\n```js\nlet resolve, reject;\nconst promise = new Promise((res, rej) => { resolve = res; reject = rej; });\n```\nبعد:\n```js\nconst { promise, resolve, reject } = Promise.withResolvers();\nsocket.onmessage = e => resolve(e.data);\nsocket.onerror = reject;\nawait promise;\n```\nتوجه: این ابزار **لغو** نمی‌کند؛ برای لغو باید از `AbortController` استفاده کنی.",
+      "commonMistake": "فکر اینکه promise را می‌شود cancel کرد؛ promise فقط settle می‌شود.",
+      "followUp": "چرا نگه داشتن `resolve` بیرون از executor را گاهی anti-pattern می‌دانند؟",
+      "estimatedSeconds": 45,
+      "minVersion": "ES2024",
+      "tags": [
+        "es2024",
+        "promises",
+        "async"
+      ],
+      "choices": [
+        {
+          "text": "ساختن promise به‌همراه `resolve` و `reject` بیرون از executor، بدون کد boilerplate",
+          "isCorrect": true
+        },
+        {
+          "text": "اجرای چند promise به‌صورت موازی با محدودیت تعداد"
+        },
+        {
+          "text": "تبدیل callback به promise به‌صورت خودکار"
+        },
+        {
+          "text": "لغو کردن یک promise در حال اجرا"
+        }
+      ]
+    },
+    {
+      "id": "javascript-set-methods",
+      "level": "Mid",
+      "type": "CodeOutput",
+      "text": "خروجی چیست؟ (متدهای Set در ES2025)",
+      "codeSnippet": "const a = new Set([1, 2, 3]);\nconst b = new Set([3, 4]);\nconsole.log([...a.union(b)], [...a.intersection(b)], [...a.difference(b)]);",
+      "codeLanguage": "javascript",
+      "shortAnswer": "ES2025 متدهای `union`, `intersection`, `difference`, `symmetricDifference`, `isSubsetOf`, `isSupersetOf`, `isDisjointFrom` را به Set اضافه کرد و همه یک Set **جدید** می‌سازند (یا boolean برمی‌گردانند).",
+      "explanation": "قبلاً برای اشتراک باید `new Set([...a].filter(x => b.has(x)))` می‌نوشتیم. آرگومان این متدها می‌تواند هر «set-like» (چیزی با `size`, `has`, `keys`) باشد، نه فقط Set. Set اصلی تغییر نمی‌کند.",
+      "commonMistake": "فرض اینکه `a.union(b)` مقدار `a` را in-place تغییر می‌دهد.",
+      "followUp": "پیچیدگی زمانی `intersection` تقریباً چقدر است و به چه چیزی بستگی دارد؟",
+      "estimatedSeconds": 60,
+      "minVersion": "ES2025",
+      "tags": [
+        "es2025",
+        "set",
+        "collections"
+      ],
+      "choices": [
+        {
+          "text": "`[1,2,3,4] [3] [1,2]`",
+          "isCorrect": true
+        },
+        {
+          "text": "`[1,2,3,3,4] [3] [1,2]`"
+        },
+        {
+          "text": "`TypeError` چون Set این متدها را ندارد"
+        },
+        {
+          "text": "`[3] [1,2,3,4] [4]`"
+        }
+      ]
+    },
+    {
+      "id": "javascript-iterator-helpers",
+      "level": "Mid",
+      "type": "CodeOutput",
+      "text": "خروجی چیست؟ (Iterator helpers در ES2025)",
+      "codeSnippet": "function* nat() { let n = 1; while (true) yield n++; }\nconsole.log(nat().filter(n => n % 2).map(n => n * n).take(3).toArray());",
+      "codeLanguage": "javascript",
+      "shortAnswer": "متدهای `map`, `filter`, `take`, `drop`, `flatMap` و … روی iteratorها **lazy** اجرا می‌شوند؛ با `take(3)` بعد از سه مقدار متوقف می‌شود و `toArray()` نتیجه را می‌سازد.",
+      "explanation": "عددهای فرد: 1, 3, 5 ← به توان دو: 1, 9, 25. برخلاف آرایه (`arr.filter().map()` که هر مرحله آرایه‌ی میانی می‌سازد)، این زنجیره هر مقدار را یکی‌یکی از تمام مراحل عبور می‌دهد و برای دنباله‌های بزرگ یا بی‌نهایت مناسب است. متدهای مصرفی: `toArray`, `reduce`, `forEach`, `some`, `every`, `find`.",
+      "commonMistake": "فکر اینکه این متدها آرایه برمی‌گردانند و روی generator بی‌نهایت هنگ می‌کنند.",
+      "followUp": "چرا `Iterator.prototype.map` با `Array.prototype.map` از نظر مصرف حافظه فرق دارد؟",
+      "estimatedSeconds": 70,
+      "minVersion": "ES2025",
+      "tags": [
+        "es2025",
+        "iterators",
+        "generators"
+      ],
+      "choices": [
+        {
+          "text": "`[1, 3, 5]`"
+        },
+        {
+          "text": "`[1, 9, 25]`",
+          "isCorrect": true
+        },
+        {
+          "text": "`[1, 4, 9]`"
+        },
+        {
+          "text": "برنامه برای همیشه در حلقه می‌ماند چون generator بی‌نهایت است"
+        }
+      ]
+    },
+    {
+      "id": "javascript-map-vs-object",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "چه زمانی `Map` را به شیء ساده ترجیح می‌دهی؟",
+      "shortAnswer": "Map هر نوع کلید را می‌پذیرد (با شناسه‌ی SameValueZero)، `size` دارد، ترتیب درج را تضمین می‌کند و برای درج/حذف مکرر بهینه است. شیء ساده برای رکوردهای با شکل ثابت و سریالایز JSON مناسب‌تر است.",
+      "explanation": "شیء ساده کلیدها را به string/symbol تبدیل می‌کند (`obj[1]` و `obj['1']` یکی‌اند) و prototype دارد (کلیدهایی مثل `constructor`). Map مستقیماً JSON نمی‌شود (باید `[...map]` یا `Object.fromEntries` بزنی).",
+      "commonMistake": "استفاده از شیء به عنوان دیکشنری برای ورودی کاربر و گرفتار شدن به کلیدهایی مثل `__proto__`.",
+      "followUp": "`WeakMap` چه مشکلی را حل می‌کند که Map نمی‌کند؟",
+      "estimatedSeconds": 55,
+      "minVersion": "ES2015",
+      "tags": [
+        "map",
+        "collections",
+        "data-structures"
+      ],
+      "choices": [
+        {
+          "text": "هیچ‌وقت؛ Map فقط یک alias برای شیء است"
+        },
+        {
+          "text": "وقتی فقط کلیدهای string داری و ساختار ثابت است"
+        },
+        {
+          "text": "وقتی می‌خواهی داده را با `JSON.stringify` سریالایز کنی"
+        },
+        {
+          "text": "وقتی کلیدها از هر نوعی (مثلاً شیء) باشند، کلیدها پویا/زیاد باشند، یا به `size` و درج/حذف مکرر نیاز داشته باشی",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "javascript-esm-vs-commonjs",
+      "level": "Mid",
+      "type": "Conceptual",
+      "text": "ES Modules با CommonJS چه تفاوت‌هایی دارند؟",
+      "shortAnswer": "ESM با `import/export` استاندارد زبان است، **static** تحلیل می‌شود (tree-shaking ممکن است)، asynchronous لود می‌شود، همیشه strict است و از top-level await پشتیبانی می‌کند. CommonJS با `require/module.exports` است، synchronous و پویاست.",
+      "explanation": "| | ESM | CommonJS |\n|---|---|---|\n| سینتکس | `import x from` | `require()` |\n| بارگذاری | async، static | sync، پویا |\n| export | live binding | کپی مقدار در زمان export |\n| top-level await | ✅ | ❌ |\n| `this` سطح فایل | `undefined` | `module.exports` |\n\n«live binding» یعنی اگر ماژول صادرکننده مقدار را عوض کند، وارد‌کننده تغییر را می‌بیند. در Node با `\"type\": \"module\"` یا پسوند `.mjs` ESM فعال می‌شود. `import()` پویا در هر دو محیط برای code splitting و lazy loading موجود است. تعامل: ESM می‌تواند CJS را import کند ولی `require()` کردن ESM سال‌ها ممکن نبود و فقط در نسخه‌های جدید Node در شرایط خاص مجاز شده؛ روی آن حساب مشترک نکن مگر نسخه‌ی هدف را چک کنی.",
+      "commonMistake": "گفتن اینکه «import فقط syntax متفاوتی از require است»؛ تفاوت اصلی static بودن و live binding است.",
+      "followUp": "circular import در ESM و CJS چه فرقی در رفتار دارد؟",
+      "estimatedSeconds": 150,
+      "minVersion": "ES2015",
+      "tags": [
+        "modules",
+        "esm",
+        "commonjs"
+      ]
+    },
+    {
+      "id": "javascript-microtask-vs-macrotask",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "کدام یک **microtask** است؟",
+      "shortAnswer": "Microtaskها: `.then/.catch/.finally`، ادامه‌ی بعد از `await`، `queueMicrotask` و `MutationObserver`. Macrotask (task)ها: تایمرها، I/O، رویدادهای UI، `MessageChannel`.",
+      "explanation": "بعد از هر task، engine کل صف microtask را خالی می‌کند و بعد سراغ task بعدی (یا render) می‌رود. مهم در عمل: کارهای سنگین داخل microtask مرورگر را قفل می‌کنند چون render تا خالی شدن صف انجام نمی‌شود؛ برای شکستن کار سنگین از `setTimeout`/`scheduler.postTask`/Worker استفاده کن.",
+      "commonMistake": "فرض اینکه `await` یک «توقف» است؛ در واقع ادامه‌ی تابع به‌صورت microtask زمان‌بندی می‌شود.",
+      "followUp": "`await 1` چند tick microtask به تأخیر می‌اندازد؟ (نکته: مدرن engineها ۱ tick.)",
+      "estimatedSeconds": 45,
+      "minVersion": "ES2015",
+      "tags": [
+        "event-loop",
+        "microtask",
+        "async"
+      ],
+      "choices": [
+        {
+          "text": "callback یک `setInterval`"
+        },
+        {
+          "text": "callback یک `.then()` روی promise تسویه‌شده",
+          "isCorrect": true
+        },
+        {
+          "text": "callback یک `setTimeout`"
+        },
+        {
+          "text": "callback یک رویداد `click` کاربر"
+        }
+      ]
+    },
+    {
+      "id": "javascript-generators-usecases",
+      "level": "Mid",
+      "type": "ShortAnswer",
+      "text": "Generator چیست و چه کاربردهایی دارد؟",
+      "shortAnswer": "تابعی با `function*` که با `yield` اجرا را متوقف می‌کند و با `next()` ادامه می‌دهد. کاربردها: ساختن iterable به‌صورت lazy، دنباله‌های بی‌نهایت، state machine، و (در گذشته) coroutine مثل redux-saga.",
+      "explanation": "```js\nfunction* ids() {\n  let id = 1;\n  while (true) yield id++;\n}\nconst it = ids();\nit.next(); // { value: 1, done: false }\n```\nهر `yield` یک نقطه‌ی توقف است و state تابع بین فراخوانی‌ها حفظ می‌شود. `for...of` و spread می‌توانند generator را مصرف کنند. `yield*` به generator/iterable دیگر delegate می‌کند. برای منابع async از `async function*` و `for await...of` استفاده می‌شود.",
+      "commonMistake": "spread کردن یک generator بی‌نهایت (`[...ids()]`) که هرگز تمام نمی‌شود.",
+      "followUp": "`return()` و `throw()` روی generator چه کاری می‌کنند و برای cleanup چه نقشی دارند؟",
+      "estimatedSeconds": 100,
+      "minVersion": "ES2015",
+      "tags": [
+        "generators",
+        "iterators",
+        "async"
+      ]
+    },
+    {
+      "id": "javascript-array-immutable-methods",
+      "level": "Mid",
+      "type": "CodeOutput",
+      "text": "خروجی چیست؟ (ES2023)",
+      "codeSnippet": "const arr = [3, 1, 2];\nconst sorted = arr.toSorted();\nconsole.log(arr, sorted);",
+      "codeLanguage": "javascript",
+      "shortAnswer": "`toSorted`, `toReversed`, `toSpliced` و `with` نسخه‌های **غیرمخرب** (non-mutating) متدهای `sort`, `reverse`, `splice` و `arr[i] = x` هستند و آرایه‌ی جدید برمی‌گردانند.",
+      "explanation": "برای state در React/Angular signals که immutability لازم است، این متدها جایگزین تمیز `[...arr].sort()` هستند. `arr.with(1, 'x')` یک کپی با تغییر همان اندیس می‌سازد. `Array.prototype.findLast/findLastIndex` هم از ES2023 آمدند.",
+      "commonMistake": "تصور اینکه `sort()` آرایه‌ی جدید برمی‌گرداند و اصل دست‌نخورده می‌ماند.",
+      "followUp": "چرا mutation مستقیم آرایه در state مشکل‌ساز است؟",
+      "estimatedSeconds": 40,
+      "minVersion": "ES2023",
+      "tags": [
+        "es2023",
+        "array",
+        "immutability"
+      ],
+      "choices": [
+        {
+          "text": "`[1, 2, 3] [3, 1, 2]`"
+        },
+        {
+          "text": "`undefined [1, 2, 3]`"
+        },
+        {
+          "text": "`[3, 1, 2] [1, 2, 3]`",
+          "isCorrect": true
+        },
+        {
+          "text": "`[1, 2, 3] [1, 2, 3]`"
+        }
+      ]
+    },
+    {
+      "id": "javascript-freeze-shallow",
+      "level": "Mid",
+      "type": "CodeOutput",
+      "text": "خروجی چیست؟",
+      "codeSnippet": "'use strict';\nconst o = Object.freeze({ a: 1, nested: { b: 1 } });\no.nested.b = 2;\ntry { o.a = 2; } catch (e) { console.log(e.constructor.name); }\nconsole.log(o.nested.b);",
+      "codeLanguage": "javascript",
+      "shortAnswer": "`Object.freeze` فقط **سطحی** است. در strict mode نوشتن روی property فریز‌شده `TypeError` می‌دهد (در sloppy بی‌صدا نادیده گرفته می‌شود)، ولی شیء تو در تو هنوز قابل تغییر است.",
+      "explanation": "`Object.seal` اجازه‌ی افزودن/حذف property را نمی‌دهد ولی تغییر مقدار را می‌دهد؛ `preventExtensions` فقط افزودن را می‌بندد. برای deep freeze باید بازگشتی پیمایش کنی. در TypeScript از `readonly`/`as const`/`Readonly<T>` برای همین هدف در سطح type استفاده می‌شود (فقط compile-time).",
+      "commonMistake": "فکر اینکه freeze شیء تو در تو را هم قفل می‌کند.",
+      "followUp": "تفاوت `freeze` و `const` چیست؟",
+      "estimatedSeconds": 60,
+      "minVersion": "ES2015",
+      "tags": [
+        "objects",
+        "immutability",
+        "strict-mode"
+      ],
+      "choices": [
+        {
+          "text": "`TypeError` و بعد `1`"
+        },
+        {
+          "text": "`undefined` و بعد `2`"
+        },
+        {
+          "text": "`2` و بدون خطا"
+        },
+        {
+          "text": "`TypeError` و بعد `2`",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "javascript-node-nexttick-order",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "در Node.js (ماژول CommonJS) ترتیب اجرای `process.nextTick`، `Promise.then` و `setImmediate` چیست؟",
+      "shortAnswer": "بعد از اتمام عملیات فعلی، Node اول صف `process.nextTick` و بعد صف microtask (promise) را خالی می‌کند؛ `setImmediate` در فاز check از event loop اجرا می‌شود که بعد از آنهاست.",
+      "explanation": "فازهای event loop در Node: timers ← pending callbacks ← poll (I/O) ← check (`setImmediate`) ← close callbacks. بین هر callback صف `nextTick` و بعد microtask خالی می‌شود. ترتیب `setTimeout(0)` و `setImmediate` در ماژول اصلی وابسته به سرعت پردازش است و نامشخص؛ داخل callback یک I/O، `setImmediate` همیشه اول است. نکته: در ماژول ESM چون کد بالادستی خودش داخل یک microtask اجرا می‌شود، promiseها ممکن است قبل از `nextTick` بیایند. استفاده‌ی زیاد از `nextTick` بازگشتی I/O را گرسنه می‌کند.",
+      "commonMistake": "نمی‌دانند `nextTick` اسمش گمراه‌کننده است و در واقع «قبل از ادامه‌ی event loop» اجرا می‌شود، نه tick بعدی.",
+      "followUp": "چرا در Node توصیه می‌شود به‌جای `nextTick` از `queueMicrotask` یا `setImmediate` استفاده شود؟",
+      "estimatedSeconds": 90,
+      "minVersion": "ES2015",
+      "tags": [
+        "nodejs",
+        "event-loop",
+        "async"
+      ],
+      "choices": [
+        {
+          "text": "`nextTick` ← `Promise.then` ← `setImmediate`",
+          "isCorrect": true
+        },
+        {
+          "text": "`setImmediate` ← `nextTick` ← `Promise.then`"
+        },
+        {
+          "text": "`Promise.then` ← `nextTick` ← `setImmediate`"
+        },
+        {
+          "text": "ترتیب تصادفی است"
+        }
+      ]
+    },
+    {
+      "id": "javascript-memory-leaks",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "چه چیزهایی در JavaScript باعث نشت حافظه می‌شوند و چطور آن را پیدا و رفع می‌کنی؟",
+      "shortAnswer": "علت‌های رایج: event listener و تایمر که پاک نمی‌شوند، closureهایی که آبجکت بزرگ را زنده نگه می‌دارند، cache/Map بدون سقف، متغیرهای global ناخواسته و DOM nodeهای detached. با heap snapshot و allocation timeline در DevTools ردیابی و با پاک‌سازی صریح (removeEventListener، AbortController، WeakMap/WeakRef) برطرف می‌شوند.",
+      "explanation": "روش تشخیص: ۱) در Chrome DevTools → Memory یک snapshot قبل و یکی بعد از تکرار سناریو بگیر. ۲) مقایسه‌ی snapshotها و دنبال «Detached DOM tree» یا شمار رو‌به‌رشد یک کلاس بگرد. ۳) با «Retainers» ببین چه چیزی شیء را زنده نگه داشته.\n\n```js\n// نشت: listener هرگز حذف نمی‌شود و component را زنده نگه می‌دارد\nwindow.addEventListener('resize', this.onResize);\n\n// رفع با AbortController: یک signal برای پاک‌سازی همه‌ی listenerها\nconst ac = new AbortController();\nwindow.addEventListener('resize', onResize, { signal: ac.signal });\n// هنگام destroy:\nac.abort();\n```\nدر Node هم `--inspect` و heap snapshot یا `process.memoryUsage()` برای نظارت روند استفاده می‌شود. در فریمورک‌ها (Angular: unsubscribe/`takeUntilDestroyed`، React: cleanup در `useEffect`) نشت معمولاً از subscription رها شده است.",
+      "commonMistake": "فرض اینکه چون garbage collector دارد، نشت حافظه ممکن نیست. GC فقط چیزهای «غیرقابل دسترس» را جمع می‌کند.",
+      "followUp": "تفاوت «نشت واقعی» با «رشد عادی cache» را چطور در heap تشخیص می‌دهی؟",
+      "estimatedSeconds": 180,
+      "minVersion": "ES2015",
+      "tags": [
+        "memory",
+        "performance",
+        "debugging"
+      ]
+    },
+    {
+      "id": "javascript-weakmap-weakref",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "کدام گزینه درباره‌ی `WeakMap` درست است؟",
+      "shortAnswer": "WeakMap و WeakSet فقط شیء (و non-registered symbol) را به عنوان کلید می‌پذیرند و چون رفتار GC قابل مشاهده نیست، `size` و iteration ندارند.",
+      "explanation": "کاربرد اصلی: نگه داشتن metadata خصوصی روی شیء بدون جلوگیری از garbage collection آن.\n```js\nconst meta = new WeakMap();\nfunction track(el) { meta.set(el, { clicks: 0 }); }\n// وقتی el از DOM حذف و بی‌ارجاع شود، entry هم آزاد می‌شود\n```\n`WeakRef` و `FinalizationRegistry` سطح پایین‌تر و غیرقطعی‌اند: زمان cleanup مشخص نیست و نباید منطق برنامه به آن وابسته شود.",
+      "commonMistake": "استفاده از WeakRef/FinalizationRegistry برای منطق حیاتی برنامه؛ زمان اجرای GC تضمین‌شده نیست.",
+      "followUp": "چرا در private field کلاس‌ها (`#x`) با WeakMap می‌شد شبیه‌سازی کرد؟",
+      "estimatedSeconds": 60,
+      "minVersion": "ES2015",
+      "tags": [
+        "weakmap",
+        "memory",
+        "gc"
+      ],
+      "choices": [
+        {
+          "text": "`size` دارد و entryها را با `keys()` برمی‌گرداند"
+        },
+        {
+          "text": "کلیدها می‌توانند string باشند و می‌توان با `for...of` روی آنها پیمایش کرد"
+        },
+        {
+          "text": "کلیدهایش (شیء) به‌صورت weak نگه داشته می‌شوند، قابل پیمایش نیستند و اگر شیء دیگر جایی ارجاع نداشته باشد entry هم جمع می‌شود",
+          "isCorrect": true
+        },
+        {
+          "text": "برای cache کردن با کلید primitive ایده‌آل است"
+        }
+      ]
+    },
+    {
+      "id": "javascript-timeout-abortcontroller",
+      "level": "Senior",
+      "type": "ShortAnswer",
+      "text": "چطور برای یک `fetch` timeout و قابلیت لغو پیاده‌سازی می‌کنی؟",
+      "shortAnswer": "با `AbortController`/`AbortSignal`: signal را به `fetch` می‌دهیم و برای timeout از `AbortSignal.timeout(ms)` استفاده می‌کنیم؛ ترکیب چند signal با `AbortSignal.any([...])`. `Promise.race` با تایمر، درخواست را واقعاً لغو نمی‌کند و فقط نتیجه را نادیده می‌گیرد.",
+      "explanation": "```js\nconst userCancel = new AbortController();\nconst signal = AbortSignal.any([userCancel.signal, AbortSignal.timeout(5000)]);\n\ntry {\n  const res = await fetch('/api/data', { signal });\n} catch (e) {\n  if (e.name === 'TimeoutError') { /* timeout */ }\n  else if (e.name === 'AbortError') { /* لغو توسط کاربر */ }\n  else throw e;\n}\n```\nنکات: `fetch` با status خطا (مثل 500) reject نمی‌شود؛ باید `res.ok` را چک کنی. لغو باعث reject با `AbortError` (یا `TimeoutError` برای timeout) می‌شود و باید در cleanup (مثل تغییر route) صدا زده شود تا نشت و race condition نداشته باشیم.",
+      "commonMistake": "استفاده از `Promise.race` با `setTimeout` و فرض اینکه درخواست شبکه قطع شده است.",
+      "followUp": "چطور جلوی race condition در «آخرین جستجو برنده است» را می‌گیری؟",
+      "estimatedSeconds": 130,
+      "minVersion": "ES2022",
+      "tags": [
+        "abortcontroller",
+        "fetch",
+        "async"
+      ]
+    },
+    {
+      "id": "javascript-async-iterators",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "درباره‌ی `for await...of` کدام گزینه درست است؟",
+      "shortAnswer": "`for await` ترتیبی است؛ برای دریافت دنباله‌ای از داده‌ها (stream، صفحه‌بندی API، خط‌به‌خط فایل) مناسب است، نه برای موازی‌سازی.",
+      "explanation": "```js\nasync function* pages(url) {\n  let next = url;\n  while (next) {\n    const res = await fetch(next).then(r => r.json());\n    yield* res.items;\n    next = res.nextUrl;\n  }\n}\nfor await (const item of pages('/api/items')) { /* ... */ }\n```\n`ReadableStream` در مرورگرهای جدید و Node async iterable است. با `break` داخل حلقه، متد `return()` iterator صدا زده می‌شود و منابع آزاد می‌شوند. اگر موازی‌سازی می‌خواهی `Promise.all` یا یک pool با محدودیت concurrency بساز.",
+      "commonMistake": "انتظار موازی بودن `for await` و تعجب از کندی.",
+      "followUp": "backpressure در streamها یعنی چه و `for await` چطور کمک می‌کند؟",
+      "estimatedSeconds": 75,
+      "minVersion": "ES2018",
+      "tags": [
+        "async-iterators",
+        "generators",
+        "streams"
+      ],
+      "choices": [
+        {
+          "text": "همه‌ی promiseها را موازی اجرا می‌کند مثل `Promise.all`"
+        },
+        {
+          "text": "روی آرایه‌ی معمولی خطا می‌دهد"
+        },
+        {
+          "text": "فقط داخل توابع غیر async قابل استفاده است"
+        },
+        {
+          "text": "روی async iterable یا iterableای از promiseها پیمایش می‌کند و هر iteration قبل از رفتن به بعدی await می‌شود",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "javascript-proxy-reflect",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "`Proxy` معمولاً برای چه کاری و با کدام نکته‌ی احتیاطی استفاده می‌شود؟",
+      "shortAnswer": "Proxy با handler (trapها مثل `get`, `set`, `has`, `deleteProperty`) عملیات را رهگیری می‌کند؛ `Reflect` همان عملیات پیش‌فرض را با semantics درست (شامل `receiver`) انجام می‌دهد.",
+      "explanation": "نمونه: سیستم reactivity در Vue 3 با Proxy کار می‌کند.\n```js\nconst state = new Proxy({ count: 0 }, {\n  set(target, key, value, receiver) {\n    console.log(`${String(key)} changed`);\n    return Reflect.set(target, key, value, receiver);\n  },\n});\n```\nهزینه‌ها: Proxy کندتر از دسترسی مستقیم است، `===` بین proxy و target متفاوت است، و بعضی اشیای داخلی (مثل `Map`/`Date`) که internal slot دارند روی proxy معمولی درست کار نمی‌کنند مگر متدها bind شوند. trap `set` باید `true` برگرداند وگرنه در strict mode خطا می‌دهد.",
+      "commonMistake": "فراموش کردن `return true` در trap `set` یا استفاده از `target[key] = value` به‌جای `Reflect.set` (خراب شدن `receiver` با getter/setter و ارث‌بری).",
+      "followUp": "چرا `new Proxy(new Map(), {})` با `.size` خطا می‌دهد؟",
+      "estimatedSeconds": 90,
+      "minVersion": "ES2015",
+      "tags": [
+        "proxy",
+        "reflect",
+        "metaprogramming"
+      ],
+      "choices": [
+        {
+          "text": "برای سریع‌تر کردن دسترسی به property و کاهش مصرف حافظه"
+        },
+        {
+          "text": "برای ساختن deep copy از شیء"
+        },
+        {
+          "text": "فقط برای شبیه‌سازی private field در کلاس"
+        },
+        {
+          "text": "برای intercept کردن عملیات روی شیء (get/set/has…) مثل reactivity و validation، و باید در trap‌ها از `Reflect` برای رفتار پیش‌فرض استفاده کرد",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "javascript-custom-iterable",
+      "level": "Senior",
+      "type": "CodeOutput",
+      "text": "خروجی چیست؟",
+      "codeSnippet": "const range = {\n  from: 1,\n  to: 3,\n  [Symbol.iterator]() {\n    let c = this.from, t = this.to;\n    return { next: () => c <= t ? { value: c++, done: false } : { value: undefined, done: true } };\n  },\n};\nconsole.log([...range], Math.max(...range));",
+      "codeLanguage": "javascript",
+      "shortAnswer": "شیئی که متد `[Symbol.iterator]()` برگرداندن یک iterator (با `next()`) را پیاده‌سازی کند iterable است؛ spread و `Math.max(...x)` هر دو از همین پروتکل استفاده می‌کنند.",
+      "explanation": "پروتکل iterable: `[Symbol.iterator]()` → iterator؛ iterator: `next()` → `{ value, done }`. اگر هم `return()` تعریف شود، هنگام خروج زودهنگام (`break`, destructuring جزئی) صدا زده می‌شود تا cleanup انجام شود. ساده‌ترین راه پیاده‌سازی: `*[Symbol.iterator]() { for (let i = this.from; i <= this.to; i++) yield i; }`.",
+      "commonMistake": "پیاده‌سازی `next` بدون برگرداندن `{ done: true }` در پایان و ایجاد حلقه‌ی بی‌نهایت.",
+      "followUp": "تفاوت iterable و iterator چیست و آیا هر iterator خودش iterable است؟",
+      "estimatedSeconds": 90,
+      "minVersion": "ES2015",
+      "tags": [
+        "iterators",
+        "symbol",
+        "protocols"
+      ],
+      "choices": [
+        {
+          "text": "`[1, 2, 3] undefined`"
+        },
+        {
+          "text": "`[1, 2, 3] 3`",
+          "isCorrect": true
+        },
+        {
+          "text": "`TypeError: range is not iterable`"
+        },
+        {
+          "text": "`[[Object]] NaN`"
+        }
+      ]
+    },
+    {
+      "id": "javascript-error-iserror-cause",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "`Error.isError(x)` (ES2026) نسبت به `x instanceof Error` چه مزیتی دارد؟",
+      "shortAnswer": "`instanceof` به `Error` همان realm وابسته است و برای خطای ساخته‌شده در iframe یا context دیگر `false` می‌دهد. `Error.isError` بر اساس internal slot تشخیص می‌دهد.",
+      "explanation": "ترکیب با `cause` (ES2022) برای زنجیره‌ی خطا:\n```js\ntry {\n  await save();\n} catch (err) {\n  if (!Error.isError(err)) throw err;\n  throw new Error('ذخیره ناموفق بود', { cause: err });\n}\n```\nاین الگو اطلاعات ریشه‌ای را حفظ می‌کند. یادت باشد در JS می‌شود هر مقداری را `throw` کرد (حتی رشته)، پس در `catch` نباید بی‌گدار به `err.message` تکیه کرد.",
+      "commonMistake": "فرض اینکه `catch (e)` همیشه یک Error می‌دهد و رفتن سراغ `e.message` بدون بررسی.",
+      "followUp": "چرا `throw 'text'` بد است؟ چه چیزی از دست می‌رود؟",
+      "estimatedSeconds": 60,
+      "minVersion": "ES2026",
+      "tags": [
+        "es2026",
+        "errors",
+        "error-handling"
+      ],
+      "choices": [
+        {
+          "text": "هر شیء که فیلد `message` داشته باشد را خطا حساب می‌کند"
+        },
+        {
+          "text": "فقط برای `TypeError` کار می‌کند"
+        },
+        {
+          "text": "علاوه بر تشخیص، stack trace را هم برمی‌گرداند"
+        },
+        {
+          "text": "خطاهای واقعی را حتی اگر از realm دیگری (iframe، vm، worker) آمده باشند درست تشخیص می‌دهد",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "javascript-array-fromasync",
+      "level": "Senior",
+      "type": "CodeOutput",
+      "text": "خروجی چیست؟ (ES2026)",
+      "codeSnippet": "async function* gen() { yield 1; yield 2; }\nconst arr = await Array.fromAsync(gen(), x => x * 10);\nconsole.log(arr);",
+      "codeLanguage": "javascript",
+      "shortAnswer": "`Array.fromAsync(asyncIterable, mapFn?)` یک promise از آرایه برمی‌گرداند و مقدارها را به ترتیب (ترتیبی، نه موازی) جمع می‌کند؛ `mapFn` می‌تواند خودش async باشد.",
+      "explanation": "معادل قدیمی:\n```js\nconst out = [];\nfor await (const x of gen()) out.push(x * 10);\n```\nورودی می‌تواند async iterable، sync iterable (حتی از promiseها) یا array-like باشد. چون همه چیز را در حافظه جمع می‌کند، برای streamهای بسیار بزرگ مناسب نیست؛ آنجا `for await` مصرف تدریجی است.",
+      "commonMistake": "انتظار اینکه عناصر موازی resolve شوند؛ اینجا ترتیبی هستند.",
+      "followUp": "چه زمانی `Array.fromAsync` را به `Promise.all(arr.map(...))` ترجیح می‌دهی؟",
+      "estimatedSeconds": 60,
+      "minVersion": "ES2026",
+      "tags": [
+        "es2026",
+        "async-iterators",
+        "array"
+      ],
+      "choices": [
+        {
+          "text": "`[10, 20]`",
+          "isCorrect": true
+        },
+        {
+          "text": "`[Promise, Promise]`"
+        },
+        {
+          "text": "`TypeError` چون آرایه از async iterable ساخته نمی‌شود"
+        },
+        {
+          "text": "`[1, 2]`"
+        }
+      ]
+    },
+    {
+      "id": "javascript-map-getorinsert",
+      "level": "Senior",
+      "type": "CodeOutput",
+      "text": "خروجی چیست؟ (ES2026 — upsert)",
+      "codeSnippet": "const m = new Map();\nm.getOrInsert('a', 1);\nm.getOrInsert('a', 2);\nm.getOrInsertComputed('b', k => k + '!');\nconsole.log([...m]);",
+      "codeLanguage": "javascript",
+      "shortAnswer": "`getOrInsert(key, default)` اگر کلید نبود مقدار را درج می‌کند و در هر حال مقدار موجود را برمی‌گرداند؛ `getOrInsertComputed(key, fn)` مقدار پیش‌فرض را lazy می‌سازد و فقط در صورت نبود کلید صدا زده می‌شود.",
+      "explanation": "الگوی رایج گروه‌بندی که قبلاً می‌نوشتیم:\n```js\nif (!map.has(k)) map.set(k, []);\nmap.get(k).push(v);\n```\nحالا: `map.getOrInsertComputed(k, () => []).push(v);`. با `getOrInsert(k, [])` آرایه حتی وقتی کلید هست ساخته می‌شود (هزینه‌ی الکی)، پس برای مقدار سنگین از نسخه‌ی Computed استفاده کن. روی `WeakMap` هم وجود دارد.",
+      "commonMistake": "استفاده از `getOrInsert(k, expensive())` که مقدار را همیشه محاسبه می‌کند.",
+      "followUp": "چرا نسخه‌ی `Computed` جدا تعریف شد؟",
+      "estimatedSeconds": 60,
+      "minVersion": "ES2026",
+      "tags": [
+        "es2026",
+        "map",
+        "collections"
+      ],
+      "choices": [
+        {
+          "text": "`[['a', 1], ['b', 'b!']]`",
+          "isCorrect": true
+        },
+        {
+          "text": "`[['a', 2], ['b', 'b!']]`"
+        },
+        {
+          "text": "`TypeError`"
+        },
+        {
+          "text": "`[['a', 1]]`"
+        }
+      ]
+    },
+    {
+      "id": "javascript-json-parse-source",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "چطور می‌توانی عدد بزرگی مثل `12345678901234567890` را هنگام `JSON.parse` بدون از دست رفتن دقت نگه داری؟ (ES2026)",
+      "shortAnswer": "در ES2026، reviver آرگومان سومی به نام `context` می‌گیرد که برای مقدارهای primitive شامل `source` (متن دقیق در JSON) است.",
+      "explanation": "```js\nconst data = JSON.parse('{\"id\":12345678901234567890}', (key, value, ctx) =>\n  key === 'id' ? BigInt(ctx.source) : value\n);\ndata.id; // 12345678901234567890n\n```\nبدون این ویژگی عدد قبل از رسیدن به reviver به `Number` (float64) تبدیل و گرد می‌شود، یعنی دقت از دست رفته است. متناظرش `JSON.rawJSON()` برای `stringify` است تا BigInt را درست سریالایز کنی. تا وقتی همه‌ی محیط‌های هدف پشتیبانی نکنند، بهتر است شناسه‌های بزرگ در API به‌صورت string ارسال شوند.",
+      "commonMistake": "تصور اینکه `Number.MAX_SAFE_INTEGER` مشکل را حل می‌کند؛ بالاتر از آن دقت اعداد صحیح تضمین نیست.",
+      "followUp": "چرا شناسه‌های snowflake/64-bit را در JSON معمولاً به‌صورت string می‌فرستند؟",
+      "estimatedSeconds": 75,
+      "minVersion": "ES2026",
+      "tags": [
+        "es2026",
+        "json",
+        "bigint"
+      ],
+      "choices": [
+        {
+          "text": "با `parseFloat` روی نتیجه‌ی parse"
+        },
+        {
+          "text": "با `JSON.parse` نمی‌شود و باید حتماً از string استفاده کرد"
+        },
+        {
+          "text": "در reviver از آرگومان سوم (`context.source`) که متن خام عدد است استفاده کنی و `BigInt(context.source)` بسازی",
+          "isCorrect": true
+        },
+        {
+          "text": "با `JSON.parse(text, Number)`"
+        }
+      ]
+    },
+    {
+      "id": "javascript-worker-transferables",
+      "level": "Senior",
+      "type": "ShortAnswer",
+      "text": "برای پردازش سنگین در مرورگر بدون قفل کردن UI چه می‌کنی؟ داده را چطور بین thread ها جابه‌جا می‌کنی؟",
+      "shortAnswer": "کار سنگین را در Web Worker اجرا می‌کنیم. داده با `postMessage` و structured clone کپی می‌شود؛ برای بافرهای بزرگ از **transferable** (انتقال مالکیت بدون کپی) و برای حافظه‌ی مشترک از `SharedArrayBuffer` + `Atomics` (با شرط cross-origin isolation) استفاده می‌کنیم.",
+      "explanation": "```js\n// main.js\nconst worker = new Worker(new URL('./heavy.js', import.meta.url), { type: 'module' });\nconst buffer = new ArrayBuffer(50_000_000);\nworker.postMessage({ buffer }, [buffer]);   // transfer: buffer.byteLength اینجا 0 می‌شود\nworker.onmessage = e => render(e.data);\n```\nWorker به DOM دسترسی ندارد. هزینه‌ی کپی اشیای بزرگ می‌تواند از خود محاسبه بیشتر شود؛ برای همین transfer یا SharedArrayBuffer. برای chunk کردن کار روی main thread هم می‌توان از `scheduler.yield()`/`setTimeout` یا `requestIdleCallback` استفاده کرد ولی برای CPU-bound واقعی Worker درست‌تر است.",
+      "commonMistake": "فرستادن اشیای بسیار بزرگ با `postMessage` بدون transfer و دلخوری از کندی.",
+      "followUp": "در Node.js معادل این کار چیست؟ (`worker_threads` در برابر `cluster` و `child_process`)",
+      "estimatedSeconds": 150,
+      "minVersion": "ES2015",
+      "tags": [
+        "web-workers",
+        "performance",
+        "concurrency"
+      ]
+    },
+    {
+      "id": "javascript-circular-imports",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "Circular dependency بین ماژول‌ها چه مشکلی ایجاد می‌کند و چطور رفعش می‌کنی؟",
+      "shortAnswer": "در چرخه، یک ماژول ممکن است قبل از اینکه ماژول دیگر کامل ارزیابی شود، به آن دسترسی پیدا کند و مقدار `undefined` یا خطای TDZ ببیند. راه‌حل: شکستن چرخه با استخراج کد مشترک به ماژول سوم، وارونه‌سازی وابستگی (dependency inversion) یا import تنبل (`import()` داخل تابع).",
+      "explanation": "در ESM بایندینگ‌ها live هستند، پس دسترسی **داخل توابع** که بعداً صدا می‌شوند معمولاً مشکلی ندارد؛ مشکل وقتی است که در سطح ماژول (top-level) از مقداری استفاده کنی که هنوز initialize نشده (`ReferenceError` برای `let/const/class`). در CommonJS، `require` وسط چرخه یک شیء **ناقص** `module.exports` را برمی‌گرداند.\n\nنشانه‌های وجود چرخه: `undefined is not a function` غیرمنتظره، وابستگی به ترتیب import. ابزارها: `madge --circular`، قانون `import/no-cycle` در ESLint، یا `dpdm`. الگوی رایج ایجاد چرخه: فایل barrel (`index.ts`) که همه چیز را دوباره export می‌کند؛ داخل همان پکیج مستقیم از فایل مقصد import کن.",
+      "commonMistake": "وصله کردن با جابه‌جا کردن ترتیب importها به جای رفع ریشه‌ی وابستگی چرخه‌ای.",
+      "followUp": "چرا barrel fileها در پروژه‌های بزرگ می‌توانند باعث چرخه و کندی build شوند؟",
+      "estimatedSeconds": 150,
+      "minVersion": "ES2015",
+      "tags": [
+        "modules",
+        "architecture",
+        "esm"
+      ]
+    },
+    {
+      "id": "javascript-float-precision-sum",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "نتیجه‌ی `Math.sumPrecise([0.1, 0.2, 0.3])` (ES2026) در مقایسه با `reduce((a, b) => a + b)` چیست؟",
+      "shortAnswer": "اعداد JavaScript از نوع double (IEEE 754) هستند و جمع ساده در هر مرحله گرد می‌شود و خطا انباشته می‌شود. `Math.sumPrecise` جمع را با دقت بالا انجام می‌دهد و فقط یک‌بار در انتها گرد می‌کند.",
+      "explanation": "به همین دلیل `0.1 + 0.2 !== 0.3`. نکته‌ی مهم: `sumPrecise` مشکل نمایش `0.1` را حل نمی‌کند، فقط خطای جمع را کم می‌کند. برای پول هرگز float استفاده نکن: عدد صحیح در کوچک‌ترین واحد (ریال/سنت) با `BigInt` یا کتابخانه‌ی decimal. برای مقایسه‌ی float از epsilon استفاده کن (`Math.abs(a - b) < Number.EPSILON * scale`).",
+      "commonMistake": "نگه داشتن مبلغ پول به صورت float و رند کردن با `toFixed` که خود گرد‌شدن را هم مشکل‌دار می‌کند.",
+      "followUp": "چرا `(1.005).toFixed(2)` برابر `'1.00'` است؟",
+      "estimatedSeconds": 60,
+      "minVersion": "ES2026",
+      "tags": [
+        "es2026",
+        "numbers",
+        "floating-point"
+      ],
+      "choices": [
+        {
+          "text": "هر دو `0.6`"
+        },
+        {
+          "text": "`0.6` در مقابل `0.6000000000000001` که reduce می‌دهد",
+          "isCorrect": true
+        },
+        {
+          "text": "`sumPrecise` وجود ندارد و `NaN` می‌دهد"
+        },
+        {
+          "text": "هر دو `0.6000000000000001`"
+        }
+      ]
+    },
+    {
+      "id": "javascript-v8-hidden-classes",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "موتور V8 چگونه دسترسی به property را بهینه می‌کند و چه کدنویسی‌هایی این بهینه‌سازی را خراب می‌کند؟",
+      "shortAnswer": "V8 برای اشیائی که property مشابه با ترتیب یکسان دارند «hidden class (shape/map)» مشترک می‌سازد و با inline cache دسترسی را سریع می‌کند. اگر شکل اشیا در یک نقطه‌ی کد متنوع باشد (polymorphic/megamorphic)، یا با `delete` و اضافه کردن property به ترتیب‌های مختلف شکل را بشکنیم، کد کند می‌شود.",
+      "explanation": "توصیه‌ها:\n- همه‌ی propertyها را در constructor و به یک ترتیب مقداردهی کن (شکل ثابت).\n- از `delete obj.x` پرهیز کن؛ مقدار را `null/undefined` کن.\n- آرایه‌ها را با نوع یکنواخت نگه دار (آرایه‌ی عدد صحیح ← double ← generic جهش یک‌طرفه‌ی «elements kind» دارد) و از holey شدن (`arr[1000] = x` روی آرایه‌ی خالی) دوری کن.\n- تابع hot را با شکل‌های ثابت صدا بزن تا monomorphic بماند.\n\nاین‌ها **ریزبهینه‌سازی** هستند؛ اول با profiler (DevTools Performance) گلوگاه را پیدا کن. خوانایی مهم‌تر از حدس زدن است و JIT تغییر می‌کند.",
+      "commonMistake": "ریزبهینه‌سازی زودهنگام بدون profile کردن.",
+      "followUp": "«deoptimization» چیست و در DevTools/Node چطور دیده می‌شود؟",
+      "estimatedSeconds": 150,
+      "minVersion": "ES2015",
+      "tags": [
+        "v8",
+        "performance",
+        "engine"
+      ]
+    },
+    {
+      "id": "javascript-unhandled-rejection",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "اگر یک promise reject شود و هیچ‌جا handler برایش نباشد، در Node.js (نسخه‌ی ۱۵ به بعد) و مرورگر چه اتفاقی می‌افتد؟",
+      "shortAnswer": "از Node 15 حالت پیش‌فرض `--unhandled-rejections=throw` است؛ می‌توان با `process.on('unhandledRejection')` آن را مدیریت کرد. در مرورگر برنامه ادامه می‌دهد ولی خطا در console گزارش و رویداد `unhandledrejection` ارسال می‌شود.",
+      "explanation": "در production همیشه یک هندلر سراسری (لاگ به سرویس مانیتورینگ مثل Sentry) بگذار ولی به‌عنوان جایگزین `catch` درست از آن استفاده نکن. الگوی خطرناک: `async` تابعی که بدون `await` صدا زده شده و rejection آن گم می‌شود. در Node بعد از unhandled exception وضعیت process نامطمئن است؛ توصیه شده لاگ بگیری و process را ری‌استارت کنی (با process manager).",
+      "commonMistake": "فرض اینکه بدون `catch`، خطا فقط یک هشدار است و برنامه ادامه می‌دهد (در Node قدیمی درست بود ولی الان نه).",
+      "followUp": "`Promise.prototype.finally` روی رد شدن چه تأثیری دارد؟ آیا reject را handle می‌کند؟",
+      "estimatedSeconds": 70,
+      "minVersion": "ES2015",
+      "tags": [
+        "promises",
+        "error-handling",
+        "nodejs"
+      ],
+      "choices": [
+        {
+          "text": "در Node به‌طور پیش‌فرض process با خطا متوقف می‌شود و در مرورگر رویداد `unhandledrejection` روی window ثبت می‌شود",
+          "isCorrect": true
+        },
+        {
+          "text": "در هر دو محیط بی‌صدا نادیده گرفته می‌شود"
+        },
+        {
+          "text": "در هر دو محیط برنامه بلافاصله crash می‌کند"
+        },
+        {
+          "text": "در Node فقط یک warning چاپ می‌شود"
+        }
+      ]
+    }
+  ]
+}
