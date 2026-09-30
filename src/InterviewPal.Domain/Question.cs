@@ -32,6 +32,9 @@ public class Question
     /// <summary>Last version the answer is valid for; null means "still valid".</summary>
     public string? MaxVersion { get; set; }
 
+    /// <summary>Hash of the source content, lets the seeder skip unchanged questions.</summary>
+    public string? ContentHash { get; set; }
+
     public List<string> Tags { get; set; } = [];
     public List<Choice> Choices { get; set; } = [];
 }
