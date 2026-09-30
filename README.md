@@ -59,6 +59,9 @@ In Development the OpenAPI document is served at `/openapi/v1.json`.
 | POST | `/api/practice/sessions` | Build a practice session (balanced random selection) |
 | POST | `/api/practice/questions/{id}/check` | Grade one answer and return the explanation (learning / flashcard modes) |
 | POST | `/api/practice/evaluate` | Grade a whole session (interview mode) and get scores per technology, level and weak tags |
+| GET | `/api/lessons` | Algorithm and design-pattern lessons – filters: `kind` (`Algorithm`/`DesignPattern`), `level`, `category`, `technology` |
+| GET | `/api/lessons/{id}?technology=react` | One lesson with the real-world scenario, explanation, the implementation written for the chosen technology and its exercises (without answers) |
+| POST | `/api/lessons/{id}/exercises/{exerciseId}/check` | Grade one exercise of a lesson (`{ "choiceId": 1 }`) |
 
 Errors are returned as RFC 7807 `ProblemDetails`.
 
@@ -83,6 +86,25 @@ POST /api/practice/evaluate
 `technologies` and `levels` may be empty (meaning "all"); `count` is between 5 and 100. If fewer
 matching questions exist, fewer are returned.
 
+### Lessons (algorithms and design patterns)
+
+Besides the question bank there are **24 lessons** – 14 algorithms and 10 design patterns – each with a real-world
+scenario (price filter, rate limiter, shipping routes, checkout …), an explanation, complexity / when to use / common
+mistake, **one implementation per technology** and four exercises. The implementation is written in the idiom of the
+chosen technology: plain algorithm code for JavaScript, TypeScript and C#, and an Angular service / React hook /
+Next.js route handler or server action for the framework technologies.
+
+```
+content/lessons/<lesson-id>/
+  lesson.json       texts (Persian), metadata, exercises, one entry per technology
+  javascript.js  typescript.ts  angular.ts  react.tsx  nextjs.ts  dotnet.cs
+```
+
+Lessons are static content, so they are loaded into memory at startup (`LessonCatalog`) instead of the database.
+`LessonValidator` checks the layout on startup and in the tests: all six technologies are present, every code file exists,
+every lesson has at least two exercises with exactly one correct choice, algorithms declare their complexity. Choice
+order is shuffled deterministically (seeded by the exercise id) so authors do not have to balance answer positions.
+
 ## Architecture
 
 ```
@@ -106,6 +128,17 @@ Notes:
 - The question bank is data, not code. The seeder upserts by question id and stores a content hash, so
   unchanged questions keep their choice ids across restarts, changed questions are updated, and questions
   removed from the files are deleted.
+
+## Lesson content
+
+A lesson is a folder under `content/lessons/`. Rules for new lessons:
+
+1. **Run the code.** The JavaScript, TypeScript and C# files are self-contained programs
+   (`node file.js`, `node file.ts`, `dotnet run file.cs`); type-check the Angular, React and Next.js files against the
+   real framework typings. Put the expected output in comments.
+2. **Use a real scenario** and keep the example small but complete; show the framework idiom, not a port of the plain code.
+3. Do not let length give the answer away: the guard test fails if the correct choice is the unique longest one in more
+   than 45% of all exercises (or the first choice in more than 45%).
 
 ## Question content
 
