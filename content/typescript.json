@@ -1,0 +1,1435 @@
+{
+  "technology": {
+    "slug": "typescript",
+    "name": "TypeScript",
+    "currentVersion": "7.0"
+  },
+  "questions": [
+    {
+      "id": "typescript-any-unknown-never",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "تفاوت `any`، `unknown` و `never` چیست؟",
+      "shortAnswer": "`any` یعنی «از تایپ‌چک بیرون بیا» و آلودگی آن به بقیه‌ی کد سرایت می‌کند. `unknown` بالاترین نوع امن است: هر مقداری را می‌پذیرد ولی بدون بررسی نمی‌توانی روی آن کاری کنی. `never` پایین‌ترین نوع است: تابعی که هرگز برنمی‌گردد (throw) یا شاخه‌ای که غیرممکن است.",
+      "explanation": "```ts\nfunction parse(input: unknown) {\n  if (typeof input === 'string') return input.toUpperCase(); // narrowed\n  // input.toUpperCase();  // ❌ خطا: 'input' is of type 'unknown'\n}\n```\nبرای داده‌ی بیرونی (JSON، ورودی کاربر، `catch`) از `unknown` استفاده کن و با type guard یا validator (مثل Zod) نوع را ثابت کن. `never` برای exhaustive check در `switch` هم استفاده می‌شود.",
+      "commonMistake": "استفاده از `any` برای «رد شدن سریع از خطا» که مزیت TypeScript را از بین می‌برد.",
+      "followUp": "در `catch (e)` نوع `e` چیست و چرا؟",
+      "estimatedSeconds": 50,
+      "minVersion": "5.0",
+      "tags": [
+        "any",
+        "unknown",
+        "never",
+        "types"
+      ],
+      "choices": [
+        {
+          "text": "`any` بررسی نوع را خاموش می‌کند، `unknown` امن است و قبل از استفاده باید narrow شود، و `never` نوعی است که هیچ مقداری ندارد",
+          "isCorrect": true
+        },
+        {
+          "text": "`never` یعنی مقدار `null` یا `undefined`"
+        },
+        {
+          "text": "`any` امن‌تر از `unknown` است چون کامپایلر از آن خطا نمی‌گیرد"
+        },
+        {
+          "text": "`unknown` همان `any` است ولی با نام جدید"
+        }
+      ]
+    },
+    {
+      "id": "typescript-interface-vs-type",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "تفاوت اصلی `interface` و `type` در TypeScript کدام است؟",
+      "shortAnswer": "برای شکل اشیا هر دو کار می‌کنند. `interface` اگر دو بار با یک نام تعریف شود merge می‌شود (برای augment کتابخانه‌ها مفید) ولی `type` با تعریف مجدد خطای duplicate می‌دهد. `type` برای union، intersection، mapped و conditional types لازم است.",
+      "explanation": "```ts\ntype Id = string | number;               // فقط با type\ninterface User { name: string }\ninterface User { age: number }           // merge: هر دو property\ntype Point = { x: number } & { y: number };\n```\nقاعده‌ی عملی: برای API/شکل اشیا `interface` (پیام‌های خطای بهتر و `extends` سریع‌تر در بزرگ‌مقیاس)، برای هر چیز دیگر `type`. مهم‌تر از انتخاب، **ثابت بودن** رویه در تیم است.",
+      "commonMistake": "ادعای اینکه «`type` ضعیف‌تر است» یا «interface فقط برای OOP است».",
+      "followUp": "چه زمانی declaration merging در `interface` به دردت می‌خورد؟",
+      "estimatedSeconds": 50,
+      "minVersion": "5.0",
+      "tags": [
+        "interface",
+        "type-alias",
+        "types"
+      ],
+      "choices": [
+        {
+          "text": "فرقی ندارند و هیچ‌کدام هرگز قابل جایگزینی نیستند"
+        },
+        {
+          "text": "`interface` فقط برای کلاس‌ها و `type` فقط برای اشیا است"
+        },
+        {
+          "text": "`type` مثل `interface` قابل merge شدن با تعریف هم‌نام است"
+        },
+        {
+          "text": "`interface` قابل declaration merging است و با `extends` گسترش می‌یابد، ولی `type` می‌تواند union، tuple و نوع‌های primitive را هم نام‌گذاری کند",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "typescript-literal-widening",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "نوع `a` و `b` در کد زیر چیست؟",
+      "codeSnippet": "let a = 'hi';\nconst b = 'hi';",
+      "codeLanguage": "typescript",
+      "shortAnswer": "برای `let` نوع widen می‌شود چون مقدار بعداً می‌تواند تغییر کند؛ برای `const` مقدار ثابت است و literal type حفظ می‌شود.",
+      "explanation": "در شیء هم property های قابل تغییر widen می‌شوند: `const o = { mode: 'dark' }` نوع `mode` برابر `string` است نه `'dark'`. راه‌حل‌ها: `as const`، یا annotation صریح، یا `satisfies`.\n```ts\nconst o = { mode: 'dark' } as const; // { readonly mode: 'dark' }\n```\nاین مشکل موقع پاس دادن شیء به تابعی که union از literalها می‌خواهد خودش را نشان می‌دهد.",
+      "commonMistake": "تعجب از خطای «string is not assignable to 'dark' | 'light'» وقتی شیء را جدا تعریف کرده‌اند.",
+      "followUp": "`as const` روی یک آرایه چه نوعی می‌سازد؟",
+      "estimatedSeconds": 50,
+      "minVersion": "5.0",
+      "tags": [
+        "inference",
+        "literal-types",
+        "const"
+      ],
+      "choices": [
+        {
+          "text": "هر دو `string`"
+        },
+        {
+          "text": "هر دو `\"hi\"`"
+        },
+        {
+          "text": "`a` از نوع `\"hi\"` و `b` از نوع `string`"
+        },
+        {
+          "text": "`a` از نوع `string` و `b` از نوع `\"hi\"` (literal)",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "typescript-narrowing-typeof",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "در تابع زیر کدام خط خطای کامپایل می‌دهد؟",
+      "codeSnippet": "function fmt(value: string | number) {\n  value.toFixed(1);                 // 1\n  if (typeof value === 'string') {\n    return value.toUpperCase();     // 2\n  }\n  return value.toFixed(1);          // 3\n}",
+      "codeLanguage": "typescript",
+      "shortAnswer": "TypeScript با «control flow analysis» مسیر اجرا را دنبال می‌کند. داخل `if (typeof value === 'string')` نوع `string` است و چون آن شاخه `return` می‌کند، بعد از `if` نوع به `number` narrow شده باقی می‌ماند. ولی قبل از هر بررسی فقط اعضای مشترک union قابل دسترسی‌اند.",
+      "explanation": "روش‌های narrowing: `typeof`, `instanceof`, `in`, برابری (`===`), truthiness و type guardهای سفارشی. بعد از `return`/`throw` در یک شاخه، نوع در ادامه‌ی تابع حذف‌شده‌ی آن حالت است (به این «early return narrowing» می‌گویند و کد تمیزتری از `else` تو در تو می‌دهد).\n```ts\nfunction f(v: string | number) {\n  if (typeof v === 'string') return v.toUpperCase();\n  return v.toFixed(1); // اینجا v: number است\n}\n```",
+      "commonMistake": "فکر اینکه بعد از `if` نوع دوباره union کامل می‌شود و نوشتن `else` یا `as` لازم است.",
+      "followUp": "`in` operator چطور برای narrowing یک union از اشیا کمک می‌کند؟",
+      "estimatedSeconds": 55,
+      "minVersion": "5.0",
+      "tags": [
+        "narrowing",
+        "union-types",
+        "control-flow"
+      ],
+      "choices": [
+        {
+          "text": "فقط خط ۲ (`value.toUpperCase()` داخل `if`)"
+        },
+        {
+          "text": "فقط خط ۳ (`value.toFixed(1)` بعد از `if`) چون هنوز union است"
+        },
+        {
+          "text": "هیچ‌کدام خطا نمی‌دهند"
+        },
+        {
+          "text": "فقط خط ۱ (`value.toFixed(1)` قبل از `if`)، چون آنجا `value` هنوز `string | number` است",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "typescript-optional-vs-undefined",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "تفاوت `{ a?: string }` و `{ a: string | undefined }` چیست؟",
+      "shortAnswer": "Optional property یعنی «ممکن است وجود نداشته باشد»؛ ولی `string | undefined` یعنی «وجود دارد و ممکن است undefined باشد». با گزینه‌ی `exactOptionalPropertyTypes` این تفاوت حتی سخت‌گیرانه‌تر هم می‌شود.",
+      "explanation": "```ts\ntype A = { a?: string };\ntype B = { a: string | undefined };\nconst x: A = {};        // ✅\nconst y: B = {};        // ❌ property 'a' is missing\nconst z: B = { a: undefined }; // ✅\n```\nدر پارامتر تابع هم `f(x?: string)` با `f(x: string | undefined)` فرق دارد: اولی اجازه‌ی حذف آرگومان را می‌دهد.",
+      "commonMistake": "فرض اینکه `?` و `| undefined` یکسان‌اند و بعد گرفتن خطا هنگام نوشتن `{}`.",
+      "followUp": "`exactOptionalPropertyTypes` چه چیزی را تغییر می‌دهد؟",
+      "estimatedSeconds": 50,
+      "minVersion": "5.0",
+      "tags": [
+        "optional",
+        "undefined",
+        "types"
+      ],
+      "choices": [
+        {
+          "text": "دومی اجازه می‌دهد property حذف شود"
+        },
+        {
+          "text": "در اولی مقدار `null` هم مجاز است"
+        },
+        {
+          "text": "در اولی می‌شود property را کلاً ننوشت، در دومی property باید حتماً وجود داشته باشد (حتی با مقدار `undefined`)",
+          "isCorrect": true
+        },
+        {
+          "text": "هیچ تفاوتی ندارند"
+        }
+      ]
+    },
+    {
+      "id": "typescript-readonly-as-const",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "`readonly` و `as const` چه کاری می‌کنند و در چه لایه‌ای اثر دارند؟",
+      "shortAnswer": "TypeScript یک سیستم نوع زمان-کامپایل است. `readonly` و `as const` بعد از compile حذف می‌شوند و کد JS خروجی همان است.",
+      "explanation": "```ts\nconst roles = ['admin', 'user'] as const;    // readonly ['admin', 'user']\ntype Role = typeof roles[number];            // 'admin' | 'user'\n\ninterface Config { readonly url: string }\nconst c: Config = { url: 'x' };\n// c.url = 'y'; // ❌ فقط کامپایل‌تایم\n```\nاگر واقعاً می‌خواهی در runtime هم قفل باشد `Object.freeze` هم لازم است (سطحی). الگوی `as const` + `typeof arr[number]` جایگزین رایج `enum` است.",
+      "commonMistake": "تصور اینکه `readonly` در runtime جلوی تغییر را می‌گیرد.",
+      "followUp": "`Readonly<T>` عمیق است یا سطحی؟",
+      "estimatedSeconds": 55,
+      "minVersion": "5.0",
+      "tags": [
+        "readonly",
+        "as-const",
+        "immutability"
+      ],
+      "choices": [
+        {
+          "text": "هر دو فقط برای کلاس‌ها کار می‌کنند"
+        },
+        {
+          "text": "`as const` مقدار را به `const` جاوااسکریپت تبدیل می‌کند"
+        },
+        {
+          "text": "هر دو فقط در زمان کامپایل تغییر را ممنوع می‌کنند و در runtime هیچ محافظتی ایجاد نمی‌کنند؛ `as const` علاوه بر آن literal type را حفظ می‌کند",
+          "isCorrect": true
+        },
+        {
+          "text": "`readonly` مثل `Object.freeze` در runtime شیء را قفل می‌کند"
+        }
+      ]
+    },
+    {
+      "id": "typescript-enum-vs-union",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "چرا خیلی از تیم‌ها به‌جای `enum` از union of string literals استفاده می‌کنند؟",
+      "shortAnswer": "`enum` (غیر از `const enum`) یک شیء واقعی در runtime می‌سازد و syntax خاص TypeScript است که با ابزارهایی که فقط type را پاک می‌کنند (Node type stripping، Babel با تنظیمات خاص) سازگار نیست؛ گزینه‌ی `erasableSyntaxOnly` (از 5.8) آن را ممنوع می‌کند.",
+      "explanation": "```ts\ntype Status = 'idle' | 'loading' | 'error';   // بدون runtime\nconst Status = { Idle: 'idle', Loading: 'loading' } as const;\ntype StatusValue = typeof Status[keyof typeof Status];\n```\n`enum` هنوز در TypeScript وجود دارد و اشکالی ندارد؛ فقط باید آگاه باشی که numeric enumها reverse mapping دارند و قبلاً مقدار خارج از محدوده هم به آن assign می‌شد. انتخاب به رویه‌ی تیم و ابزار build بستگی دارد.",
+      "commonMistake": "ادعای اینکه `enum` منسوخ شده است؛ اینطور نیست.",
+      "followUp": "`const enum` چه مشکلی با `isolatedModules` دارد؟",
+      "estimatedSeconds": 55,
+      "minVersion": "5.8",
+      "tags": [
+        "enum",
+        "union-types",
+        "erasable-syntax"
+      ],
+      "choices": [
+        {
+          "text": "چون enum فقط مقدار عددی را پشتیبانی می‌کند"
+        },
+        {
+          "text": "چون union هیچ کد runtime تولید نمی‌کند، با JS ساده سازگار است و با حالت‌های «type stripping» و `erasableSyntaxOnly` مشکل ندارد",
+          "isCorrect": true
+        },
+        {
+          "text": "چون `enum` در TypeScript ۷ حذف شده است"
+        },
+        {
+          "text": "چون union سریع‌تر از enum کامپایل می‌شود ولی enum امن‌تر است"
+        }
+      ]
+    },
+    {
+      "id": "typescript-tuples",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "Tuple در TypeScript چیست؟",
+      "shortAnswer": "Tuple برای برگرداندن چند مقدار با نوع‌های متفاوت (مثل `useState` در React) و پارامترهای rest تایپ‌دار مناسب است. عناصرش می‌توانند برچسب‌دار و optional باشند.",
+      "explanation": "```ts\ntype Pair = [name: string, age: number];\nconst p: Pair = ['Sara', 30];\nconst [n, a] = p;                 // n: string, a: number\n\ntype Args = [id: number, ...tags: string[]];   // rest در tuple\n```\nتا وقتی `readonly` نباشد `push` روی tuple مجاز است و طول را از نظر runtime تغییر می‌دهد (TypeScript جلوی آن را نمی‌گیرد)، پس برای اطمینان `readonly [string, number]` بنویس.",
+      "commonMistake": "استفاده از tuple برای داده‌ی بزرگ‌تر از دو یا سه عضو؛ در آن حالت object خواناتر است.",
+      "followUp": "چرا `useState` یک tuple برمی‌گرداند و نه شیء؟",
+      "estimatedSeconds": 45,
+      "minVersion": "5.0",
+      "tags": [
+        "tuples",
+        "arrays",
+        "types"
+      ],
+      "choices": [
+        {
+          "text": "آرایه‌ای که فقط عدد نگه می‌دارد"
+        },
+        {
+          "text": "نوعی که فقط برای پارامترهای rest معتبر است"
+        },
+        {
+          "text": "شیئی با کلیدهای عددی که نمی‌شود تغییرش داد"
+        },
+        {
+          "text": "آرایه‌ای با طول ثابت (یا الگوی مشخص) که نوع هر موقعیت آن جدا تعریف شده است، مثل `[string, number]`",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "typescript-utility-types-basic",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "برای ساختن نوعی که همه‌ی propertyهای `User` را optional می‌کند و نوع دیگری که فقط `id` و `name` را نگه می‌دارد از چه utility typeهایی استفاده می‌کنی؟",
+      "shortAnswer": "`Partial<T>` همه را optional، `Required<T>` همه را اجباری، `Pick<T, K>` فقط کلیدهای انتخابی، `Omit<T, K>` همه به جز کلیدهای داده‌شده و `Record<K, V>` شیء با کلید K و مقدار V می‌سازد.",
+      "explanation": "```ts\ninterface User { id: number; name: string; email: string }\ntype UserPatch  = Partial<User>;\ntype UserPreview = Pick<User, 'id' | 'name'>;\ntype WithoutEmail = Omit<User, 'email'>;\ntype Roles = Record<'admin' | 'user', boolean>;\n```\n`Extract`/`Exclude` روی **union**ها کار می‌کنند نه روی کلیدهای شیء. یک نکته: `Omit` روی union ها distributive نیست و ممکن است نتیجه‌ی غیرمنتظره بدهد.",
+      "commonMistake": "استفاده‌ی اشتباه `Exclude/Extract` برای حذف کلید از شیء.",
+      "followUp": "`ReturnType<typeof fn>` و `Parameters<typeof fn>` چه می‌کنند؟",
+      "estimatedSeconds": 50,
+      "minVersion": "5.0",
+      "tags": [
+        "utility-types",
+        "partial",
+        "pick-omit"
+      ],
+      "choices": [
+        {
+          "text": "`Partial<User>` و `Pick<User, 'id' | 'name'>`",
+          "isCorrect": true
+        },
+        {
+          "text": "`Readonly<User>` و `Record<User, 'id'>`"
+        },
+        {
+          "text": "`Extract<User, 'id'>` و `Exclude<User, 'name'>`"
+        },
+        {
+          "text": "`Required<User>` و `Omit<User, 'id' | 'name'>`"
+        }
+      ]
+    },
+    {
+      "id": "typescript-type-assertion",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "عبارت `const el = document.getElementById('x') as HTMLInputElement` چه ریسکی دارد؟",
+      "shortAnswer": "`as` فقط به کامپایلر می‌گوید «به من اعتماد کن». هیچ کدی تولید نمی‌کند و مسئولیت درستی نوع با توست.",
+      "explanation": "راه امن‌تر: بررسی واقعی.\n```ts\nconst el = document.getElementById('x');\nif (el instanceof HTMLInputElement) {\n  el.value = 'hi';                // narrowed\n}\n```\n`as unknown as T` نشانه‌ی خطر است. اگر مجبور به assertion بودی، بهتر است در یک تابع کوچک با نام مشخص جمعش کنی. `satisfies` جایگزین خوبی است وقتی می‌خواهی نوع را بررسی کنی بدون اینکه آن را عوض کنی.",
+      "commonMistake": "پر کردن پروژه با `as` برای ساکت کردن خطاها.",
+      "followUp": "`as` با annotation (`const x: T = ...`) چه فرقی دارد؟",
+      "estimatedSeconds": 55,
+      "minVersion": "5.0",
+      "tags": [
+        "type-assertion",
+        "type-safety",
+        "dom"
+      ],
+      "choices": [
+        {
+          "text": "کد بعد از compile به `instanceof` تبدیل می‌شود"
+        },
+        {
+          "text": "هیچ ریسکی ندارد چون `getElementById` همیشه المان برمی‌گرداند"
+        },
+        {
+          "text": "هیچ چک runtime انجام نمی‌شود؛ اگر المان وجود نداشته باشد یا از نوع دیگری باشد، خطا بعداً هنگام اجرا رخ می‌دهد",
+          "isCorrect": true
+        },
+        {
+          "text": "TypeScript در runtime نوع را بررسی و در صورت نادرستی throw می‌کند"
+        }
+      ]
+    },
+    {
+      "id": "typescript-function-param-types",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "کدام امضا اجازه می‌دهد تابع `greet` را هم با `greet('Ali')` و هم با `greet()` صدا بزنیم؟",
+      "shortAnswer": "پارامتر optional با `?` و پارامتر با مقدار پیش‌فرض هر دو حذف‌شدنی‌اند. پارامترهای optional باید بعد از پارامترهای اجباری بیایند.",
+      "explanation": "```ts\nfunction greet(name = 'friend'): string {   // نوع از default استنباط می‌شود\n  return `Hi ${name}`;\n}\n```\nبا default، نوع پارامتر داخل تابع `string` است (نه `string | undefined`) و بیرون از تابع optional دیده می‌شود. نوع بازگشتی را برای توابع export‌شده معمولاً صریح بنویس تا API پایدار باشد و خطاها زودتر پیدا شوند. `...rest` باید آرایه/tuple باشد.",
+      "commonMistake": "گذاشتن پارامتر optional قبل از پارامتر اجباری.",
+      "followUp": "تفاوت `void` و `undefined` به‌عنوان نوع بازگشتی چیست؟",
+      "estimatedSeconds": 45,
+      "minVersion": "5.0",
+      "tags": [
+        "functions",
+        "optional-parameters",
+        "types"
+      ],
+      "choices": [
+        {
+          "text": "`function greet(...name: string)`"
+        },
+        {
+          "text": "`function greet(name: string | void[])`"
+        },
+        {
+          "text": "`function greet(name: string)`"
+        },
+        {
+          "text": "`function greet(name?: string)` یا `function greet(name: string = 'friend')`",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "typescript-structural-typing",
+      "level": "Junior",
+      "type": "Conceptual",
+      "text": "Structural typing یعنی چه و چه تفاوتی با nominal typing دارد؟",
+      "shortAnswer": "در TypeScript سازگاری نوع‌ها بر اساس «شکل» است، نه نام. اگر یک مقدار همه‌ی propertyهای لازم را با نوع درست داشته باشد، به آن نوع assignable است، حتی اگر صریحاً `implements` نکرده باشد. در nominal typing (مثل C# و Java) نام نوع/رابطه‌ی ارث‌بری اعلام‌شده تعیین‌کننده است.",
+      "explanation": "```ts\ninterface Point { x: number; y: number }\nclass P2 { constructor(public x: number, public y: number) {} }\n\nconst p: Point = new P2(1, 2);   // ✅ شکل یکی است\n```\nپیامد: دو نوع با نام متفاوت ولی یک شکل قابل جایگزینی‌اند (`UserId` و `OrderId` هر دو `string`). اگر تفکیک لازم است از **branded types** استفاده می‌شود. تنها استثنا: کلاس‌هایی که property `private/protected` دارند رفتار تقریباً nominal پیدا می‌کنند. همچنین excess property check فقط روی object literal تازه اعمال می‌شود.",
+      "commonMistake": "فرض اینکه اگر کلاسی `implements` نکرده، نمی‌شود به‌جای interface به کار برد.",
+      "followUp": "چطور جلوی اشتباه دادن `UserId` به‌جای `OrderId` را می‌گیری؟",
+      "estimatedSeconds": 120,
+      "minVersion": "5.0",
+      "tags": [
+        "structural-typing",
+        "type-system",
+        "fundamentals"
+      ]
+    },
+    {
+      "id": "typescript-generics-basic",
+      "level": "Junior",
+      "type": "ShortAnswer",
+      "text": "Generic چیست و چرا از `any` بهتر است؟ یک مثال بزن.",
+      "shortAnswer": "Generic یعنی نوع را به‌عنوان پارامتر بگیریم تا تابع/کلاس با نوع‌های مختلف کار کند ولی رابطه‌ی بین ورودی و خروجی حفظ شود. `any` این رابطه را از بین می‌برد و خروجی هم `any` می‌شود.",
+      "explanation": "```ts\nfunction first<T>(items: T[]): T | undefined {\n  return items[0];\n}\nconst n = first([1, 2, 3]);      // number | undefined\nconst s = first(['a', 'b']);     // string | undefined\n```\nبا `any` هر دو `any` می‌شدند و کامپایلر نمی‌توانست خطاهای بعدی را بگیرد. معمولاً `T` از آرگومان **استنباط** می‌شود و لازم نیست صریح بنویسی. با `extends` می‌توان محدودیت گذاشت: `<T extends { id: number }>`. نام‌های معنادار (`TItem`, `TKey`) در generics پیچیده خوانایی را بالا می‌برند.",
+      "commonMistake": "نوشتن `<T>` بدون این‌که واقعاً از رابطه بین ورودی و خروجی استفاده شود؛ اگر `T` فقط یک‌بار ظاهر می‌شود احتمالاً generic لازم نیست.",
+      "followUp": "چرا `function f<T>(x: T): void` معمولاً generic بی‌فایده‌ای است؟",
+      "estimatedSeconds": 100,
+      "minVersion": "5.0",
+      "tags": [
+        "generics",
+        "functions",
+        "types"
+      ]
+    },
+    {
+      "id": "typescript-strict-default-ts6",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "در TypeScript 6.0 و 7.0 مقدار پیش‌فرض گزینه‌ی `strict` چیست؟",
+      "shortAnswer": "از TypeScript 6.0 پیش‌فرض‌ها مدرن‌تر شدند: `strict` به‌صورت پیش‌فرض `true` است (و پیش‌فرض‌های دیگری مثل `module: esnext` و target جدید ES هم به‌روز شدند). می‌توانی همچنان با `\"strict\": false` آن را خاموش کنی.",
+      "explanation": "`strict` یک «چتر» است که شامل `noImplicitAny`, `strictNullChecks`, `strictFunctionTypes`, `strictBindCallApply`, `strictPropertyInitialization`, `noImplicitThis`, `useUnknownInCatchVariables` و `alwaysStrict` می‌شود. برای مهاجرت پروژه‌ی قدیمی بهتر است بدون خاموش کردن کل `strict`، گزینه‌ها را یکی‌یکی روشن کنی. گزینه‌های مهم دیگر که داخل `strict` نیستند: `noUncheckedIndexedAccess` و `exactOptionalPropertyTypes`.",
+      "commonMistake": "فرض اینکه `strict` شامل `noUncheckedIndexedAccess` هم هست؛ نیست.",
+      "followUp": "`strictNullChecks` دقیقاً چه چیزی را عوض می‌کند؟",
+      "estimatedSeconds": 45,
+      "minVersion": "6.0",
+      "tags": [
+        "tsconfig",
+        "strict",
+        "typescript-6"
+      ],
+      "choices": [
+        {
+          "text": "`false` مثل قبل و باید دستی روشن شود"
+        },
+        {
+          "text": "فقط در پروژه‌های React پیش‌فرض `true` است"
+        },
+        {
+          "text": "`true`، یعنی پروژه‌ی جدید بدون تنظیم اضافه هم strict است",
+          "isCorrect": true
+        },
+        {
+          "text": "`strict` حذف شده و همیشه فعال است و قابل خاموش شدن نیست"
+        }
+      ]
+    },
+    {
+      "id": "typescript-types-erased",
+      "level": "Junior",
+      "type": "Conceptual",
+      "text": "چرا TypeScript جلوی خطاهای runtime را نمی‌گیرد و «type erasure» یعنی چه؟",
+      "shortAnswer": "TypeScript فقط در زمان کامپایل نوع را چک می‌کند و بعد آنها را پاک می‌کند؛ خروجی JavaScript معمولی است. پس داده‌ای که از بیرون می‌آید (API، فرم، JSON، `localStorage`) هیچ تضمین runtime ندارد مگر اینکه اعتبارسنجی کنی.",
+      "explanation": "```ts\nconst user = (await res.json()) as User;   // ❌ فقط ادعا است\n```\nاگر سرور `age` را string بفرستد کامپایلر خبر نمی‌دهد. راه‌حل: اعتبارسنجی در مرز سیستم با کتابخانه‌هایی مثل Zod/Valibot/ArkType که هم runtime schema و هم نوع استاتیک (`z.infer`) می‌سازند. همچنین چون نوع‌ها پاک می‌شوند، `instanceof SomeInterface` معنی ندارد و برای تشخیص باید از type guard مبتنی بر مقدار (مثل `'kind' in x`) استفاده کرد.",
+      "commonMistake": "اعتماد کامل به نوع‌های TypeScript برای داده‌ی ورودی از شبکه.",
+      "followUp": "چطور نوع استاتیک و validator را همگام نگه می‌داری تا دو تعریف جدا ننویسی؟",
+      "estimatedSeconds": 100,
+      "minVersion": "5.0",
+      "tags": [
+        "type-erasure",
+        "runtime",
+        "validation"
+      ]
+    },
+    {
+      "id": "typescript-non-null-assertion",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "عملگر `!` در `user!.name` چه می‌کند؟",
+      "shortAnswer": "Non-null assertion فقط `null` و `undefined` را از نوع حذف می‌کند. اگر مقدار در واقع `null` باشد همان `TypeError` معمول JavaScript رخ می‌دهد.",
+      "explanation": "جایگزین‌های امن‌تر: optional chaining (`user?.name`)، بررسی صریح `if (!user) return`، یا مقدار پیش‌فرض با `??`. استفاده‌ی موجه: وقتی مطمئنی (مثلاً بعد از `map.has(key)` که `map.get(key)!`) و نمی‌خواهی کد اضافه بنویسی؛ ولی اگر زیاد می‌بینی، طراحی نوع مشکل دارد. ESLint قانون `no-non-null-assertion` دارد.",
+      "commonMistake": "استفاده‌ی گسترده از `!` به‌جای مدل کردن حالت‌های واقعی داده.",
+      "followUp": "definite assignment assertion (`name!: string`) با non-null assertion چه فرقی دارد؟",
+      "estimatedSeconds": 45,
+      "minVersion": "5.0",
+      "tags": [
+        "null-safety",
+        "strict-null-checks",
+        "operators"
+      ],
+      "choices": [
+        {
+          "text": "اگر `null` بود به‌صورت خودکار مقدار پیش‌فرض می‌گذارد"
+        },
+        {
+          "text": "به کامپایلر می‌گوید مقدار `null`/`undefined` نیست؛ چک runtime اضافه نمی‌کند و اگر اشتباه باشد در اجرا خطا می‌گیری",
+          "isCorrect": true
+        },
+        {
+          "text": "مقدار را در runtime به `false` منفی می‌کند"
+        },
+        {
+          "text": "نتیجه را به `boolean` تبدیل می‌کند"
+        }
+      ]
+    },
+    {
+      "id": "typescript-discriminated-union",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "در `switch` زیر اگر یک عضو جدید به `Shape` اضافه شود چه اتفاقی می‌افتد؟",
+      "codeSnippet": "type Shape =\n  | { kind: 'circle'; r: number }\n  | { kind: 'square'; side: number };\n\nfunction area(s: Shape): number {\n  switch (s.kind) {\n    case 'circle': return Math.PI * s.r ** 2;\n    case 'square': return s.side ** 2;\n    default: return assertNever(s);\n  }\n}",
+      "codeLanguage": "typescript",
+      "shortAnswer": "Discriminated union یک property مشترک literal (مثل `kind`) دارد که TypeScript با آن narrow می‌کند. الگوی exhaustive check با `never` تضمین می‌کند همه‌ی حالت‌ها پوشش داده شده‌اند.",
+      "explanation": "```ts\nfunction assertNever(x: never): never {\n  throw new Error(`Unexpected: ${JSON.stringify(x)}`);\n}\n```\nاین الگو برای state machineها، ریداکس (action type)، نتیجه‌ی API (`{ ok: true, data } | { ok: false, error }`) بسیار مفید است. جایگزین جدیدتر برای `default`: `default: { const _: never = s; return _; }`.",
+      "commonMistake": "نوشتن `default: return ...` که خطای حالت جدید را ساکت می‌کند.",
+      "followUp": "چرا `kind` باید literal type باشد نه `string`؟",
+      "estimatedSeconds": 70,
+      "minVersion": "5.0",
+      "tags": [
+        "discriminated-union",
+        "exhaustive-check",
+        "never"
+      ],
+      "choices": [
+        {
+          "text": "خطای کامپایل روی تعریف `Shape` رخ می‌دهد"
+        },
+        {
+          "text": "خط `assertNever(s)` خطای کامپایل می‌دهد چون `s` دیگر `never` نیست و این یعنی case جدید هندل نشده است",
+          "isCorrect": true
+        },
+        {
+          "text": "هیچ اتفاقی نمی‌افتد و در runtime `undefined` برمی‌گردد"
+        },
+        {
+          "text": "کد به‌صورت خودکار یک case پیش‌فرض می‌سازد"
+        }
+      ]
+    },
+    {
+      "id": "typescript-custom-type-guard",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "در `function isUser(x: unknown): x is User` عبارت `x is User` چه نقشی دارد؟",
+      "shortAnswer": "Type predicate فقط قرارداد بین تو و کامپایلر است؛ درستی بدنه‌ی تابع مسئولیت خودت است. اگر بدنه غلط باشد، کامپایلر گول می‌خورد.",
+      "explanation": "```ts\nfunction isUser(x: unknown): x is User {\n  return typeof x === 'object' && x !== null && 'id' in x && typeof (x as any).id === 'number';\n}\nif (isUser(data)) data.id; // User\n```\n`asserts x is User` نسخه‌ی assertion است که در صورت شکست throw می‌کند و بعد از فراخوانی narrowing برقرار می‌ماند. در بسیاری موارد بهتر است به‌جای نوشتن دستی از schema validator استفاده شود.",
+      "commonMistake": "نوشتن guardی که همیشه `true` برمی‌گرداند و بی‌خبری از اینکه کامپایلر آن را باور می‌کند.",
+      "followUp": "از TypeScript 5.5 چه guardهایی را خودکار infer می‌کند؟",
+      "estimatedSeconds": 60,
+      "minVersion": "5.0",
+      "tags": [
+        "type-guards",
+        "narrowing",
+        "predicates"
+      ],
+      "choices": [
+        {
+          "text": "در runtime نوع `x` را خودکار بررسی می‌کند"
+        },
+        {
+          "text": "نوع بازگشتی تابع را `User` می‌کند"
+        },
+        {
+          "text": "یک type predicate است: وقتی تابع `true` برگرداند، TypeScript نوع `x` را در شاخه‌ی مربوطه به `User` narrow می‌کند",
+          "isCorrect": true
+        },
+        {
+          "text": "باعث می‌شود تابع فقط با ورودی `User` قابل فراخوانی باشد"
+        }
+      ]
+    },
+    {
+      "id": "typescript-keyof-indexed-access",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "اگر `const cfg = { host: 'a', port: 80 }` باشد، `keyof typeof cfg` و `(typeof cfg)['port']` چه هستند؟",
+      "shortAnswer": "`typeof` مقدار را به نوع تبدیل می‌کند، `keyof` اتحاد کلیدها را می‌دهد و `T[K]` (indexed access) نوع مقدار آن کلید را.",
+      "explanation": "ترکیب کاربردی برای تابع type-safe:\n```ts\nfunction get<T, K extends keyof T>(obj: T, key: K): T[K] {\n  return obj[key];\n}\nget(cfg, 'port');   // number\n// get(cfg, 'nope'); // ❌ خطا\n```\nبا `T[number]` نوع عنصر یک آرایه یا tuple را می‌گیری: `type Item = (typeof list)[number]`.",
+      "commonMistake": "نوشتن `key: string` و از دست دادن ارتباط نوع مقدار با کلید.",
+      "followUp": "چرا `K extends keyof T` بهتر از `key: string` است؟",
+      "estimatedSeconds": 60,
+      "minVersion": "5.0",
+      "tags": [
+        "keyof",
+        "typeof",
+        "indexed-access"
+      ],
+      "choices": [
+        {
+          "text": "`typeof cfg` و `never`"
+        },
+        {
+          "text": "`'a' | 80` و `string`"
+        },
+        {
+          "text": "`'host' | 'port'` و `number`",
+          "isCorrect": true
+        },
+        {
+          "text": "`string` و `80`"
+        }
+      ]
+    },
+    {
+      "id": "typescript-mapped-types",
+      "level": "Mid",
+      "type": "CodeOutput",
+      "text": "خروجی `Getters<{ a: number; b: string }>` با تعریف زیر چیست؟",
+      "codeSnippet": "type Getters<T> = {\n  [K in keyof T as `get${Capitalize<string & K>}`]: () => T[K];\n};\ntype G = Getters<{ a: number; b: string }>;",
+      "codeLanguage": "typescript",
+      "shortAnswer": "Mapped type روی کلیدها پیمایش می‌کند و با `as` (key remapping) می‌توان نام کلید را تغییر داد. `Capitalize` یک intrinsic string type است.",
+      "explanation": "تعریف:\n```ts\ntype Getters<T> = {\n  [K in keyof T as `get${Capitalize<string & K>}`]: () => T[K];\n};\n```\nModifierها را می‌توان اضافه/حذف کرد: `-readonly`، `-?` (مثل `Required`)، `+?`. فیلتر کلیدها با `as` و `never`: `as K extends 'id' ? never : K` (شبیه `Omit`).",
+      "commonMistake": "فراموش کردن `string & K` و گرفتن خطا برای کلیدهای symbol/number در `Capitalize`.",
+      "followUp": "چطور `Omit` را خودت با mapped type پیاده‌سازی می‌کنی؟",
+      "estimatedSeconds": 80,
+      "minVersion": "5.0",
+      "tags": [
+        "mapped-types",
+        "template-literal-types",
+        "advanced-types"
+      ],
+      "choices": [
+        {
+          "text": "`{ a: () => number; b: () => string }`"
+        },
+        {
+          "text": "`{ GetA: number; GetB: string }`"
+        },
+        {
+          "text": "`string`"
+        },
+        {
+          "text": "`{ getA: () => number; getB: () => string }`",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "typescript-conditional-infer",
+      "level": "Mid",
+      "type": "CodeOutput",
+      "text": "نتیجه‌ی `Unwrap<Promise<string[]>>` و `Unwrap<number>` چیست؟",
+      "codeSnippet": "type Unwrap<T> = T extends Promise<infer U> ? U : T;\ntype A = Unwrap<Promise<string[]>>;\ntype B = Unwrap<number>;",
+      "codeLanguage": "typescript",
+      "shortAnswer": "در conditional type کلیدواژه‌ی `infer` یک نوع را از ساختار «کشف» و نام‌گذاری می‌کند. اگر شرط برقرار نبود شاخه‌ی else اعمال می‌شود.",
+      "explanation": "```ts\ntype Unwrap<T> = T extends Promise<infer U> ? U : T;\n```\nهمین مکانیزم پایه‌ی `ReturnType`, `Parameters`, `Awaited` است. `Awaited<T>` نسخه‌ی رسمی و بازگشتی برای unwrap کردن promise تو در تو است. نکته: conditional typeها روی union **distributive** هستند مگر با `[T]` پوشانده شوند.",
+      "commonMistake": "نوشتن دستی `Unwrap` به‌جای استفاده از `Awaited` رسمی.",
+      "followUp": "چطور `ReturnType` را با `infer` می‌نویسی؟",
+      "estimatedSeconds": 80,
+      "minVersion": "5.0",
+      "tags": [
+        "conditional-types",
+        "infer",
+        "advanced-types"
+      ],
+      "choices": [
+        {
+          "text": "`string` و `never`"
+        },
+        {
+          "text": "`string[]` و `number`",
+          "isCorrect": true
+        },
+        {
+          "text": "`unknown` و `unknown`"
+        },
+        {
+          "text": "`Promise<string[]>` و `number`"
+        }
+      ]
+    },
+    {
+      "id": "typescript-satisfies-operator",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "`satisfies` نسبت به annotation (`const x: T = ...`) چه مزیتی دارد؟",
+      "shortAnswer": "با annotation نوع مقدار به همان نوع widen می‌شود و اطلاعات دقیق از دست می‌رود؛ با `satisfies` هم خطاهای غلط‌نویسی گرفته می‌شود و هم نوع دقیق می‌ماند (از TypeScript 4.9).",
+      "explanation": "```ts\ntype Colors = Record<string, string | number[]>;\n\nconst palette = {\n  red: [255, 0, 0],\n  green: '#0f0',\n} satisfies Colors;\n\npalette.red.map(n => n / 2);   // ✅ هنوز number[] است\npalette.green.toUpperCase();   // ✅ هنوز string است\n// با annotation هر دو string | number[] می‌شدند و باید narrow می‌کردی\n```\nترکیب `as const satisfies T` برای پیکربندی‌های ثابت که هم بررسی شوند و هم literal بمانند بسیار مفید است.",
+      "commonMistake": "استفاده از `as` برای همین کار و از دست دادن بررسی خطا.",
+      "followUp": "`satisfies` را با `as const` چطور ترکیب می‌کنی؟",
+      "estimatedSeconds": 60,
+      "minVersion": "4.9",
+      "tags": [
+        "satisfies",
+        "inference",
+        "type-safety"
+      ],
+      "choices": [
+        {
+          "text": "مقدار را با نوع چک می‌کند ولی نوع دقیق‌تر (literal و کلیدهای واقعی) استنباط‌شده را حفظ می‌کند",
+          "isCorrect": true
+        },
+        {
+          "text": "فقط برای کلاس‌ها کار می‌کند"
+        },
+        {
+          "text": "دقیقاً مثل `as` است و فرقی ندارد"
+        },
+        {
+          "text": "نوع مقدار را در runtime بررسی می‌کند"
+        }
+      ]
+    },
+    {
+      "id": "typescript-template-literal-types",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "`type Ev = `${'click' | 'hover'}:${'on' | 'off'}`` چند عضو دارد؟",
+      "shortAnswer": "Template literal types حاصل‌ضرب دکارتی unionها را می‌سازند. برای ساختن نام رویداد، مسیر route، کلیدهای CSS و … کاربرد دارند.",
+      "explanation": "ترکیب با `infer` برای parse کردن رشته در سطح نوع:\n```ts\ntype Params<S> = S extends `${string}:${infer P}/${infer R}` ? P | Params<R>\n               : S extends `${string}:${infer P}` ? P : never;\ntype X = Params<'/users/:id/posts/:postId'>; // 'id' | 'postId'\n```\nهشدار: unionهای بزرگ در ضرب دکارتی می‌توانند سریع منفجر شوند (سقف حدود 100 هزار عضو) و کامپایل را کند کنند.",
+      "commonMistake": "ساختن template literalهای بزرگ که کامپایلر را کند می‌کنند.",
+      "followUp": "چطور `Uppercase`, `Lowercase`, `Capitalize` در این نوع‌ها استفاده می‌شوند؟",
+      "estimatedSeconds": 55,
+      "minVersion": "5.0",
+      "tags": [
+        "template-literal-types",
+        "string-types",
+        "advanced-types"
+      ],
+      "choices": [
+        {
+          "text": "دو عضو"
+        },
+        {
+          "text": "دقیقاً `string`"
+        },
+        {
+          "text": "چهار عضو: `'click:on' | 'click:off' | 'hover:on' | 'hover:off'`",
+          "isCorrect": true
+        },
+        {
+          "text": "یک عضو ترکیبی `'click|hover:on|off'`"
+        }
+      ]
+    },
+    {
+      "id": "typescript-no-unchecked-indexed-access",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "با `noUncheckedIndexedAccess` روشن، نوع `arr[0]` برای `arr: string[]` چیست؟",
+      "shortAnswer": "بدون این گزینه TypeScript فرض می‌کند هر اندیس معتبر است. با آن، دسترسی با اندیس/کلید پویا به `T | undefined` تبدیل می‌شود تا وادار به بررسی شوی.",
+      "explanation": "```ts\nconst arr: string[] = [];\nconst first = arr[0];        // string | undefined\nif (first !== undefined) first.toUpperCase();\n\nconst scores: Record<string, number> = {};\nscores['ali'];               // number | undefined\n```\nاین گزینه داخل `strict` نیست ولی برای پروژه‌های جدی توصیه می‌شود، چون خطای رایج «خواندن از اندیس خارج از محدوده» را می‌گیرد. تعداد `!` یا چک‌های اضافه در حلقه‌ها ممکن است زیاد شود؛ برای آن از `for...of` و `entries()` استفاده کن.",
+      "commonMistake": "روشن کردن گزینه و بعد پوشاندن همه‌ی خطاها با `!`.",
+      "followUp": "چرا `Record<string, T>` بدون این گزینه گمراه‌کننده است؟",
+      "estimatedSeconds": 55,
+      "minVersion": "4.1",
+      "tags": [
+        "tsconfig",
+        "arrays",
+        "type-safety"
+      ],
+      "choices": [
+        {
+          "text": "`string`"
+        },
+        {
+          "text": "`string | undefined`",
+          "isCorrect": true
+        },
+        {
+          "text": "`string | null`"
+        },
+        {
+          "text": "`never`"
+        }
+      ]
+    },
+    {
+      "id": "typescript-function-overloads",
+      "level": "Mid",
+      "type": "ShortAnswer",
+      "text": "Function overload در TypeScript چیست و چه زمانی به‌جای union یا generic از آن استفاده می‌کنی؟",
+      "shortAnswer": "چند «امضای» مختلف برای یک تابع که هرکدام رابطه‌ی متفاوتی بین ورودی و خروجی را بیان می‌کنند، به‌همراه یک پیاده‌سازی که همه را پوشش می‌دهد. وقتی نوع خروجی به نوع/تعداد ورودی بستگی دارد و union خروجی مبهم می‌شود.",
+      "explanation": "```ts\nfunction parse(input: string): number;\nfunction parse(input: string[]): number[];\nfunction parse(input: string | string[]) {\n  return Array.isArray(input) ? input.map(Number) : Number(input);\n}\n```\nامضای پیاده‌سازی از بیرون دیده نمی‌شود. ترتیب مهم است (اولین امضای مطابق انتخاب می‌شود). اگر فقط یک نوع ورودی-خروجی generic دارد یا conditional type کافی است، از overload پرهیز کن؛ overloadها را باید تست و مستند کرد.",
+      "commonMistake": "نوشتن overload برای حالت‌هایی که union ساده کافی است.",
+      "followUp": "چرا امضای پیاده‌سازی در overload از بیرون قابل مشاهده نیست؟",
+      "estimatedSeconds": 100,
+      "minVersion": "5.0",
+      "tags": [
+        "overloads",
+        "functions",
+        "advanced-types"
+      ]
+    },
+    {
+      "id": "typescript-catch-unknown",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "در پروژه‌ای با `strict`، نوع `e` در `catch (e)` چیست و چطور از آن استفاده می‌کنی؟",
+      "shortAnswer": "گزینه‌ی `useUnknownInCatchVariables` (بخشی از `strict` از TS 4.4) `e` را `unknown` می‌کند، چون در JS می‌شود هر مقداری را `throw` کرد.",
+      "explanation": "```ts\ntry { await save(); }\ncatch (e) {\n  const msg = e instanceof Error ? e.message : String(e);\n  logger.error(msg);\n}\n```\nبرای خطاهای سفارشی از کلاس‌هایی که `Error` را extend می‌کنند استفاده کن تا `instanceof` کار کند. برای پروژه‌ی ES5 قدیمی با target پایین `instanceof` روی خطاهای سفارشی مشکل داشت (نیاز به `Object.setPrototypeOf`)؛ با target مدرن این مشکل وجود ندارد.",
+      "commonMistake": "نوشتن `catch (e: any)` تا خطا ساکت شود.",
+      "followUp": "چطور یک `Result<T, E>` بسازی تا throw کم شود؟",
+      "estimatedSeconds": 55,
+      "minVersion": "4.4",
+      "tags": [
+        "error-handling",
+        "unknown",
+        "strict"
+      ],
+      "choices": [
+        {
+          "text": "`Error` همیشه"
+        },
+        {
+          "text": "`unknown`؛ قبل از استفاده با `instanceof Error` یا type guard آن را narrow می‌کنی",
+          "isCorrect": true
+        },
+        {
+          "text": "`any`، پس می‌شود مستقیم `e.message` نوشت"
+        },
+        {
+          "text": "`never`"
+        }
+      ]
+    },
+    {
+      "id": "typescript-generic-constraints",
+      "level": "Mid",
+      "type": "CodeOutput",
+      "text": "کدام صدا زدن `merge` خطای کامپایل می‌دهد؟",
+      "codeSnippet": "function merge<T extends object, U extends object>(a: T, b: U): T & U {\n  return { ...a, ...b };\n}",
+      "codeLanguage": "typescript",
+      "shortAnswer": "`T extends object` محدودیتی روی آرگومان نوع می‌گذارد. آرگومان باید subtype از `object` باشد؛ primitiveها مثل `number` نیستند.",
+      "explanation": "نتیجه‌ی `merge({ a: 1 }, { b: 2 })` نوع `{ a: number } & { b: number }` است. برای دسترسی به property لازم است در constraint آن را بیاوری: `<T extends { id: string }>`. قاعده: constraint را حداقل لازم بنویس تا تابع تا حد امکان قابل استفاده مجدد بماند. مقدار پیش‌فرض generic هم ممکن است: `<T = string>`.",
+      "commonMistake": "گذاشتن `T extends any` یا `T extends {}` و انتظار دسترسی به propertyهای خاص.",
+      "followUp": "تفاوت `T extends object` و `T extends {}` چیست؟",
+      "estimatedSeconds": 55,
+      "minVersion": "5.0",
+      "tags": [
+        "generics",
+        "constraints",
+        "advanced-types"
+      ],
+      "choices": [
+        {
+          "text": "`merge(1, 2)` چون `number` به شیء محدود نمی‌شود",
+          "isCorrect": true
+        },
+        {
+          "text": "`merge({ a: 1 }, { b: 2 })`"
+        },
+        {
+          "text": "هیچ‌کدام خطا نمی‌دهند"
+        },
+        {
+          "text": "`merge({}, {})`"
+        }
+      ]
+    },
+    {
+      "id": "typescript-declaration-merging",
+      "level": "Mid",
+      "type": "Conceptual",
+      "text": "Declaration merging و module augmentation چیست و کجا به کار می‌آید؟",
+      "shortAnswer": "وقتی چند تعریف هم‌نام در یک scope باشند (interface، namespace، enum، class+interface)، TypeScript آنها را در یک تعریف واحد ادغام می‌کند. «module augmentation» یعنی افزودن به نوع‌های یک کتابخانه‌ی بیرونی از طریق `declare module`.",
+      "explanation": "نمونه‌ی رایج: اضافه کردن `user` به Request در Express:\n```ts\n// types/express.d.ts\nimport 'express';\ndeclare module 'express-serve-static-core' {\n  interface Request { user?: { id: string } }\n}\n```\nیا افزودن property به `Window`:\n```ts\ndeclare global { interface Window { analytics: Analytics } }\n```\nفقط `interface` قابل merge است نه `type`. فایل باید module باشد (حداقل یک import/export) و در `include` تنظیم `tsconfig` قرار بگیرد، وگرنه augmentation اعمال نمی‌شود.",
+      "commonMistake": "نوشتن `augmentation` در فایل بدون import/export که به‌جای augment، نوع جدید global می‌سازد.",
+      "followUp": "چرا declaration merging با `type` ممکن نیست؟",
+      "estimatedSeconds": 120,
+      "minVersion": "5.0",
+      "tags": [
+        "declaration-merging",
+        "modules",
+        "d-ts"
+      ]
+    },
+    {
+      "id": "typescript-import-type-verbatim",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "گزینه‌ی `verbatimModuleSyntax` چه می‌کند؟",
+      "shortAnswer": "این گزینه رفتار «حذف importهای بلااستفاده» را قابل پیش‌بینی می‌کند: `import type { X }` کاملاً پاک می‌شود ولی `import { X }` همیشه باقی می‌ماند (مهم برای side-effect و bundlerها).",
+      "explanation": "```ts\nimport type { User } from './types';       // پاک می‌شود\nimport { type User, load } from './api';   // فقط `load` می‌ماند\n```\nجایگزین `importsNotUsedAsValues` و `preserveValueImports` (قدیمی) است. با ابزارهای per-file مثل esbuild/Vite/SWC و Node type stripping ضروری است چون آن‌ها نمی‌دانند `X` نوع است یا مقدار.",
+      "commonMistake": "فراموش کردن `type` در import نوع‌ها و گرفتن خطا در bundler یا runtime.",
+      "followUp": "چرا `isolatedModules` و `verbatimModuleSyntax` معمولاً با هم روشن می‌شوند؟",
+      "estimatedSeconds": 55,
+      "minVersion": "5.0",
+      "tags": [
+        "modules",
+        "tsconfig",
+        "import-type"
+      ],
+      "choices": [
+        {
+          "text": "همه‌ی importها را به‌صورت خودکار حذف می‌کند"
+        },
+        {
+          "text": "فقط برای فایل‌های `.d.ts` استفاده می‌شود"
+        },
+        {
+          "text": "importها و exportهای type-only باید صریحاً با `type` نوشته شوند و هر import بدون `type` عیناً در خروجی می‌ماند",
+          "isCorrect": true
+        },
+        {
+          "text": "ماژول‌های CommonJS را به ESM تبدیل می‌کند"
+        }
+      ]
+    },
+    {
+      "id": "typescript-array-covariance-unsound",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "کد زیر کامپایل می‌شود ولی در runtime مشکل ایجاد می‌کند. چرا؟",
+      "codeSnippet": "class Animal { name = ''; }\nclass Dog extends Animal { bark() {} }\nclass Cat extends Animal { meow() {} }\n\nconst dogs: Dog[] = [new Dog()];\nconst animals: Animal[] = dogs;   // ok\nanimals.push(new Cat());          // ok\ndogs[1].bark();                   // ?",
+      "codeLanguage": "typescript",
+      "shortAnswer": "این یکی از نقاط عمدی «ناسالمی» (unsoundness) در TypeScript است. برای سادگی، آرایه‌ها covariant در نظر گرفته می‌شوند.",
+      "explanation": "راه‌های ایمن: `ReadonlyArray<Animal>`/`readonly Animal[]` (covariance امن چون نوشتن ندارد)، یا generic با محدودیت. مثال مشابه: پارامترهای متدها (نه function property) با `strictFunctionTypes` هم bivariant می‌مانند. آگاهی از این استثناها هنگام طراحی API عمومی مهم است.",
+      "commonMistake": "فکر اینکه TypeScript سیستم نوع کاملاً «sound» دارد.",
+      "followUp": "`strictFunctionTypes` دقیقاً روی چه چیزی اثر می‌گذارد؟",
+      "estimatedSeconds": 70,
+      "minVersion": "5.0",
+      "tags": [
+        "variance",
+        "soundness",
+        "arrays"
+      ],
+      "choices": [
+        {
+          "text": "چون `Dog` و `Cat` هر دو `Animal` را extend نکرده‌اند"
+        },
+        {
+          "text": "چون TypeScript آرایه‌ها را اصلاً چک نمی‌کند"
+        },
+        {
+          "text": "چون آرایه‌ها در TypeScript covariant هستند: `Dog[]` به `Animal[]` assignable است و از طریق آن می‌شود `Cat` وارد آرایه‌ی سگ‌ها کرد",
+          "isCorrect": true
+        },
+        {
+          "text": "چون `push` در آرایه‌ها readonly است"
+        }
+      ]
+    },
+    {
+      "id": "typescript-excess-property-check",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "چرا `const a: { x: number } = { x: 1, y: 2 }` خطا می‌دهد ولی اگر اول در متغیر جدا ریخته شود (`const o = { x: 1, y: 2 }; const a: {x: number} = o;`) خطا نمی‌دهد؟",
+      "shortAnswer": "Excess property check برای گرفتن غلط املایی در literalهای مستقیم است. در حالت دوم شیء از نظر ساختاری subtype است (property اضافه در subtype مجاز است).",
+      "explanation": "پس این چک دفاع کامل نیست:\n```ts\ninterface Opts { color?: string; size?: number }\n\nconst a = { color: 'red', colour: 'blue' };   // غلط املایی colour\nconst ok: Opts = a;                           // ✅ بدون خطا: color مشترک است\n\nconst b = { colour: 'red' };\nconst bad: Opts = b;                          // ❌ خطا: weak type detection\n```\n«Weak type detection»: اگر همه‌ی propertyهای نوع مقصد optional باشند و شیء هیچ property مشترکی با آن نداشته باشد خطا می‌دهد. برای بررسی سخت‌گیرانه‌تر شکل، از `satisfies` روی literal استفاده کن.",
+      "commonMistake": "فرض اینکه هیچ property اضافه‌ای هیچ‌وقت به نوع دیگر پاس داده نمی‌شود.",
+      "followUp": "weak type detection چیست؟",
+      "estimatedSeconds": 70,
+      "minVersion": "5.0",
+      "tags": [
+        "excess-property",
+        "structural-typing",
+        "objects"
+      ],
+      "choices": [
+        {
+          "text": "چون excess property check فقط روی object literal تازه اعمال می‌شود؛ متغیر واسطه یک مقدار با نوع مشخص است و با structural typing سازگار است",
+          "isCorrect": true
+        },
+        {
+          "text": "چون در حالت دوم TypeScript نوع را `any` می‌کند"
+        },
+        {
+          "text": "این رفتار یک باگ شناخته‌شده است"
+        },
+        {
+          "text": "چون متغیر واسطه `const` است"
+        }
+      ]
+    },
+    {
+      "id": "typescript-const-type-params",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "`const T` در `function tuple<const T extends readonly unknown[]>(x: T)` (TS 5.0) چه فایده‌ای دارد؟",
+      "shortAnswer": "`const` modifier روی پارامتر نوع باعث می‌شود استنباط از literalها widen نشود و آرایه/شیء به‌صورت readonly و دقیق استنباط شود.",
+      "explanation": "```ts\nfunction tuple<const T extends readonly unknown[]>(x: T) { return x; }\nconst t = tuple(['a', 1]);      // readonly ['a', 1]  (بدون const: (string | number)[])\n```\nمفید برای APIهای «تعریف پیکربندی» (router، schema، store) که کاربر نباید `as const` بنویسد. توجه: constraint باید `readonly` باشد وگرنه آرایه‌ی readonly با آن سازگار نیست و استنباط به نوع معمولی برمی‌گردد.",
+      "commonMistake": "نوشتن constraint به‌صورت `unknown[]` (mutable) که با `const T` سازگار نیست.",
+      "followUp": "`as const` در محل فراخوانی چه فرقی با `const T` دارد؟",
+      "estimatedSeconds": 70,
+      "minVersion": "5.0",
+      "tags": [
+        "generics",
+        "const-type-parameters",
+        "inference"
+      ],
+      "choices": [
+        {
+          "text": "نوع `T` را در runtime ثابت می‌کند"
+        },
+        {
+          "text": "همان `readonly` است و فرقی ندارد"
+        },
+        {
+          "text": "آرگومان را مثل `as const` استنباط می‌کند تا بدون نوشتن `as const` در محل صدا زدن، نوع‌های literal و tuple دقیق باقی بمانند",
+          "isCorrect": true
+        },
+        {
+          "text": "باعث می‌شود تابع فقط با ثابت‌های `const` صدا زده شود"
+        }
+      ]
+    },
+    {
+      "id": "typescript-abstract-vs-interface",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "چه زمانی `abstract class` را به `interface` ترجیح می‌دهی؟",
+      "shortAnswer": "`interface` فقط در compile-time وجود دارد و پیاده‌سازی ندارد. `abstract class` در JavaScript خروجی می‌گیرد (یک کلاس واقعی)، می‌تواند state و متد پیاده‌سازی‌شده داشته باشد و `instanceof` کار می‌کند؛ ولی یک کلاس فقط از یک کلاس ارث می‌برد.",
+      "explanation": "```ts\nabstract class Repo<T> {\n  abstract find(id: string): Promise<T | null>;\n  async require(id: string) {                 // منطق مشترک\n    const x = await this.find(id);\n    if (!x) throw new Error('not found');\n    return x;\n  }\n}\n```\nدر بسیاری از طراحی‌ها composition + interface بهتر از سلسله‌مراتب ارث‌بری است. در DI (مثل Angular) از abstract class گاهی به‌عنوان token هم استفاده می‌شود چون در runtime وجود دارد (interface وجود ندارد).",
+      "commonMistake": "استفاده از ارث‌بری عمیق برای اشتراک کد به‌جای composition.",
+      "followUp": "چرا نمی‌شود interface را به‌عنوان DI token در Angular استفاده کرد؟",
+      "estimatedSeconds": 60,
+      "minVersion": "5.0",
+      "tags": [
+        "abstract-class",
+        "interface",
+        "oop"
+      ],
+      "choices": [
+        {
+          "text": "وقتی فقط شکل یک شیء ساده را توصیف می‌کنی"
+        },
+        {
+          "text": "وقتی می‌خواهی بخشی از پیاده‌سازی (state یا متد مشترک) را همراه قرارداد به کلاس‌های فرزند بدهی و بتوانی در runtime هم `instanceof` بزنی",
+          "isCorrect": true
+        },
+        {
+          "text": "وقتی می‌خواهی چند کلاس از چند interface را همزمان implement کنی"
+        },
+        {
+          "text": "abstract class در runtime هیچ اثری ندارد پس همیشه بهتر است"
+        }
+      ]
+    },
+    {
+      "id": "typescript-index-signature-record",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "چه تفاوتی بین `{ [key: string]: number }`، `Record<'a' | 'b', number>` و `Map<string, number>` وجود دارد؟",
+      "shortAnswer": "Index signature برای دیکشنری پویا است؛ `Record` با union کلید، شیء با کلیدهای مشخص می‌سازد؛ `Map` برای کلیدهای غیر string و ترتیب/درج زیاد.",
+      "explanation": "```ts\nconst dyn: { [k: string]: number } = {};      // هر کلیدی\nconst fixed: Record<'a' | 'b', number> = { a: 1, b: 2 };  // هر دو اجباری\nconst m = new Map<string, number>();\n```\nهشدار: با index signature، `dyn.foo` نوع `number` دارد حتی وقتی وجود ندارد (مگر `noUncheckedIndexedAccess`). اگر کلیدها optional باشند `Partial<Record<K, V>>` بنویس.",
+      "commonMistake": "استفاده از index signature برای شیئی که کلیدهایش در واقع ثابت و شناخته‌شده است.",
+      "followUp": "چطور مقدار `Record<K, V>` را از یک `as const` array می‌سازی؟",
+      "estimatedSeconds": 55,
+      "minVersion": "5.0",
+      "tags": [
+        "index-signature",
+        "record",
+        "maps"
+      ],
+      "choices": [
+        {
+          "text": "اولی هر تعداد کلید string می‌پذیرد، دومی دقیقاً کلیدهای `a` و `b` را اجباری می‌کند و سومی ساختار داده‌ی runtime جداگانه با API متد است",
+          "isCorrect": true
+        },
+        {
+          "text": "`Record` فقط در runtime وجود دارد"
+        },
+        {
+          "text": "هر سه دقیقاً یکی هستند"
+        },
+        {
+          "text": "`Map` نوع کلیدها را در compile-time محدود به union می‌کند"
+        }
+      ]
+    },
+    {
+      "id": "typescript-noinfer",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "`NoInfer<T>` (TS 5.4) برای چیست؟",
+      "shortAnswer": "بدون `NoInfer` هر آرگومانی که `T` در آن باشد کاندیدای استنباط است و ممکن است `T` را گسترده‌تر از مقصود بکند.",
+      "explanation": "```ts\nfunction pick<T extends string>(options: T[], initial: NoInfer<T>) {}\n\npick(['a', 'b'], 'a');    // ✅\npick(['a', 'b'], 'c');    // ❌ خطا: 'c' جزو گزینه‌ها نیست\n// بدون NoInfer: T به 'a' | 'b' | 'c' استنباط می‌شد و خطا نمی‌داد\n```\nکاربرد: مقدار پیش‌فرض/اولیه که باید عضو مجموعه‌ی دیگر باشد، APIهای state و کتابخانه‌های فرم.",
+      "commonMistake": "نوشتن `T & {}` hackهای قدیمی برای همین منظور.",
+      "followUp": "چرا مقدار `initial` باعث گسترش `T` می‌شود؟",
+      "estimatedSeconds": 65,
+      "minVersion": "5.4",
+      "tags": [
+        "noinfer",
+        "generics",
+        "inference"
+      ],
+      "choices": [
+        {
+          "text": "استنباط نوع را کاملاً خاموش می‌کند و همه‌جا `any` می‌شود"
+        },
+        {
+          "text": "نوع `T` را در runtime پاک می‌کند"
+        },
+        {
+          "text": "جلوی اینکه یک موقعیت خاص در استنباط `T` نقش داشته باشد را می‌گیرد تا فقط از موقعیت‌های دیگر استنباط شود",
+          "isCorrect": true
+        },
+        {
+          "text": "فقط برای کلاس‌ها استفاده می‌شود"
+        }
+      ]
+    },
+    {
+      "id": "typescript-inferred-type-predicates",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "بعد از TS 5.5 نوع `r` در `const r = [1, undefined, 3].filter(x => x !== undefined)` چیست؟",
+      "codeSnippet": "const r = [1, undefined, 3].filter(x => x !== undefined);",
+      "codeLanguage": "typescript",
+      "shortAnswer": "از TS 5.5 اگر تابع فقط یک پارامتر و بدنه‌ی ساده‌ی boolean داشته باشد و narrowing آن «اگر و فقط اگر» باشد، `x is T` خودکار استنباط می‌شود.",
+      "explanation": "قبلاً مجبور بودیم بنویسیم `.filter((x): x is number => x !== undefined)`. اما این نسخه استنباط نمی‌شود:\n```ts\n[0, 1, undefined].filter(x => !!x);   // (number | undefined)[]\n```\nچون `0` falsy است و `false` بودن شرط لزوماً به معنی `undefined` بودن نیست (شرط «اگر و فقط اگر» برقرار نیست). این دقیقاً جایی است که کامپایلر جلوی باگ را می‌گیرد.",
+      "commonMistake": "اعتماد به `filter(Boolean)` برای حذف `undefined` و از دست دادن `0` و `''`.",
+      "followUp": "چرا استنباط برای `x => !!x` رخ نمی‌دهد؟",
+      "estimatedSeconds": 70,
+      "minVersion": "5.5",
+      "tags": [
+        "type-predicates",
+        "inference",
+        "typescript-5.5"
+      ],
+      "choices": [
+        {
+          "text": "`(number | undefined)[]` مثل قبل"
+        },
+        {
+          "text": "`number`"
+        },
+        {
+          "text": "`number[]` (چون تابع فیلتر به‌صورت خودکار به‌عنوان type predicate استنباط می‌شود)",
+          "isCorrect": true
+        },
+        {
+          "text": "`never[]`"
+        }
+      ]
+    },
+    {
+      "id": "typescript-variance-annotations",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "`interface Producer<out T>` و `interface Consumer<in T>` چه چیزی را بیان می‌کنند؟",
+      "shortAnswer": "Variance annotation (از TS 4.7) رابطه‌ی زیرنوع/ابرنوع نوع generic را صریح می‌کند و کامپایلر را از محاسبه‌ی ساختاری پرهزینه بی‌نیاز می‌کند.",
+      "explanation": "```ts\ninterface Producer<out T> { get(): T }            // Producer<Dog> → Producer<Animal> ✅\ninterface Consumer<in T>  { accept(x: T): void }  // Consumer<Animal> → Consumer<Dog> ✅\n```\nاگر annotation با استفاده‌ی واقعی نخواند خطا می‌دهد (مثلاً `out T` ولی `T` در پارامتر متد باشد). فایده‌ها: مستندسازی قصد، کمک به سرعت کامپایل در نوع‌های بازگشتی بزرگ، و گرفتن اشتباه هنگام refactor. اغلب لازم نیست؛ فقط در کتابخانه‌ها یا نوع‌های بسیار پیچیده مفید است.",
+      "commonMistake": "گذاشتن annotation روی همه‌ی generic ها بدون نیاز.",
+      "followUp": "در تابع `(x: Animal) => void` و `(x: Dog) => void` کدام به دیگری assignable است و چرا؟",
+      "estimatedSeconds": 80,
+      "minVersion": "4.7",
+      "tags": [
+        "variance",
+        "generics",
+        "advanced-types"
+      ],
+      "choices": [
+        {
+          "text": "`out` یعنی `T` فقط خروجی است (covariant) و `in` یعنی فقط ورودی است (contravariant) و کامپایلر همین را اعمال و بررسی می‌کند",
+          "isCorrect": true
+        },
+        {
+          "text": "`in`/`out` جهت import و export ماژول را مشخص می‌کنند"
+        },
+        {
+          "text": "فقط برای کلاس‌های abstract قابل استفاده‌اند"
+        },
+        {
+          "text": "`out` باعث می‌شود `T` در runtime ذخیره شود"
+        }
+      ]
+    },
+    {
+      "id": "typescript-branded-types",
+      "level": "Senior",
+      "type": "ShortAnswer",
+      "text": "Branded (opaque) type چیست و چطور در TypeScript ساخته می‌شود؟ چرا لازم است؟",
+      "shortAnswer": "چون TypeScript structural است، `UserId` و `OrderId` (هر دو `string`) قابل جایگزینی‌اند. با اضافه کردن یک «برچسب» فقط-نوع (phantom property) دو نوع را از هم متمایز می‌کنیم و جلوی اشتباه پاس دادن شناسه‌ها را می‌گیریم.",
+      "explanation": "```ts\ndeclare const brand: unique symbol;\ntype Brand<T, B> = T & { readonly [brand]: B };\n\ntype UserId  = Brand<string, 'UserId'>;\ntype OrderId = Brand<string, 'OrderId'>;\n\nconst asUserId = (s: string) => s as UserId;   // تنها نقطه‌ی cast\n\nfunction loadUser(id: UserId) {}\nloadUser('abc' as OrderId);                    // ❌\n```\nCast فقط در یک تابع «سازنده/اعتبارسنج» انجام شود تا برچسب معنادار باشد (بهتر: بعد از اعتبارسنجی مثلاً uuid). هزینه‌ی runtime صفر است چون برچسب فقط در نوع وجود دارد. کتابخانه‌هایی مثل Zod (`.brand()`) و Effect همین را پشتیبانی می‌کنند.",
+      "commonMistake": "ساختن برچسب و بعد cast کردن آزادانه در همه‌جا که مزیتش را از بین می‌برد.",
+      "followUp": "چه چیزهایی را باید brand کرد (مثال‌های واقعی)؟",
+      "estimatedSeconds": 120,
+      "minVersion": "5.0",
+      "tags": [
+        "branded-types",
+        "type-safety",
+        "patterns"
+      ]
+    },
+    {
+      "id": "typescript-distributive-conditional",
+      "level": "Senior",
+      "type": "CodeOutput",
+      "text": "نتیجه‌ی `ToArr<string | number>` و `ToArrND<string | number>` چیست؟",
+      "codeSnippet": "type ToArr<T> = T extends any ? T[] : never;\ntype ToArrND<T> = [T] extends [any] ? T[] : never;\n\ntype A = ToArr<string | number>;\ntype B = ToArrND<string | number>;",
+      "codeLanguage": "typescript",
+      "shortAnswer": "conditional type وقتی پارامترش «نوع خالص» `T` است روی هر عضو union جداگانه اعمال می‌شود (distributive). با قرار دادن `T` داخل tuple یا آرایه (`[T]`) این رفتار خاموش می‌شود.",
+      "explanation": "```ts\ntype ToArr<T> = T extends any ? T[] : never;\ntype ToArrND<T> = [T] extends [any] ? T[] : never;\n```\nنمونه‌ی مشهور: `Exclude<T, U> = T extends U ? never : T` بر پایه‌ی distributivity کار می‌کند. `never` هم union خالی است، پس `ToArr<never>` می‌شود `never`، اما `ToArrND<never>` می‌شود `never[]`. این نکته در نوشتن utility typeهای دقیق اهمیت دارد.",
+      "commonMistake": "تعجب از نتیجه‌ی غیرمنتظره‌ی conditional type روی union و `never`.",
+      "followUp": "چطور `IsNever<T>` را درست می‌نویسی؟",
+      "estimatedSeconds": 90,
+      "minVersion": "5.0",
+      "tags": [
+        "conditional-types",
+        "distributive",
+        "advanced-types"
+      ],
+      "choices": [
+        {
+          "text": "`string[]` و `number[]`"
+        },
+        {
+          "text": "هر دو `(string | number)[]`"
+        },
+        {
+          "text": "`string[] | number[]` و `(string | number)[]`",
+          "isCorrect": true
+        },
+        {
+          "text": "هر دو `string[] | number[]`"
+        }
+      ]
+    },
+    {
+      "id": "typescript-recursive-deep-types",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "یک `DeepReadonly<T>` بنویس و توضیح بده چه ریسک‌هایی در نوع‌های بازگشتی هست.",
+      "shortAnswer": "با mapped type بازگشتی: هر property را readonly می‌کنیم و اگر مقدار شیء بود دوباره همان را روی آن اعمال می‌کنیم. ریسک‌ها: عمق بازگشت (خطای «excessively deep»)، کندی کامپایل روی نوع‌های بزرگ، و رفتار غیرمنتظره روی توابع، آرایه‌ها، Map/Set و Date.",
+      "explanation": "```ts\ntype DeepReadonly<T> =\n  T extends (infer U)[] ? readonly DeepReadonly<U>[] :\n  T extends Function ? T :\n  T extends object ? { readonly [K in keyof T]: DeepReadonly<T[K]> } :\n  T;\n```\nنکات: توابع را نباید map کرد؛ Map/Set/Date به‌صورت خاص باید هندل شوند؛ نوع‌های بازگشتی با tail-recursion elimination در conditional type تا عمق بالاتری کار می‌کنند (فرم accumulator). اگر کامپایلر شکایت کرد، بهتر است نوع را ساده کنی به‌جای دور زدن با `any`. نوع‌های بسیار هوشمند هزینه‌ی نگهداری دارند؛ تیم باید بتواند آنها را بخواند.",
+      "commonMistake": "ساختن نوع‌های بازگشتی عمیق که پیام خطای غیرقابل فهم و کامپایل کند می‌سازد.",
+      "followUp": "نوع بازگشتی برای JSON (`type Json = ...`) چطور تعریف می‌شود؟",
+      "estimatedSeconds": 160,
+      "minVersion": "5.0",
+      "tags": [
+        "recursive-types",
+        "mapped-types",
+        "advanced-types"
+      ]
+    },
+    {
+      "id": "typescript-erasable-syntax-only",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "گزینه‌ی `erasableSyntaxOnly` (TS 5.8) چیست و چرا با اجرای مستقیم TypeScript در Node ارتباط دارد؟",
+      "shortAnswer": "این گزینه هر syntax TypeScript را که «فقط با پاک کردن نوع‌ها» قابل تبدیل به JavaScript نیست ممنوع می‌کند (enum، namespace با کد runtime، parameter property، `import x = require()`). ابزارهایی که فقط type را strip می‌کنند (مثل type stripping در Node) فقط همین زیرمجموعه را اجرا می‌کنند.",
+      "explanation": "```ts\nenum Color { Red }                        // ❌ نیاز به تولید کد دارد\nclass A { constructor(private x: number) {} }   // ❌ parameter property\n```\nجایگزین: union literal به‌جای enum، و تعریف field + تخصیص در constructor. با این رویکرد می‌شود بدون مرحله‌ی build فایل `.ts` را در Node اجرا کرد، ولی همچنان برای type-check باید `tsc --noEmit` اجرا شود، چون strip کردن نوع‌ها چک نمی‌کند. توجه: در Node اجرای TypeScript با strip کردن انجام می‌شود و `tsconfig.json` را نمی‌خواند (مثلاً `paths` کار نمی‌کند).",
+      "commonMistake": "فکر اینکه اجرای مستقیم `.ts` در Node یعنی type-check هم انجام می‌شود.",
+      "followUp": "چه چیزهایی هنوز نیاز به build دارند (JSX، decorators قدیمی، paths)؟",
+      "estimatedSeconds": 130,
+      "minVersion": "5.8",
+      "tags": [
+        "erasable-syntax",
+        "nodejs",
+        "typescript-5.8"
+      ]
+    },
+    {
+      "id": "typescript-isolated-declarations",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "`isolatedDeclarations` (TS 5.5) چه مشکلی را حل می‌کند؟",
+      "shortAnswer": "تولید `.d.ts` معمولاً به استنباط نوع (که به کل برنامه وابسته است) نیاز دارد. با این گزینه، نوع همه‌ی APIهای export‌شده باید صریح باشد تا هر فایل به‌تنهایی قابل emit باشد.",
+      "explanation": "این در monorepoهای بزرگ باعث می‌شود build سریع‌تر و موازی شود:\n```ts\nexport function total(items: Item[]) { return items.length; }   // ❌ نوع بازگشتی صریح لازم است\nexport function total2(items: Item[]): number { return items.length; }  // ✅\n```\nهزینه: کمی verbosity، ولی مزیت مستندسازی API. برای اپلیکیشن‌ها معمولاً لازم نیست؛ برای کتابخانه‌ها و پکیج‌های داخلی monorepo مفید است.",
+      "commonMistake": "روشن کردن آن در اپلیکیشن ساده و تحمل هزینه‌ی بی‌مورد.",
+      "followUp": "چرا نوشتن نوع بازگشتی صریح برای توابع export‌شده در کتابخانه‌ها توصیه می‌شود؟",
+      "estimatedSeconds": 70,
+      "minVersion": "5.5",
+      "tags": [
+        "isolated-declarations",
+        "build-performance",
+        "d-ts"
+      ],
+      "choices": [
+        {
+          "text": "با الزام نوشتن نوع صریح روی exportها، فایل‌های `.d.ts` را می‌توان مستقل و موازی (حتی توسط ابزارهای غیر tsc) بدون type-check کامل تولید کرد",
+          "isCorrect": true
+        },
+        {
+          "text": "ایزوله کردن runtime هر ماژول در sandbox"
+        },
+        {
+          "text": "حذف خودکار همه‌ی importهای استفاده‌نشده"
+        },
+        {
+          "text": "فعال کردن strict mode فقط برای فایل‌های declaration"
+        }
+      ]
+    },
+    {
+      "id": "typescript-project-references",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "Project references در TypeScript چیست و چه زمانی در monorepo از آن استفاده می‌کنی؟",
+      "shortAnswer": "با `references` در `tsconfig` و `composite: true` پروژه را به چند بخش با مرز مشخص تقسیم می‌کنیم و `tsc -b` فقط بخش‌های تغییرکرده را بازسازی می‌کند. مزایا: build افزایشی سریع، اعمال مرز وابستگی (بسته A نمی‌تواند به سورس B نامرتبط وصل شود) و ادیتور سریع‌تر.",
+      "explanation": "```jsonc\n// packages/app/tsconfig.json\n{\n  \"compilerOptions\": { \"composite\": true, \"outDir\": \"dist\" },\n  \"references\": [{ \"path\": \"../shared\" }]\n}\n```\nهزینه: پیچیدگی تنظیمات و لزوم build کردن پروژه‌ی وابسته (خروجی `.d.ts`). در ترکیب با workspace مدیر بسته (pnpm/npm workspaces) و ابزارهایی مثل Nx/Turborepo cache می‌شود. اگر پروژه‌ی کوچک است و tsc سریع است، لازم نیست؛ با TypeScript 7 که بسیار سریع‌تر است بخشی از این نیاز کم شده ولی مرزبندی وابستگی همچنان ارزش دارد.",
+      "commonMistake": "استفاده از `paths` برای ارجاع به سورس پکیج‌های دیگر که مرز را از بین می‌برد و build را کند می‌کند.",
+      "followUp": "`composite` چه محدودیت‌هایی اضافه می‌کند؟",
+      "estimatedSeconds": 120,
+      "minVersion": "5.0",
+      "tags": [
+        "project-references",
+        "monorepo",
+        "build"
+      ]
+    },
+    {
+      "id": "typescript-typescript-7-native",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "TypeScript 7.0 چه چیزی را عوض کرد و مهاجرت از 5.x/6.x چه ملاحظاتی دارد؟",
+      "shortAnswer": "کامپایلر و language service در TypeScript 7.0 به کد بومی (نوشته‌شده با Go) منتقل شده و معمولاً حدود ۱۰ برابر سریع‌تر از نسخه‌ی مبتنی بر JavaScript است (build و ادیتور). نسخه‌ی 6.0 آخرین نسخه‌ی مبتنی بر JS بود و پل مهاجرت به 7.0 محسوب می‌شد: پیش‌فرض‌ها را مدرن کرد و هشدار deprecation برای گزینه‌های قدیمی داد.",
+      "explanation": "راهبرد مهاجرت پیشنهادی:\n1. اول به 6.0 ارتقا بده و تمام هشدارهای deprecation و تغییر پیش‌فرض‌ها (مثل `strict: true`) را رفع کن.\n2. سپس به 7.0 برو. زبان و رفتار type-check با هدف سازگاری حفظ شده و `tsc` همان CLI است.\n3. ابزارهایی که به API برنامه‌نویسی JavaScript خود TypeScript (مثل بعضی پلاگین‌های ESLint/ابزار codegen/transformerها) وابسته‌اند را بررسی کن؛ ممکن است نسخه‌ی سازگار لازم باشد.\n\nنتیجه‌ی عملی: کاهش چشمگیر زمان CI و بهبود تجربه‌ی ادیتور در monorepoهای بزرگ. ولی هرگز بدون اجرای type-check کامل و تست روی CI ارتقا نده و ابزارهای وابسته‌ی build را قبل از merge کنترل کن.",
+      "commonMistake": "فرض اینکه ارتقا به 7.0 زبان TypeScript را تغییر می‌دهد؛ تمرکز روی معماری کامپایلر و سرعت است.",
+      "followUp": "چرا سرعت type-check برای feedback loop توسعه مهم است، جدا از زمان CI؟",
+      "estimatedSeconds": 150,
+      "minVersion": "7.0",
+      "tags": [
+        "typescript-7",
+        "native-compiler",
+        "migration"
+      ]
+    },
+    {
+      "id": "typescript-ts6-bridge",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "نقش TypeScript 6.0 در مسیر ارتقا به 7.0 چیست؟",
+      "shortAnswer": "6.0 یک «bridge release» است: رفتارها و پیش‌فرض‌ها را با 7.0 هم‌راستا می‌کند تا ارتقا به کامپایلر بومی با کمترین شگفتی همراه باشد.",
+      "explanation": "تغییرهای قابل توجه‌ی 6.0 شامل پیش‌فرض `strict: true`، `module: esnext`، target جدیدتر (ES2025) و پشتیبانی از subpath import با `#/` در `nodenext` و `bundler` است، به‌علاوه‌ی نوع‌های API های جدید (مثل Temporal و `RegExp.escape`). اگر با هشدار deprecation مواجه شدی، ابتدا گزینه را اصلاح کن و فقط در صورت ناچاری از `ignoreDeprecations` استفاده کن (موقت).",
+      "commonMistake": "نادیده گرفتن هشدارهای deprecation در 6.0 و غافلگیر شدن هنگام 7.0.",
+      "followUp": "پروژه‌ای که `target: ES5` دارد چه مسیری برای ارتقا دارد؟",
+      "estimatedSeconds": 70,
+      "minVersion": "6.0",
+      "tags": [
+        "typescript-6",
+        "migration",
+        "tsconfig"
+      ],
+      "choices": [
+        {
+          "text": "نسخه‌ای که کامپایلر را به Go بازنویسی کرد"
+        },
+        {
+          "text": "آخرین نسخه‌ی مبتنی بر JS که پیش‌فرض‌ها را مدرن می‌کند و برای گزینه‌های قدیمی هشدار deprecation می‌دهد تا مهاجرت به 7.0 آسان شود",
+          "isCorrect": true
+        },
+        {
+          "text": "نسخه‌ای که `strict` را از زبان حذف کرد"
+        },
+        {
+          "text": "نسخه‌ی منسوخ‌شده که فقط برای Node قدیمی است"
+        }
+      ]
+    },
+    {
+      "id": "typescript-method-bivariance",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "با `strictFunctionTypes` روشن، کدام خط خطای کامپایل می‌دهد؟",
+      "codeSnippet": "class Animal { name = ''; }\nclass Dog extends Animal { bark() {} }\n\ninterface H {\n  onFn: (a: Animal) => void;\n  onMethod(a: Animal): void;\n}\ndeclare const h: H;\nh.onFn = (d: Dog) => {};\nh.onMethod = (d: Dog) => {};",
+      "codeLanguage": "typescript",
+      "shortAnswer": "`strictFunctionTypes` پارامترهای «function type» را contravariant چک می‌کند، ولی پارامترهای **متد** (سینتکس `m(x: T): void`) عمداً bivariant باقی می‌مانند تا الگوهای رایج (مثل آرایه‌ها و DOM) شکسته نشوند.",
+      "explanation": "پس دو interface که ظاهراً یکی‌اند رفتار متفاوتی دارند:\n```ts\ninterface H {\n  onFn: (a: Animal) => void;    // سخت‌گیر\n  onMethod(a: Animal): void;    // bivariant (راحت‌تر، ولی ناسالم‌تر)\n}\n```\nاگر می‌خواهی سخت‌گیری بیشتر برای callbackها داشته باشی، property از نوع تابع بنویس. این یکی از دلایلی است که در تعریف APIهای event/handler توصیه می‌شود توجه کنی کدام سینتکس را انتخاب می‌کنی.",
+      "commonMistake": "فرض اینکه `strictFunctionTypes` روی همه‌ی تابع‌ها اثر یکسان دارد.",
+      "followUp": "چرا تیم TypeScript متدها را bivariant نگه داشت؟",
+      "estimatedSeconds": 80,
+      "minVersion": "2.6",
+      "tags": [
+        "variance",
+        "strict-function-types",
+        "soundness"
+      ],
+      "choices": [
+        {
+          "text": "هیچ‌کدام"
+        },
+        {
+          "text": "هر دو خط"
+        },
+        {
+          "text": "`h.onMethod = (d: Dog) => {}`"
+        },
+        {
+          "text": "`h.onFn = (d: Dog) => {}` چون property از نوع تابع contravariant چک می‌شود؛ ولی همان تعریف با سینتکس متد (`onMethod`) مجاز است",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "typescript-type-performance",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "پروژه‌ی TypeScript کند شده است؛ چطور علت را پیدا و رفع می‌کنی؟",
+      "shortAnswer": "ابتدا اندازه‌گیری: `tsc --extendedDiagnostics` برای شمار نوع‌ها/instantiationها و `--generateTrace` برای ردیابی دقیق (با ابزار Perfetto/`@typescript/analyze-trace`). سپس رفع نقطه‌های پرهزینه: unionهای بزرگ، نوع‌های بازگشتی عمیق، intersectionهای زیاد، و استنباط سنگین.",
+      "explanation": "چک‌لیست:\n- `interface extends` به‌جای intersection (`&`) بزرگ (کش‌شونده‌تر).\n- نوع بازگشتی صریح برای توابع export‌شده.\n- `skipLibCheck: true` برای پرش از چک `.d.ts` وابستگی‌ها.\n- کوچک کردن `include` و استفاده از project references.\n- ساده‌سازی template literal/conditional typeهای بزرگ.\n- جلوگیری از importهای barrel عظیم که کل گراف را بارگذاری می‌کنند.\n\nبا TypeScript 7 (native) بسیاری از این مشکلات کم‌رنگ‌تر شده‌اند، ولی نوع‌های بسیار پیچیده هنوز می‌توانند هزینه‌ساز باشند. قبل از بهینه‌سازی، نوع را بسنج؛ حدس زدن کار را خراب می‌کند.",
+      "commonMistake": "بهینه‌سازی بدون اندازه‌گیری، یا خاموش کردن `strict` برای «سرعت».",
+      "followUp": "`incremental` و `tsBuildInfo` چطور کمک می‌کنند؟",
+      "estimatedSeconds": 130,
+      "minVersion": "5.0",
+      "tags": [
+        "performance",
+        "tsconfig",
+        "diagnostics"
+      ]
+    },
+    {
+      "id": "typescript-authoring-d-ts",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "برای انتشار یک کتابخانه‌ی TypeScript چه چیزهایی را درباره‌ی نوع‌ها و `package.json` باید درست تنظیم کنی؟",
+      "shortAnswer": "باید `.d.ts` تولید شود (`declaration: true`)، در `package.json` فیلد `exports` با شرط `types` تعریف شود و هم ESM و هم CJS (در صورت نیاز) درست ارائه شوند. نوع‌ها باید با runtime هم‌خوان باشند و APIهای عمومی نوع بازگشتی صریح داشته باشند.",
+      "explanation": "```json\n{\n  \"type\": \"module\",\n  \"exports\": {\n    \".\": {\n      \"types\": \"./dist/index.d.ts\",\n      \"import\": \"./dist/index.js\"\n    }\n  },\n  \"files\": [\"dist\"]\n}\n```\nابزارهای مفید: `publint` و `@arethetypeswrong/cli` برای پیدا کردن مشکلات رایج (تعریف نوع اشتباه برای CJS/ESM). ترتیب شرط‌ها در `exports` مهم است و `types` باید **اول** بیاید. اگر `moduleResolution: nodenext` استفاده می‌کنی، در importهای نسبی پسوند `.js` لازم است. از `peerDependencies` برای وابستگی‌هایی که باید یکی باشند (مثل React) استفاده کن.",
+      "commonMistake": "ترتیب اشتباه شرط‌ها در `exports` که باعث می‌شود مصرف‌کننده نوع‌ها را نبیند.",
+      "followUp": "چرا در `nodenext` باید در importهای نسبی `.js` نوشت حتی وقتی فایل `.ts` است؟",
+      "estimatedSeconds": 130,
+      "minVersion": "5.0",
+      "tags": [
+        "library-authoring",
+        "d-ts",
+        "package-json"
+      ]
+    },
+    {
+      "id": "typescript-using-declarations",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "`using` (TS 5.2 — Explicit Resource Management) چه می‌کند؟",
+      "shortAnswer": "الگوی RAII/`try...finally` را ساده می‌کند: فایل، اتصال دیتابیس، قفل، تراکنش. آزادسازی به ترتیب معکوس ایجاد انجام می‌شود، حتی در صورت خطا.",
+      "explanation": "```ts\nfunction open(path: string) {\n  return { read: () => '...', [Symbol.dispose]() { console.log('closed'); } };\n}\n{\n  using f = open('a.txt');\n  f.read();\n} // اینجا closed چاپ می‌شود\n\nasync function run() {\n  await using conn = await pool.connect();   // Symbol.asyncDispose\n}\n```\nنیازمند پشتیبانی runtime (یا polyfill برای `Symbol.dispose`) و `lib` مناسب (مثل `esnext.disposable`) است. این ویژگی پیشنهاد ECMAScript است و بخشی از سینتکس JS شده؛ در ابزارهای مختلف پشتیبانی متفاوت است، پس نسخه‌ی هدف را چک کن.",
+      "commonMistake": "فکر اینکه `using` جایگزین garbage collector است؛ فقط cleanup قطعی برای منابع غیر حافظه را قابل پیش‌بینی می‌کند.",
+      "followUp": "`DisposableStack` برای چه سناریویی است؟",
+      "estimatedSeconds": 80,
+      "minVersion": "5.2",
+      "tags": [
+        "using",
+        "resource-management",
+        "typescript-5.2"
+      ],
+      "choices": [
+        {
+          "text": "شیء را با garbage collector آزاد می‌کند"
+        },
+        {
+          "text": "وقتی scope تمام شود، متد `[Symbol.dispose]()` (یا `Symbol.asyncDispose` با `await using`) را خودکار صدا می‌زند تا منبع آزاد شود",
+          "isCorrect": true
+        },
+        {
+          "text": "مثل `let` است ولی مقدار را immutable می‌کند"
+        },
+        {
+          "text": "فقط برای import کردن ماژول‌های ESM است"
+        }
+      ]
+    },
+    {
+      "id": "typescript-module-resolution",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "گزینه‌ی `moduleResolution` را برای `nodenext` و `bundler` مقایسه کن و بگو کدام را کجا استفاده می‌کنی.",
+      "shortAnswer": "`nodenext` قوانین واقعی Node را (ESM/CJS بر اساس `type` و پسوند، الزام پسوند فایل در importهای نسبی ESM، `exports` در package.json) شبیه‌سازی می‌کند و برای کدی است که مستقیم در Node اجرا می‌شود یا کتابخانه‌هایی که برای Node منتشر می‌شوند. `bundler` برای پروژه‌هایی است که bundler (Vite، webpack، esbuild) importها را حل می‌کند و اجازه می‌دهد بدون پسوند import کنی ولی `exports` را رعایت می‌کند.",
+      "explanation": "راهنما:\n| سناریو | تنظیم |\n|---|---|\n| سرویس Node/کتابخانه‌ی منتشرشونده | `module: nodenext` (که `moduleResolution: nodenext` را هم می‌آورد) |\n| اپ فرانت با Vite/Angular CLI/Next | `module: esnext`, `moduleResolution: bundler` |\n\nحالت قدیمی `node10` (پیش‌فرض قدیمی `node`) `exports` را نمی‌فهمد و در مسیر حذف/deprecation است. اگر کتابخانه منتشر می‌کنی و با `bundler` تست می‌کنی، ممکن است برای کاربران Node که پسوند لازم دارند خراب شود؛ حتماً با `nodenext` هم بسنج.",
+      "commonMistake": "استفاده از `bundler` برای کتابخانه‌ای که در Node مصرف می‌شود.",
+      "followUp": "چرا `import './util'` در ESM واقعی Node کار نمی‌کند ولی در Vite کار می‌کند؟",
+      "estimatedSeconds": 120,
+      "minVersion": "5.0",
+      "tags": [
+        "module-resolution",
+        "tsconfig",
+        "esm"
+      ]
+    }
+  ]
+}
