@@ -1,0 +1,23 @@
+{
+  "technology": { "slug": "sample", "name": "Sample", "currentVersion": "1" },
+  "questions": [
+    {
+      "id": "sample-mcq-junior", "level": "Junior", "type": "MultipleChoice",
+      "text": "Which one is right?", "shortAnswer": "B", "explanation": "Because B.",
+      "commonMistake": "Picking A", "followUp": "Why not C?", "estimatedSeconds": 60,
+      "minVersion": "1", "tags": ["basics", "Alpha"],
+      "choices": [ { "text": "A" }, { "text": "B", "isCorrect": true }, { "text": "C" } ]
+    },
+    {
+      "id": "sample-code-mid", "level": "Mid", "type": "CodeOutput",
+      "text": "What does this print?", "codeSnippet": "console.log(1 + 1)", "codeLanguage": "javascript",
+      "shortAnswer": "2", "explanation": "Numbers add.", "estimatedSeconds": 45, "tags": ["basics"],
+      "choices": [ { "text": "2", "isCorrect": true }, { "text": "11" } ]
+    },
+    {
+      "id": "sample-short-senior", "level": "Senior", "type": "ShortAnswer",
+      "text": "Explain X.", "shortAnswer": "X is X.", "explanation": "Long X.", "estimatedSeconds": 120,
+      "tags": ["deep"]
+    }
+  ]
+}

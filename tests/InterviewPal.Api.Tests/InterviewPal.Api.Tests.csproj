@@ -23,4 +23,8 @@
     <ProjectReference Include="..\..\src\InterviewPal.Api\InterviewPal.Api.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="TestContent\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
