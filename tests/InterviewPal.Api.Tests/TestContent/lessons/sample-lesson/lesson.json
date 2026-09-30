@@ -1,0 +1,15 @@
+{
+  "id": "sample-lesson", "kind": "Algorithm", "title": "Sample lesson", "category": "searching", "level": "Junior",
+  "summary": "A lesson used by the tests.", "scenario": "A real-world scenario.", "explanation": "The explanation.",
+  "timeComplexity": "O(n)", "spaceComplexity": "O(1)", "whenToUse": "When testing.", "estimatedMinutes": 5,
+  "tags": ["Testing", "sample"],
+  "implementations": {
+    "sample": { "title": "Sample implementation", "file": "sample.js", "walkthrough": "How it works." }
+  },
+  "exercises": [
+    { "id": "e1", "text": "Pick the right one", "explanation": "Because it is right.",
+      "choices": [ { "text": "wrong 1" }, { "text": "right", "isCorrect": true }, { "text": "wrong 2" }, { "text": "wrong 3" } ] },
+    { "id": "e2", "text": "Pick again", "explanation": "Still right.",
+      "choices": [ { "text": "right", "isCorrect": true }, { "text": "wrong" } ] }
+  ]
+}

@@ -1,4 +1,5 @@
 using InterviewPal.Application.Abstractions;
+using InterviewPal.Infrastructure.Lessons;
 using InterviewPal.Infrastructure.Persistence;
 using InterviewPal.Infrastructure.Seeding;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,8 @@ public static class DependencyInjection
         services.AddScoped<IQuestionRepository, QuestionRepository>();
         services.AddScoped<IReportRepository, ReportRepository>();
         services.AddScoped<ContentSeeder>();
+        services.AddSingleton<LessonCatalog>();
+        services.AddSingleton<ILessonCatalog>(sp => sp.GetRequiredService<LessonCatalog>());
         return services;
     }
 
@@ -27,5 +30,8 @@ public static class DependencyInjection
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await db.Database.EnsureCreatedAsync();
         await scope.ServiceProvider.GetRequiredService<ContentSeeder>().SeedAsync(contentDirectory);
+
+        var technologies = await db.Technologies.Select(t => t.Slug).ToListAsync();
+        provider.GetRequiredService<LessonCatalog>().Load(Path.Combine(contentDirectory, "lessons"), technologies);
     }
 }
