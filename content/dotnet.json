@@ -1,0 +1,1442 @@
+{
+  "technology": {
+    "slug": "dotnet",
+    "name": ".NET",
+    "currentVersion": "10",
+    "supportedFrom": "8"
+  },
+  "questions": [
+    {
+      "id": "dotnet-value-vs-reference",
+      "level": "Junior",
+      "type": "CodeOutput",
+      "text": "خروجی این کد چیست؟",
+      "codeSnippet": "var p1 = new P { X = 1 }; var p2 = p1; p2.X = 2;\nvar c1 = new C { X = 1 }; var c2 = c1; c2.X = 2;\nConsole.WriteLine($\"{p1.X} {c1.X}\");\n\nstruct P { public int X; }\nclass C { public int X; }",
+      "codeLanguage": "csharp",
+      "shortAnswer": "`struct` نوع مقداری (value type) است و با انتساب کپی می‌شود؛ `class` نوع ارجاعی است و انتساب فقط reference را کپی می‌کند، پس `c1` و `c2` یک شیء را نشان می‌دهند.",
+      "explanation": "نتیجه با اجرای واقعی روی .NET 10 تأیید شد. نکات: نوع‌های مقداری معمولاً روی stack یا inline در شیء نگه‌داری می‌شوند (نه همیشه)، و به متد به‌صورت کپی پاس داده می‌شوند مگر با `ref/in/out`. `struct`های بزرگ و mutable مشکل‌ساز می‌شوند؛ توصیه: `struct` کوچک و ترجیحاً immutable (`readonly struct`). boxing وقتی نوع مقداری به `object`/interface تبدیل شود رخ می‌دهد و یک allocation heap می‌سازد.",
+      "commonMistake": "تصور اینکه انتساب دو متغیر `struct` به یک داده اشاره می‌کند.",
+      "followUp": "boxing و unboxing چیست و چرا هزینه دارد؟",
+      "estimatedSeconds": 55,
+      "minVersion": "8",
+      "tags": [
+        "value-types",
+        "reference-types",
+        "csharp"
+      ],
+      "choices": [
+        {
+          "text": "`1 2`",
+          "isCorrect": true
+        },
+        {
+          "text": "`2 1`"
+        },
+        {
+          "text": "`1 1`"
+        },
+        {
+          "text": "`2 2`"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-string-immutability",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "چرا در حلقه‌ی بزرگ به‌جای `s += x` از `StringBuilder` استفاده می‌کنیم؟",
+      "shortAnswer": "تغییر رشته همیشه نمونه‌ی جدید می‌سازد؛ در حلقه‌ی n بار، هزینه‌ی کپی به O(n²) می‌رسد.",
+      "explanation": "```csharp\nvar sb = new StringBuilder();\nforeach (var line in lines) sb.AppendLine(line);\nvar text = sb.ToString();\n```\nبرای چند رشته‌ی کوچک (بدون حلقه) `+` یا interpolation (`$\"...\"`) خوانا و کافی است؛ کامپایلر آنها را به `string.Concat`/`DefaultInterpolatedStringHandler` بهینه می‌کند. برای join از `string.Join` و برای مقایسه‌ی حساس به فرهنگ از `StringComparison` صریح (`Ordinal`, `OrdinalIgnoreCase`) استفاده کن.",
+      "commonMistake": "استفاده از `StringBuilder` برای الحاق دو سه رشته که فایده‌ای ندارد.",
+      "followUp": "`string.Intern` و رشته‌های literal چه ارتباطی دارند؟",
+      "estimatedSeconds": 50,
+      "minVersion": "8",
+      "tags": [
+        "strings",
+        "performance",
+        "csharp"
+      ],
+      "choices": [
+        {
+          "text": "چون `string` در C# قابل تغییر است و `StringBuilder` امن‌تر است"
+        },
+        {
+          "text": "چون `string` تغییرناپذیر است و هر `+=` یک رشته‌ی جدید می‌سازد (کپی و allocation)؛ `StringBuilder` بافر قابل تغییر دارد",
+          "isCorrect": true
+        },
+        {
+          "text": "چون `+=` روی رشته‌ها خطای کامپایل می‌دهد"
+        },
+        {
+          "text": "چون `StringBuilder` رشته‌ها را رمزنگاری می‌کند"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-nullable-reference-types",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "فعال بودن Nullable Reference Types (`<Nullable>enable</Nullable>`) چه چیزی را عوض می‌کند؟",
+      "shortAnswer": "NRT یک تحلیل استاتیک است (annotation و flow analysis)، نه اجباری در runtime. در قالب پروژه‌های جدید .NET فعال است.",
+      "explanation": "```csharp\nstring name = null;          // ⚠️ هشدار: non-nullable\nstring? maybe = GetName();\nConsole.WriteLine(maybe.Length);      // ⚠️ ممکن است null باشد\nif (maybe is not null) Console.WriteLine(maybe.Length);   // ✅\nvar len = maybe?.Length ?? 0;\n```\n`!` (null-forgiving) هشدار را ساکت می‌کند ولی چیزی را تضمین نمی‌کند. بهتر است هشدارها را خطا کنی (`TreatWarningsAsErrors` یا `WarningsAsErrors=nullable`). API عمومی و DTOها را با `required` و nullable صریح مدل کن. داده‌ی ورودی از بیرون (JSON، DB) ممکن است annotation را نقض کند؛ اعتبارسنجی مرز سیستم لازم است.",
+      "commonMistake": "فرض اینکه با NRT دیگر `NullReferenceException` رخ نمی‌دهد.",
+      "followUp": "تفاوت `string?` و `Nullable<int>` (`int?`) چیست؟",
+      "estimatedSeconds": 55,
+      "minVersion": "8",
+      "tags": [
+        "nullable",
+        "null-safety",
+        "csharp"
+      ],
+      "choices": [
+        {
+          "text": "null را در runtime ممنوع می‌کند و `NullReferenceException` هرگز رخ نمی‌دهد"
+        },
+        {
+          "text": "کامپایلر نوع‌های ارجاعی را به‌صورت non-nullable (`string`) یا nullable (`string?`) دنبال و در صورت احتمال dereference کردن null هشدار می‌دهد؛ رفتار runtime تغییر نمی‌کند",
+          "isCorrect": true
+        },
+        {
+          "text": "فقط برای structها اثر دارد"
+        },
+        {
+          "text": "همه‌ی نوع‌ها را خودکار nullable می‌کند"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-collections-choice",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "کدام گزینه درباره‌ی `List<T>`، آرایه و `IEnumerable<T>` درست است؟",
+      "shortAnswer": "پارامتر ورودی را تا حد امکان با اینترفیس عمومی‌تر (`IEnumerable<T>` یا `IReadOnlyList<T>`) بگیر و خروجی را با نوع دقیق‌تر برگردان.",
+      "explanation": "راهنما:\n- `T[]`: طول ثابت، سریع، بدون overhead.\n- `List<T>`: پرکاربردترین مجموعه‌ی قابل تغییر.\n- `IEnumerable<T>`: فقط پیمایش؛ ممکن است هر بار دوباره محاسبه شود (deferred).\n- `IReadOnlyList<T>`/`IReadOnlyCollection<T>`: خواندنی با اندیس/شمارش.\n- `Dictionary<K,V>`: جست‌وجوی O(1) میانگین، `HashSet<T>` برای یکتایی.\n- در .NET 8+ `FrozenDictionary/FrozenSet` برای داده‌ی ثابت با خواندن بسیار سریع و `ImmutableArray` برای تغییرناپذیری.\n\nاز `ToList()` فقط در جایی استفاده کن که واقعاً نتیجه را ذخیره یا چندبار پیمایش می‌کنی.",
+      "commonMistake": "چندبار پیمایش کردن یک `IEnumerable` که هر بار query دیتابیس را اجرا می‌کند.",
+      "followUp": "چه زمانی `FrozenDictionary` را انتخاب می‌کنی؟",
+      "estimatedSeconds": 55,
+      "minVersion": "8",
+      "tags": [
+        "collections",
+        "ienumerable",
+        "csharp"
+      ],
+      "choices": [
+        {
+          "text": "`IEnumerable<T>` همیشه یک لیست کامل در حافظه است"
+        },
+        {
+          "text": "آرایه طول ثابت دارد، `List<T>` قابل رشد است، و `IEnumerable<T>` فقط قرارداد «قابل پیمایش» است (بدون افزودن/اندیس) و ممکن است lazy باشد",
+          "isCorrect": true
+        },
+        {
+          "text": "`List<T>` طول ثابت دارد"
+        },
+        {
+          "text": "آرایه بعد از ساخت قابل تغییر اندازه است"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-linq-deferred-basic",
+      "level": "Junior",
+      "type": "CodeOutput",
+      "text": "خروجی این کد چیست؟",
+      "codeSnippet": "var nums = new List<int> { 1, 2, 3 };\nvar q = nums.Where(n => n > 1);\nnums.Add(4);\nConsole.WriteLine(string.Join(\",\", q));\n\nvar snap = nums.Where(n => n > 1).ToList();\nnums.Add(5);\nConsole.WriteLine(string.Join(\",\", snap));",
+      "codeLanguage": "csharp",
+      "shortAnswer": "`Where` اجرای تنبل (deferred) دارد: query هنگام پیمایش اجرا می‌شود، نه هنگام تعریف؛ پس `4` که بعد از تعریف اضافه شد در نتیجه‌ی اول دیده می‌شود. `ToList()` نتیجه را همان لحظه «materialize» می‌کند و بعداً تغییر نمی‌کند.",
+      "explanation": "نتیجه با اجرای واقعی تأیید شد. نتیجه‌ی عملی: اگر روی `IEnumerable` که از EF Core می‌آید چندبار پیمایش کنی هر بار query اجرا می‌شود؛ یک‌بار `ToListAsync()` بگیر. از طرفی، در deferred execution تغییر منبع بین تعریف و اجرا باعث نتیجه‌ی غیرمنتظره می‌شود. عملگرهای فوری: `ToList`, `ToArray`, `Count`, `First`, `Sum`, `Any`.",
+      "commonMistake": "فرض اینکه `Where` بلافاصله فیلتر می‌کند و نتیجه را ثابت نگه می‌دارد.",
+      "followUp": "چرا در EF Core باید `ToListAsync` قبل از پایان scope دیتابیس صدا زده شود؟",
+      "estimatedSeconds": 60,
+      "minVersion": "8",
+      "tags": [
+        "linq",
+        "deferred-execution",
+        "csharp"
+      ],
+      "choices": [
+        {
+          "text": "`2,3` و بعد `2,3,4,5`"
+        },
+        {
+          "text": "`2,3,4` و بعد `2,3,4`",
+          "isCorrect": true
+        },
+        {
+          "text": "`2,3,4` و بعد `2,3,4,5`"
+        },
+        {
+          "text": "`2,3` و بعد `2,3`"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-async-basics",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "کدام گزینه درباره‌ی `async/await` درست است؟",
+      "shortAnswer": "async/await مدل «ادامه‌ی کار پس از تکمیل» است؛ thread در انتظار I/O مشغول نمی‌ماند و مقیاس‌پذیری وب‌سرور بهتر می‌شود.",
+      "explanation": "```csharp\npublic async Task<User?> GetAsync(int id, CancellationToken ct)\n{\n    var user = await _db.Users.FindAsync([id], ct);\n    return user;\n}\n```\nقواعد: نام متد با `Async` تمام شود، `Task`/`Task<T>` برگردان (نه `async void` که خطاهایش قابل گرفتن نیست)، `CancellationToken` را پاس بده، و از `.Result`/`.Wait()` روی Task پرهیز کن (خطر deadlock و بلاک شدن thread). برای کار CPU-bound سنگین در ASP.NET Core `Task.Run` معمولاً مفید نیست (thread pool درخواست را مصرف می‌کند).",
+      "commonMistake": "صدا زدن `.Result` روی Task داخل متد سینکرون و deadlock/بلاک thread.",
+      "followUp": "چرا `async void` خطرناک است؟",
+      "estimatedSeconds": 55,
+      "minVersion": "8",
+      "tags": [
+        "async-await",
+        "tasks",
+        "csharp"
+      ],
+      "choices": [
+        {
+          "text": "`async void` بهترین نوع بازگشتی برای همه‌ی متدها است"
+        },
+        {
+          "text": "`await` thread را تا پایان کار بلاک می‌کند"
+        },
+        {
+          "text": "`async` متد را روی thread جدید اجرا می‌کند و همیشه CPU-bound را سریع‌تر می‌کند"
+        },
+        {
+          "text": "متد `async` وقتی به `await` روی کار ناتمام می‌رسد thread را آزاد می‌کند و بعداً ادامه می‌دهد؛ برای I/O مناسب است و `async void` را فقط برای event handlerها استفاده کن",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "dotnet-di-lifetimes",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "تفاوت lifetime سرویس‌ها `Transient`، `Scoped` و `Singleton` در DI داخلی ASP.NET Core چیست؟",
+      "shortAnswer": "انتخاب lifetime بر اساس state و هزینه‌ی ساخت: `DbContext` معمولاً Scoped، سرویس stateless سبک Transient/Singleton، cache و config Singleton.",
+      "explanation": "```csharp\nbuilder.Services.AddTransient<IEmailBuilder, EmailBuilder>();\nbuilder.Services.AddScoped<AppDbContext>();          // با AddDbContext پیش‌فرض Scoped\nbuilder.Services.AddSingleton<IClock, SystemClock>();\n```\nقانون: سرویس با عمر بلندتر نباید وابسته به سرویس با عمر کوتاه‌تر باشد (captive dependency): Singleton که Scoped بگیرد ممکن است `DbContext` را برای همیشه نگه دارد و thread-safe هم نیست. در محیط Development با `ValidateScopes` این خطا هنگام شروع/resolve گزارش می‌شود. اگر Singleton به سرویس Scoped نیاز دارد از `IServiceScopeFactory` استفاده کن.",
+      "commonMistake": "تزریق `DbContext` به یک Singleton.",
+      "followUp": "captive dependency چیست و چطور کشفش می‌کنی؟",
+      "estimatedSeconds": 55,
+      "minVersion": "8",
+      "tags": [
+        "dependency-injection",
+        "lifetimes",
+        "aspnet-core"
+      ],
+      "choices": [
+        {
+          "text": "Scoped مثل Singleton است"
+        },
+        {
+          "text": "Transient هر بار که درخواست شود نمونه‌ی جدید، Scoped یک نمونه به‌ازای هر scope (در وب: هر درخواست HTTP)، Singleton یک نمونه برای کل عمر برنامه",
+          "isCorrect": true
+        },
+        {
+          "text": "Transient یک‌بار ساخته و کش می‌شود"
+        },
+        {
+          "text": "Singleton به‌ازای هر درخواست ساخته می‌شود"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-middleware-order",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "چرا ترتیب `app.Use...` در Program.cs مهم است؟",
+      "shortAnswer": "pipeline زنجیره‌ای است؛ هر middleware می‌تواند درخواست را به بعدی بدهد (`await next()`) یا کوتاه کند.",
+      "explanation": "ترتیب معمول:\n```csharp\napp.UseExceptionHandler();\napp.UseHttpsRedirection();\napp.UseRouting();          // (در مدل minimal اغلب ضمنی)\napp.UseCors();\napp.UseAuthentication();\napp.UseAuthorization();\napp.MapControllers();\n```\nCORS باید قبل از auth و endpoint باشد؛ exception handler اول تا خطای بقیه را بگیرد؛ static files معمولاً زود (تا برای فایل استاتیک auth اجرا نشود). اشتباه ترتیب باعث باگ‌های امنیتی (endpoint بدون auth) یا CORS شکسته می‌شود.",
+      "commonMistake": "گذاشتن `UseAuthorization` قبل از `UseAuthentication`.",
+      "followUp": "چطور یک middleware سفارشی ساده می‌نویسی؟",
+      "estimatedSeconds": 55,
+      "minVersion": "8",
+      "tags": [
+        "middleware",
+        "pipeline",
+        "aspnet-core"
+      ],
+      "choices": [
+        {
+          "text": "چون درخواست از میان middlewareها به ترتیب ثبت عبور می‌کند و پاسخ برعکس برمی‌گردد؛ مثلاً `UseAuthentication` باید قبل از `UseAuthorization` و هر دو قبل از endpoint اجرا شوند",
+          "isCorrect": true
+        },
+        {
+          "text": "ترتیب اهمیتی ندارد و ASP.NET خودش مرتب می‌کند"
+        },
+        {
+          "text": "فقط `UseHttpsRedirection` ترتیب‌دار است"
+        },
+        {
+          "text": "middlewareها به‌صورت موازی اجرا می‌شوند"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-minimal-vs-controllers",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "Minimal APIs و Controllers چه تفاوتی دارند و چه زمانی کدام؟",
+      "shortAnswer": "هر دو روی همان زیرساخت (routing، DI، middleware) هستند. Minimal APIs از .NET 6 معرفی و هر نسخه قوی‌تر شدند (endpoint filters، TypedResults، OpenAPI، validation در .NET 10).",
+      "explanation": "```csharp\nvar app = WebApplication.Create(args);\napp.MapGet(\"/users/{id:int}\", async (int id, AppDb db) =>\n    await db.Users.FindAsync(id) is { } u ? Results.Ok(u) : Results.NotFound());\napp.Run();\n```\nمعیار: پروژه‌ی کوچک/میکروسرویس ← Minimal؛ API بزرگ با filterها، versioning، و تیم آشنا با MVC ← Controllers؛ ترکیب هم ممکن است. در Minimal APIs برای سازمان‌دهی از `MapGroup` و کلاس‌های endpoint/extension method استفاده کن تا `Program.cs` انبوه نشود.",
+      "commonMistake": "ریختن همه‌ی endpointها در `Program.cs` بدون گروه‌بندی.",
+      "followUp": "`MapGroup` چه مزیتی دارد؟",
+      "estimatedSeconds": 55,
+      "minVersion": "8",
+      "tags": [
+        "minimal-apis",
+        "controllers",
+        "aspnet-core"
+      ],
+      "choices": [
+        {
+          "text": "Controllers دیگر در .NET 8+ کار نمی‌کنند"
+        },
+        {
+          "text": "Minimal APIs فقط برای تست هستند"
+        },
+        {
+          "text": "Minimal APIs با کد کمتر و بدون کلاس controller endpoint می‌سازند؛ Controllers ساختار، filterها و model binding سنتی و کنوانسیون‌های غنی‌تر برای APIهای بزرگ دارند و هر دو در ASP.NET Core پشتیبانی می‌شوند",
+          "isCorrect": true
+        },
+        {
+          "text": "Minimal APIs منسوخ شده‌اند"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-options-pattern",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "Options pattern در ASP.NET Core برای چیست؟",
+      "shortAnswer": "به‌جای خواندن رشته‌ای `configuration[\"A:B\"]` در همه‌جا، تنظیمات نوع‌دار، قابل اعتبارسنجی و قابل تست داری.",
+      "explanation": "```csharp\npublic sealed class SmtpOptions { public required string Host { get; init; } public int Port { get; init; } = 587; }\n\nbuilder.Services.AddOptions<SmtpOptions>()\n    .Bind(builder.Configuration.GetSection(\"Smtp\"))\n    .ValidateDataAnnotations()\n    .ValidateOnStart();          // خطا هنگام شروع، نه اولین استفاده\n```\nتفاوت‌ها: `IOptions<T>` مقدار ثابت (Singleton)، `IOptionsSnapshot<T>` به‌ازای هر درخواست (Scoped) و `IOptionsMonitor<T>` با تغییر فایل به‌روز می‌شود و نوتیفیکیشن دارد. secretها را در appsettings commit نکن؛ از user-secrets (dev)، متغیر محیطی یا Key Vault استفاده کن.",
+      "commonMistake": "نوشتن secret در `appsettings.json` و commit کردن آن.",
+      "followUp": "`ValidateOnStart` چه فایده‌ای دارد؟",
+      "estimatedSeconds": 55,
+      "minVersion": "8",
+      "tags": [
+        "configuration",
+        "options",
+        "aspnet-core"
+      ],
+      "choices": [
+        {
+          "text": "جایگزین middleware است"
+        },
+        {
+          "text": "bind کردن بخشی از configuration (مثل appsettings.json) به یک کلاس نوع‌دار و تزریق آن با `IOptions<T>`/`IOptionsSnapshot<T>`/`IOptionsMonitor<T>`",
+          "isCorrect": true
+        },
+        {
+          "text": "فقط برای ذخیره‌ی رمز عبور در کد است"
+        },
+        {
+          "text": "برای مقداردهی خودکار DbContext است"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-record-equality",
+      "level": "Junior",
+      "type": "CodeOutput",
+      "text": "خروجی چیست؟",
+      "codeSnippet": "var a = new Point(1, 2); var b = new Point(1, 2);\nvar c = new Box { X = 1 }; var d = new Box { X = 1 };\nConsole.WriteLine($\"{a == b} {c == d} {ReferenceEquals(a, b)}\");\n\nrecord Point(int X, int Y);\nclass Box { public int X; }",
+      "codeLanguage": "csharp",
+      "shortAnswer": "`record` به‌صورت پیش‌فرض برابری مقداری (value-based) روی propertyها دارد ولی `class` معمولی برابری ارجاعی؛ `ReferenceEquals` هم دو شیء متفاوت است.",
+      "explanation": "نتیجه با اجرای واقعی تأیید شد. `record` (و `record struct`) `Equals`, `GetHashCode`, `ToString` و deconstruction و `with` (کپی غیرمخرب) می‌سازد:\n```csharp\nvar b = a with { Y = 5 };\n```\nبرای DTO، value objectها و پیام‌ها عالی است. نکته: برابری record فقط روی propertyهای positional/تعریف‌شده اعمال می‌شود و مقایسه‌ی عمیق مجموعه‌ها (مثل `List<int>` داخل record) را به‌صورت ارجاعی انجام می‌دهد. برای entityهای EF معمولاً `class` بهتر است (هویت بر اساس Id، tracking).",
+      "commonMistake": "استفاده از record برای entity دیتابیس با برابری مقداری که با identity/tracking جور نیست.",
+      "followUp": "`record class` و `record struct` چه فرقی دارند؟",
+      "estimatedSeconds": 55,
+      "minVersion": "8",
+      "tags": [
+        "records",
+        "equality",
+        "csharp"
+      ],
+      "choices": [
+        {
+          "text": "`True True True`"
+        },
+        {
+          "text": "`True False False`",
+          "isCorrect": true
+        },
+        {
+          "text": "`False False False`"
+        },
+        {
+          "text": "`True True False`"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-using-dispose",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "`using var stream = File.OpenRead(path);` چه فایده‌ای دارد؟",
+      "shortAnswer": "GC فقط حافظه‌ی managed را جمع می‌کند؛ منابع مثل file handle، socket و اتصال DB باید صریحاً با `IDisposable` آزاد شوند. `using` معادل `try/finally` با `Dispose` است.",
+      "explanation": "```csharp\nusing var conn = new SqlConnection(cs);      // dispose در پایان scope\nawait using var tx = await conn.BeginTransactionAsync();   // IAsyncDisposable\n```\nبرای منابع async از `IAsyncDisposable` و `await using` استفاده کن. اگر کلاست منبع غیرمدیریتی نگه می‌دارد الگوی Dispose (و در صورت نیاز finalizer/SafeHandle) را درست پیاده کن. `HttpClient` را برای هر درخواست `new` و dispose نکن (مشکل socket exhaustion)؛ از `IHttpClientFactory` استفاده کن.",
+      "commonMistake": "ساختن `new HttpClient()` در هر درخواست داخل `using`.",
+      "followUp": "تفاوت `Dispose` و finalizer چیست؟",
+      "estimatedSeconds": 50,
+      "minVersion": "8",
+      "tags": [
+        "idisposable",
+        "resources",
+        "csharp"
+      ],
+      "choices": [
+        {
+          "text": "حافظه‌ی managed را فوراً آزاد می‌کند و GC را دور می‌زند"
+        },
+        {
+          "text": "فایل را قفل نگه می‌دارد تا برنامه بسته شود"
+        },
+        {
+          "text": "فقط برای کتابخانه‌های System.IO کار می‌کند"
+        },
+        {
+          "text": "در پایان scope جاری متد `Dispose()` را خودکار (حتی در صورت exception) صدا می‌زند و منبع غیرمدیریتی (فایل، اتصال) آزاد می‌شود",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "dotnet-throw-vs-throw-ex",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "تفاوت `throw;` و `throw ex;` داخل `catch` چیست؟",
+      "shortAnswer": "برای حفظ ریشه‌ی خطا از `throw;` استفاده کن. اگر می‌خواهی اطلاعات اضافه بدهی، exception جدید بساز و اصلی را به‌عنوان `innerException` بده.",
+      "explanation": "```csharp\ntry { Save(); }\ncatch (DbUpdateException ex)\n{\n    _logger.LogError(ex, \"ذخیره ناموفق\");\n    throw;                                          // ✅ stack اصلی حفظ می‌شود\n    // throw new DomainException(\"...\", ex);        // ✅ یا wrap با inner\n}\n```\nنکات: exceptionها را فقط برای شرایط استثنایی استفاده کن (نه کنترل جریان معمول)؛ `catch (Exception)` کلی فقط در مرز‌های سیستم (مثل middleware سراسری)؛ از exception filter (`catch (X) when (cond)`) برای شرایط دقیق‌تر استفاده کن؛ در متدهای async خطا روی Task قرار می‌گیرد و با `await` throw می‌شود.",
+      "commonMistake": "بلع exception با `catch { }` خالی.",
+      "followUp": "exception filter (`when`) چه مزیتی دارد؟",
+      "estimatedSeconds": 50,
+      "minVersion": "8",
+      "tags": [
+        "exceptions",
+        "error-handling",
+        "csharp"
+      ],
+      "choices": [
+        {
+          "text": "`throw ex;` بهتر است چون پیام را کامل‌تر می‌کند"
+        },
+        {
+          "text": "`throw;` فقط در متدهای async مجاز است"
+        },
+        {
+          "text": "`throw;` استثنا را با stack trace اصلی دوباره پرتاب می‌کند ولی `throw ex;` stack trace را از نقطه‌ی جدید بازنویسی می‌کند و اطلاعات محل اصلی خطا را از دست می‌دهی",
+          "isCorrect": true
+        },
+        {
+          "text": "هیچ تفاوتی ندارند"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-apicontroller-validation",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "اتریبیوت `[ApiController]` روی یک controller چه امکاناتی می‌دهد؟",
+      "shortAnswer": "در پروژه‌های Web API این اتریبیوت boilerplate اعتبارسنجی را حذف می‌کند: نیازی به `if (!ModelState.IsValid)` نیست.",
+      "explanation": "```csharp\n[ApiController, Route(\"api/[controller]\")]\npublic class UsersController : ControllerBase\n{\n    [HttpPost]\n    public IActionResult Create(CreateUserRequest req) => Ok();   // اگر req نامعتبر باشد 400 خودکار\n}\n\npublic record CreateUserRequest([Required, EmailAddress] string Email, [Range(18, 120)] int Age);\n```\nبرای اعتبارسنجی پیچیده‌تر FluentValidation یا اعتبارسنجی دامنه در لایه‌ی Application. در .NET 10 برای Minimal APIs هم پشتیبانی داخلی از validation اضافه شد.",
+      "commonMistake": "نادیده گرفتن اعتبارسنجی سمت سرور با فرض اینکه UI اعتبارسنجی می‌کند.",
+      "followUp": "چطور پاسخ 400 خودکار را سفارشی‌سازی می‌کنی؟",
+      "estimatedSeconds": 50,
+      "minVersion": "8",
+      "tags": [
+        "validation",
+        "controllers",
+        "aspnet-core"
+      ],
+      "choices": [
+        {
+          "text": "اعتبارسنجی خودکار model (پاسخ 400 با `ProblemDetails` هنگام نامعتبر بودن)، الزام attribute routing، استنباط منبع binding (مثل `[FromBody]`) و پاسخ‌های استاندارد خطا",
+          "isCorrect": true
+        },
+        {
+          "text": "فقط اجازه‌ی نوشتن controller بدون constructor را می‌دهد"
+        },
+        {
+          "text": "کد را به Minimal API تبدیل می‌کند"
+        },
+        {
+          "text": "دسترسی را فقط برای کاربران لاگین‌شده باز می‌کند"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-dotnet-lts-sts",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": ".NET 8، .NET 9 و .NET 10 از نظر پشتیبانی چه وضعیتی دارند؟",
+      "shortAnswer": "مایکروسافت هر سال در نوامبر یک نسخه‌ی major می‌دهد؛ نسخه‌های زوج LTS و فرد STS هستند. تاریخ پایان پشتیبانی هر نسخه را از صفحه‌ی رسمی سیاست پشتیبانی بررسی کن.",
+      "explanation": "نکات: برای محصول production معمولاً LTS انتخاب می‌شود. مهاجرت بین نسخه‌ها در .NET مدرن نسبتاً ساده است (تغییر `TargetFramework` و رفع breaking changeهای مستندشده). SDK جدید می‌تواند پروژه‌ی قدیمی‌تر را build کند (با `global.json` پین کن). ویژگی‌های زبان (C# 12/13/14) به SDK/`LangVersion` وابسته‌اند نه فقط runtime. .NET 10 با C# 14 همراه است.",
+      "commonMistake": "ماندن روی نسخه‌ی بدون پشتیبانی امنیتی.",
+      "followUp": "`global.json` برای چه کاری است؟",
+      "estimatedSeconds": 40,
+      "minVersion": "10",
+      "tags": [
+        "dotnet",
+        "lts",
+        "versions"
+      ],
+      "choices": [
+        {
+          "text": "فقط نسخه‌های زوج، STS هستند"
+        },
+        {
+          "text": "همه‌ی نسخه‌ها LTS هستند"
+        },
+        {
+          "text": ".NET 8 و .NET 10 نسخه‌های LTS (پشتیبانی بلندمدت) هستند و .NET 9 نسخه‌ی STS (پشتیبانی کوتاه‌تر)؛ .NET 10 در نوامبر 2025 منتشر شد و LTS فعلی است",
+          "isCorrect": true
+        },
+        {
+          "text": ".NET 9 LTS است و .NET 10 STS"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-async-deadlock",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "چرا `var r = GetAsync().Result;` در برخی محیط‌ها (مثل UI یا ASP.NET قدیمی با SynchronizationContext) deadlock می‌سازد؟",
+      "shortAnswer": "در ASP.NET Core SynchronizationContext وجود ندارد پس deadlock کلاسیک رخ نمی‌دهد، ولی بلاک کردن thread pool باعث thread starvation و افت مقیاس‌پذیری می‌شود.",
+      "explanation": "قواعد: «async all the way» (async را تا بالا ادامه بده)، از `.Result`/`.Wait()`/`GetAwaiter().GetResult()` پرهیز کن. در کتابخانه‌های عمومی `ConfigureAwait(false)` می‌تواند لازم باشد تا به context گیر نکند (در ASP.NET Core اپلیکیشن معمولاً لازم نیست). اگر در نقطه‌ی ورود سینکرون مجبوری (مثلاً `Main` قدیمی)، از `async Task Main` استفاده کن.",
+      "commonMistake": "صدا زدن `.Result` در کد وب و ایجاد thread starvation زیر بار زیاد.",
+      "followUp": "`ConfigureAwait(false)` دقیقاً چه می‌کند؟",
+      "estimatedSeconds": 60,
+      "minVersion": "8",
+      "tags": [
+        "async-await",
+        "deadlock",
+        "threading"
+      ],
+      "choices": [
+        {
+          "text": "چون thread اصلی روی `.Result` بلاک است در حالی که ادامه‌ی `await` می‌خواهد روی همان context برگردد؛ هر دو منتظر همدیگر می‌مانند",
+          "isCorrect": true
+        },
+        {
+          "text": "چون `async` فقط در thread pool کار می‌کند"
+        },
+        {
+          "text": "چون Task لغو شده است"
+        },
+        {
+          "text": "چون `Result` همیشه exception می‌دهد"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-whenall-parallel",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "چطور دو فراخوانی async مستقل را موازی اجرا می‌کنی؟",
+      "shortAnswer": "`await` پشت‌سرهم ترتیبی است: دومی بعد از اتمام اولی شروع می‌شود.",
+      "explanation": "```csharp\nvar userTask = _users.GetAsync(id, ct);\nvar ordersTask = _orders.ListAsync(id, ct);\nawait Task.WhenAll(userTask, ordersTask);\nvar (user, orders) = (await userTask, await ordersTask);\n```\nنکات: برای `DbContext` موازی‌سازی روی یک instance ممنوع است (thread-safe نیست)؛ برای هر کار context جدا یا ترتیبی. برای محدود کردن همزمانی روی مجموعه‌ی بزرگ از `Parallel.ForEachAsync(..., new ParallelOptions { MaxDegreeOfParallelism = 8 })` استفاده کن (از .NET 6). اگر یکی از Taskها خطا بدهد `WhenAll` همه را منتظر می‌ماند و اولین exception را throw می‌کند (بقیه در `Task.Exception.InnerExceptions`).",
+      "commonMistake": "اجرای موازی چند query روی یک `DbContext` مشترک.",
+      "followUp": "چطور تعداد درخواست‌های همزمان به یک سرویس بیرونی را محدود می‌کنی؟",
+      "estimatedSeconds": 60,
+      "minVersion": "8",
+      "tags": [
+        "tasks",
+        "concurrency",
+        "async-await"
+      ],
+      "choices": [
+        {
+          "text": "با `Task.Run` روی هر دو و `.Wait()`"
+        },
+        {
+          "text": "هر دو Task را شروع می‌کنی و با `await Task.WhenAll(t1, t2)` منتظر می‌مانی (نه `await` پشت‌سرهم)",
+          "isCorrect": true
+        },
+        {
+          "text": "`await a(); await b();` موازی‌شان می‌کند"
+        },
+        {
+          "text": "با `Thread.Sleep` بین آنها"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-ef-tracking",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "`AsNoTracking()` در EF Core چه کاری می‌کند و کی مناسب است؟",
+      "shortAnswer": "Tracking برای تشخیص تغییر و `SaveChanges` لازم است. در endpointهای خواندنی معمولاً لازم نیست و هزینه دارد.",
+      "explanation": "```csharp\nvar list = await db.Products.AsNoTracking()\n    .Where(p => p.IsActive)\n    .Select(p => new ProductDto(p.Id, p.Name, p.Price))   // projection: حتی سبک‌تر\n    .ToListAsync(ct);\n```\nبا `Select` به DTO معمولاً tracking لازم نیست و فقط ستون‌های لازم خوانده می‌شود. می‌توان پیش‌فرض را روی context تنظیم کرد: `UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)`. با `AsNoTracking` اگر همان entity در query دو بار بیاید دو نمونه‌ی جدا می‌شود (identity resolution ندارد مگر `AsNoTrackingWithIdentityResolution`).",
+      "commonMistake": "استفاده از AsNoTracking و بعد تغییر entity و انتظار ذخیره‌ی آن با `SaveChanges`.",
+      "followUp": "projection با `Select` چه مزیتی نسبت به `Include` دارد؟",
+      "estimatedSeconds": 55,
+      "minVersion": "8",
+      "tags": [
+        "ef-core",
+        "performance",
+        "tracking"
+      ],
+      "choices": [
+        {
+          "text": "فقط با SQL خام کار می‌کند"
+        },
+        {
+          "text": "entityهای خوانده‌شده را در change tracker ثبت نمی‌کند؛ برای queryهای فقط‌خواندنی سریع‌تر و کم‌حافظه‌تر است",
+          "isCorrect": true
+        },
+        {
+          "text": "تغییرات entity را به‌صورت خودکار ذخیره می‌کند"
+        },
+        {
+          "text": "query را cache می‌کند"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-ef-n-plus-one",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "مشکل N+1 در EF Core چیست و چطور برطرفش می‌کنی؟",
+      "shortAnswer": "N+1 یعنی 1 query برای لیست + N query برای داده‌ی وابسته (اغلب با lazy loading یا دسترسی داخل حلقه).",
+      "explanation": "```csharp\n// ❌ N+1 (با lazy loading یا دسترسی داخل حلقه)\nforeach (var o in orders) Console.WriteLine(o.Customer.Name);\n\n// ✅ eager loading\nvar orders = await db.Orders.Include(o => o.Customer).ToListAsync(ct);\n\n// ✅✅ projection (فقط ستون‌های لازم)\nvar dto = await db.Orders.Select(o => new { o.Id, Customer = o.Customer.Name }).ToListAsync(ct);\n```\nبا Include روی collectionهای بزرگ ممکن است join «انفجار کارتزین» بسازد؛ آنجا `AsSplitQuery()` (چند query جدا) بهتر است. لاگ SQL (`EnableSensitiveDataLogging` فقط dev، یا `LogTo`) را ببین و با ابزارهایی مثل MiniProfiler/Application Insights پیدا کن. lazy loading proxy را معمولاً غیرفعال نگه دار.",
+      "commonMistake": "فعال کردن lazy loading و ندانستن اینکه در حلقه صدها query می‌زند.",
+      "followUp": "«cartesian explosion» چیست و `AsSplitQuery` چه می‌کند؟",
+      "estimatedSeconds": 60,
+      "minVersion": "8",
+      "tags": [
+        "ef-core",
+        "n-plus-one",
+        "performance"
+      ],
+      "choices": [
+        {
+          "text": "با `ToList()` بیشتر روی همه‌ی کدها حل می‌شود"
+        },
+        {
+          "text": "خواندن لیست و بعد یک query جدا برای هر آیتم جهت دسترسی به navigation؛ با `Include`، projection با `Select` یا `AsSplitQuery` برطرف می‌شود",
+          "isCorrect": true
+        },
+        {
+          "text": "فقط با نوشتن SQL خام قابل رفع است"
+        },
+        {
+          "text": "EF Core هیچ‌وقت چند query نمی‌زند"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-ef-migrations",
+      "level": "Mid",
+      "type": "ShortAnswer",
+      "text": "workflow مایگریشن در EF Core را توضیح بده و در production چطور اعمال می‌کنی؟",
+      "shortAnswer": "مدل (entityها و configuration) را تغییر می‌دهی، `dotnet ef migrations add Name` یک migration (کد C# با `Up/Down`) می‌سازد، و با `dotnet ef database update` یا اسکریپت SQL اعمال می‌شود. در production معمولاً اسکریپت idempotent یا bundle را در pipeline اجرا می‌کنیم، نه `Database.Migrate()` در startup برنامه‌ی چند-instance.",
+      "explanation": "```bash\ndotnet ef migrations add AddOrderStatus\ndotnet ef migrations script --idempotent -o migrate.sql   # برای DBA/CI\ndotnet ef migrations bundle                               # فایل اجرایی مایگریشن\n```\nنکات: migration را review کن (به‌ویژه drop column/داده‌های موجود)، تغییرات مخرب را چندمرحله‌ای (expand/contract) انجام بده تا zero-downtime باشد، از `HasData`/seed با احتیاط استفاده کن، و مایگریشن‌ها را در source control نگه دار. `EnsureCreated` برای تست/نمونه است و با migrations قابل ترکیب نیست.",
+      "commonMistake": "اجرای `Database.Migrate()` هم‌زمان در چند instance و race یا قفل شدن schema.",
+      "followUp": "چطور تغییر «تغییر نام ستون» را بدون از دست رفتن داده انجام می‌دهی؟",
+      "estimatedSeconds": 100,
+      "minVersion": "8",
+      "tags": [
+        "ef-core",
+        "migrations",
+        "deployment"
+      ]
+    },
+    {
+      "id": "dotnet-dbcontext-lifetime",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "چرا `DbContext` باید Scoped باشد و thread-safe نیست؟",
+      "shortAnswer": "`AddDbContext` به‌صورت پیش‌فرض Scoped ثبت می‌کند. Singleton بودن باعث رشد نامحدود change tracker، داده‌ی کهنه و race می‌شود.",
+      "explanation": "برای کارهای پس‌زمینه‌ی خارج از درخواست (Hosted Service) یا موازی از `IDbContextFactory<T>` استفاده کن و برای هر واحد کار context جدید بساز:\n```csharp\nbuilder.Services.AddDbContextFactory<AppDbContext>(o => o.UseSqlite(cs));\nawait using var db = await factory.CreateDbContextAsync(ct);\n```\n`AddDbContextPool` نمونه‌ها را reuse می‌کند (کاهش هزینه‌ی ساخت) ولی state را ریست می‌کند و نباید state سفارشی نگه دارد. هرگز یک DbContext را بین چند `Task.WhenAll` هم‌زمان به اشتراک نگذار.",
+      "commonMistake": "ثبت DbContext به‌صورت Singleton یا استفاده‌ی همزمان در چند Task.",
+      "followUp": "چه زمانی `AddDbContextPool` را انتخاب می‌کنی؟",
+      "estimatedSeconds": 55,
+      "minVersion": "8",
+      "tags": [
+        "ef-core",
+        "dbcontext",
+        "di"
+      ],
+      "choices": [
+        {
+          "text": "چون DbContext باید Singleton باشد تا cache شود"
+        },
+        {
+          "text": "فقط در Transient کار می‌کند"
+        },
+        {
+          "text": "چون DbContext کاملاً thread-safe است"
+        },
+        {
+          "text": "چون یک instance حالت (change tracker، اتصال) دارد و برای یک واحد کار (مثلاً یک درخواست) طراحی شده؛ استفاده‌ی همزمان از چند thread پشتیبانی نمی‌شود",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "dotnet-iqueryable-vs-ienumerable",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "چرا فیلتر کردن روی `IEnumerable<T>` به‌جای `IQueryable<T>` در EF Core می‌تواند فاجعه باشد؟",
+      "shortAnswer": "`IQueryable<T>` درخت عبارت (expression tree) نگه می‌دارد که provider (EF) به SQL ترجمه می‌کند. `AsEnumerable()`/`ToList()` مرز «اجرا در دیتابیس» و «اجرا در حافظه» است.",
+      "explanation": "```csharp\n// ✅ فیلتر در SQL\nvar q = db.Orders.Where(o => o.Total > 100);\n\n// ❌ اول همه را بیاور، بعد در حافظه فیلتر کن\nvar bad = db.Orders.AsEnumerable().Where(o => o.Total > 100);\n```\nهمچنین repository که `IQueryable` برمی‌گرداند لایه‌ی دیتابیس را «نشت» می‌دهد ولی `IEnumerable`/`List` برگرداندن قبل از اعمال فیلترهای caller باعث بارگذاری بیش از حد می‌شود. راه‌حل: متدهای repository با پارامترهای فیلتر/pagination، یا استفاده‌ی مستقیم از `DbContext` در handlerها. توابع C# دلخواه داخل `Where` قابل ترجمه به SQL نیستند و ممکن است خطای ترجمه یا اجرا در حافظه بدهند.",
+      "commonMistake": "صدا زدن `ToList()` قبل از `Where` و `Skip/Take`.",
+      "followUp": "expression tree چیست و چه فرقی با delegate (`Func`) دارد؟",
+      "estimatedSeconds": 60,
+      "minVersion": "8",
+      "tags": [
+        "linq",
+        "ef-core",
+        "iqueryable"
+      ],
+      "choices": [
+        {
+          "text": "چون `IEnumerable` باعث می‌شود بقیه‌ی عملیات (Where و …) در حافظه‌ی برنامه اجرا شود و کل جدول ابتدا از دیتابیس خوانده شود؛ `IQueryable` شرط را به SQL ترجمه می‌کند",
+          "isCorrect": true
+        },
+        {
+          "text": "چون `IQueryable` فقط در حافظه کار می‌کند"
+        },
+        {
+          "text": "چون `IEnumerable` از SQL خام استفاده می‌کند"
+        },
+        {
+          "text": "هیچ تفاوتی وجود ندارد"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-custom-middleware",
+      "level": "Mid",
+      "type": "ShortAnswer",
+      "text": "یک middleware سفارشی برای لاگ زمان اجرای درخواست بنویس.",
+      "shortAnswer": "middleware می‌تواند inline با `app.Use` یا به‌صورت کلاس (با `InvokeAsync(HttpContext, RequestDelegate)` یا `IMiddleware`) نوشته شود. باید `await next(context)` را صدا بزند وگرنه pipeline قطع می‌شود.",
+      "explanation": "```csharp\npublic sealed class TimingMiddleware(RequestDelegate next, ILogger<TimingMiddleware> logger)\n{\n    public async Task InvokeAsync(HttpContext context)\n    {\n        var sw = Stopwatch.StartNew();\n        try { await next(context); }\n        finally\n        {\n            sw.Stop();\n            logger.LogInformation(\"{Method} {Path} -> {Status} in {Elapsed} ms\",\n                context.Request.Method, context.Request.Path, context.Response.StatusCode, sw.ElapsedMilliseconds);\n        }\n    }\n}\napp.UseMiddleware<TimingMiddleware>();\n```\nنکات: constructor برای وابستگی‌های Singleton و `InvokeAsync` برای Scoped (چون middleware یک‌بار ساخته می‌شود)؛ بعد از شروع نوشتن response نمی‌توان header عوض کرد؛ برای header قبل از ارسال از `context.Response.OnStarting` استفاده کن؛ برای موارد وابسته به endpoint (مجوز، caching) `filter` یا endpoint filter مناسب‌تر است.",
+      "commonMistake": "فراموش کردن `await next(context)` و بلاک شدن همه‌ی درخواست‌ها.",
+      "followUp": "تفاوت middleware و filter در MVC چیست؟",
+      "estimatedSeconds": 90,
+      "minVersion": "8",
+      "tags": [
+        "middleware",
+        "aspnet-core",
+        "logging"
+      ]
+    },
+    {
+      "id": "dotnet-filters-vs-middleware",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "چه زمانی filter (action/endpoint filter) را به middleware ترجیح می‌دهی؟",
+      "shortAnswer": "Middleware در سطح HTTP pipeline کار می‌کند (قبل از دانستن endpoint)؛ filterها بعد از انتخاب endpoint و در چرخه‌ی MVC/Minimal endpoint اجرا می‌شوند و به آرگومان‌ها و نتیجه دسترسی دارند.",
+      "explanation": "نمونه‌ها: لاگ کل درخواست/exception handler سراسری/CORS/auth ← middleware. اعتبارسنجی آرگومان، caching سطح action، تبدیل نتیجه، audit خاص endpoint ← filter. در Minimal APIs از **endpoint filters** استفاده می‌شود:\n```csharp\ngroup.MapPost(\"/orders\", CreateOrder).AddEndpointFilter(async (ctx, next) =>\n{\n    var dto = ctx.GetArgument<CreateOrder>(0);\n    return dto.Quantity > 0 ? await next(ctx) : Results.ValidationProblem(new() { [\"quantity\"] = [\"باید مثبت باشد\"] });\n});\n```",
+      "commonMistake": "نوشتن منطق وابسته به آرگومان action در middleware که به آن دسترسی ندارد.",
+      "followUp": "ترتیب اجرای انواع filter در MVC چیست؟",
+      "estimatedSeconds": 55,
+      "minVersion": "8",
+      "tags": [
+        "filters",
+        "middleware",
+        "aspnet-core"
+      ],
+      "choices": [
+        {
+          "text": "هیچ فرقی ندارند"
+        },
+        {
+          "text": "filter همیشه قبل از routing اجرا می‌شود"
+        },
+        {
+          "text": "وقتی منطق به context endpoint مثل model binding، آرگومان‌های action یا نتیجه‌ی action وابسته است؛ middleware برای نگرانی‌های سراسری‌تر که به MVC وابسته نیستند",
+          "isCorrect": true
+        },
+        {
+          "text": "middleware نمی‌تواند به response دسترسی داشته باشد"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-jwt-auth-policies",
+      "level": "Mid",
+      "type": "Conceptual",
+      "text": "احراز هویت با JWT و مجوز بر اساس policy در ASP.NET Core را توضیح بده.",
+      "shortAnswer": "احراز هویت (Authentication) هویت را از توکن (JWT Bearer) می‌سازد و `ClaimsPrincipal` را روی درخواست می‌گذارد. مجوز (Authorization) با `[Authorize]`، نقش‌ها یا policyها (شرط روی claimها) تصمیم می‌گیرد آیا مجاز است. ترتیب middleware: `UseAuthentication` سپس `UseAuthorization`.",
+      "explanation": "```csharp\nbuilder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\n    .AddJwtBearer(o =>\n    {\n        o.Authority = \"https://login.example.com\";\n        o.TokenValidationParameters = new()\n        {\n            ValidateAudience = true, ValidAudience = \"api\",\n            ValidateIssuer = true, ValidateLifetime = true,\n            ClockSkew = TimeSpan.FromMinutes(1),\n        };\n    });\nbuilder.Services.AddAuthorizationBuilder()\n    .AddPolicy(\"CanRefund\", p => p.RequireClaim(\"scope\", \"orders.refund\").RequireRole(\"Support\"));\n\napp.MapPost(\"/refund\", Refund).RequireAuthorization(\"CanRefund\");\n```\nنکات: کلید/authority را از یک IdP معتبر بگیر (OpenID Connect)، خودت ثبت‌نام/رمز را از صفر ننویس؛ access token کوتاه‌عمر + refresh token امن؛ اعتبارسنجی issuer/audience/lifetime/امضا را غیرفعال نکن؛ برای مجوز مبتنی بر منبع (فقط مالک می‌تواند ویرایش کند) از `IAuthorizationService` و handler سفارشی استفاده کن؛ توکن را در localStorage نگه ندار (XSS) و برای وب‌اپ cookie امن یا BFF را بسنج.",
+      "commonMistake": "خاموش کردن `ValidateIssuer/ValidateAudience` برای «کار کردن سریع».",
+      "followUp": "تفاوت authentication و authorization و حمله‌ی IDOR چیست؟",
+      "estimatedSeconds": 140,
+      "minVersion": "8",
+      "tags": [
+        "authentication",
+        "authorization",
+        "jwt"
+      ]
+    },
+    {
+      "id": "dotnet-problem-details-exception-handler",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "در .NET 8+ برای مدیریت سراسری خطا و پاسخ استاندارد چه استفاده می‌کنی؟",
+      "shortAnswer": "`IExceptionHandler` (از .NET 8) نقطه‌ی توسعه‌ی رسمی برای تبدیل exception به پاسخ است و چند handler به ترتیب امتحان می‌شوند.",
+      "explanation": "نمونه:\n```csharp\npublic sealed class ApiExceptionHandler(IProblemDetailsService problems, ILogger<ApiExceptionHandler> log) : IExceptionHandler\n{\n    public async ValueTask<bool> TryHandleAsync(HttpContext ctx, Exception ex, CancellationToken ct)\n    {\n        var (status, title) = ex switch\n        {\n            NotFoundException => (404, \"Not found\"),\n            ValidationException => (400, \"Invalid request\"),\n            _ => (500, \"Unexpected error\"),\n        };\n        if (status == 500) log.LogError(ex, \"Unhandled\");\n        ctx.Response.StatusCode = status;\n        return await problems.TryWriteAsync(new() { HttpContext = ctx, ProblemDetails = { Status = status, Title = title } });\n    }\n}\nbuilder.Services.AddExceptionHandler<ApiExceptionHandler>().AddProblemDetails();\napp.UseExceptionHandler();\n```\nجزئیات خطای داخلی (stack trace) را در production به کلاینت نده؛ فقط پیام امن و `traceId`. exceptionهای دامنه (NotFound/Validation) را به status مناسب map کن و 500 را لاگ کن.",
+      "commonMistake": "برگرداندن پیام و stack trace exception به کلاینت در production.",
+      "followUp": "`ProblemDetails` چه فیلدهایی دارد و `traceId` چه کمکی می‌کند؟",
+      "estimatedSeconds": 70,
+      "minVersion": "8",
+      "tags": [
+        "error-handling",
+        "problem-details",
+        "aspnet-core"
+      ],
+      "choices": [
+        {
+          "text": "`IExceptionHandler` همراه با `AddProblemDetails()` و `UseExceptionHandler()` تا خطا به پاسخ RFC 7807 (`ProblemDetails`) تبدیل شود",
+          "isCorrect": true
+        },
+        {
+          "text": "`try/catch` در هر action و برگرداندن رشته‌ی خطا"
+        },
+        {
+          "text": "خاموش کردن همه‌ی exceptionها با `catch {}`"
+        },
+        {
+          "text": "فقط `Developer Exception Page` در production"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-options-validate-on-start",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "چه فایده‌ای دارد که options را با `.ValidateOnStart()` ثبت کنیم؟",
+      "shortAnswer": "بدون آن، اعتبارسنجی هنگام اولین resolve شدن `IOptions<T>` انجام می‌شود که ممکن است ساعت‌ها بعد از deploy باشد.",
+      "explanation": "```csharp\nbuilder.Services.AddOptions<JwtOptions>()\n    .BindConfiguration(\"Jwt\")\n    .Validate(o => o.Key.Length >= 32, \"کلید JWT باید حداقل 32 کاراکتر باشد\")\n    .ValidateDataAnnotations()\n    .ValidateOnStart();\n```\nبا این کار خطای پیکربندی (secret گم‌شده، مقدار نامعتبر) در health/startup دیده می‌شود و rollout ناموفق زودتر متوقف می‌شود. این الگو با readiness probe در Kubernetes هم‌خوان است.",
+      "commonMistake": "کشف اشتباه پیکربندی فقط وقتی کاربر واقعی به آن قسمت برخورد کند.",
+      "followUp": "`Validate` با `IValidateOptions<T>` چه تفاوتی دارد؟",
+      "estimatedSeconds": 50,
+      "minVersion": "8",
+      "tags": [
+        "options",
+        "validation",
+        "configuration"
+      ],
+      "choices": [
+        {
+          "text": "فقط در حالت debug اثر دارد"
+        },
+        {
+          "text": "اعتبارسنجی تنظیمات هنگام شروع برنامه انجام می‌شود و اگر نامعتبر باشند برنامه همان لحظه خطا می‌دهد (fail fast)، نه هنگام اولین استفاده در production",
+          "isCorrect": true
+        },
+        {
+          "text": "تنظیمات را به‌صورت خودکار از Azure می‌خواند"
+        },
+        {
+          "text": "باعث می‌شود اعتبارسنجی هرگز اجرا نشود"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-httpclientfactory",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "چرا به‌جای ساختن `new HttpClient()` در هر درخواست از `IHttpClientFactory` استفاده می‌کنیم؟",
+      "shortAnswer": "`IHttpClientFactory` با pooling و چرخش `HttpMessageHandler` (عمر قابل تنظیم) هم از socket exhaustion و هم از DNS کهنه جلوگیری می‌کند و نقطه‌ی مناسب برای resilience است.",
+      "explanation": "```csharp\nbuilder.Services.AddHttpClient<GitHubClient>(c => c.BaseAddress = new Uri(\"https://api.github.com/\"))\n    .AddStandardResilienceHandler();     // retry, circuit breaker, timeout (Microsoft.Extensions.Http.Resilience)\n\npublic sealed class GitHubClient(HttpClient http)\n{\n    public Task<Repo?> GetRepoAsync(string name, CancellationToken ct) => http.GetFromJsonAsync<Repo>($\"repos/{name}\", ct);\n}\n```\n`AddStandardResilienceHandler` (مبتنی بر Polly v8) در .NET 8+ یک pipeline پیش‌فرض (rate limiter، timeout کل، retry، circuit breaker، timeout هر تلاش) می‌دهد. برای عملیات غیر idempotent (POST) retry را با دقت تنظیم کن. جایگزین: یک `static/Singleton HttpClient` با `SocketsHttpHandler.PooledConnectionLifetime`.",
+      "commonMistake": "retry خودکار روی POST غیر idempotent و ایجاد تراکنش/پرداخت دوباره.",
+      "followUp": "چرا retry روی درخواست‌های non-idempotent خطرناک است؟",
+      "estimatedSeconds": 65,
+      "minVersion": "8",
+      "tags": [
+        "httpclient",
+        "resilience",
+        "aspnet-core"
+      ],
+      "choices": [
+        {
+          "text": "چون `HttpClient` در .NET 8 حذف شده است"
+        },
+        {
+          "text": "چون `new HttpClient()` همیشه خطا می‌دهد"
+        },
+        {
+          "text": "چون ساخت و dispose مکرر HttpClient باعث socket exhaustion می‌شود و نگه داشتن یک instance بدون چرخش handler مشکل DNS دارد؛ factory چرخه‌ی handlerها و تنظیمات (typed/named client) را مدیریت می‌کند",
+          "isCorrect": true
+        },
+        {
+          "text": "چون factory رمزنگاری خودکار می‌کند"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-required-init-members",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "مدیفایر `required` و `init` در C# چه کاری می‌کنند؟",
+      "shortAnswer": "`init` (C# 9) immutability را ساده می‌کند و `required` (C# 11) جلوی «فراموش کردن» property اجباری را در compile-time می‌گیرد.",
+      "explanation": "```csharp\npublic sealed class CreateOrder\n{\n    public required string CustomerId { get; init; }\n    public int Quantity { get; init; } = 1;\n}\nvar o = new CreateOrder { CustomerId = \"c1\" };   // ✅\n// var bad = new CreateOrder();                   // ❌ خطای کامپایل\n```\nبا System.Text.Json و EF Core هم سازگار است (deserializer property required را چک می‌کند و در نبود آن خطا می‌دهد). برای DTOها و optionها ایده‌آل است. توجه: `required` یک بررسی کامپایل‌تایم است و مقدار `null!` را نمی‌گیرد؛ برای اطمینان از null بودن NRT هم لازم است.",
+      "commonMistake": "فرض اینکه `required` در runtime برای ورودی JSON بدون بررسی اضافی همه‌ی موارد را اعتبارسنجی می‌کند.",
+      "followUp": "record با positional parameters چه فرقی با کلاس `required init` دارد؟",
+      "estimatedSeconds": 55,
+      "minVersion": "8",
+      "tags": [
+        "csharp",
+        "required",
+        "init"
+      ],
+      "choices": [
+        {
+          "text": "`init` باعث می‌شود property هیچ‌وقت مقدار نگیرد"
+        },
+        {
+          "text": "`init` اجازه‌ی مقداردهی property فقط هنگام ساخت (object initializer) را می‌دهد و `required` کامپایلر را وادار می‌کند سازنده‌ی شیء آن property را حتماً مقداردهی کند",
+          "isCorrect": true
+        },
+        {
+          "text": "هر دو فقط برای `struct` هستند"
+        },
+        {
+          "text": "`required` مقدار را در runtime بررسی و خطا می‌دهد"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-pattern-matching-switch",
+      "level": "Mid",
+      "type": "CodeOutput",
+      "text": "خروجی این کد چیست؟",
+      "codeSnippet": "static string Describe(object? o) => o switch\n{\n    null => \"null\",\n    int n when n < 0 => \"negative\",\n    int => \"int\",\n    string { Length: 0 } => \"empty\",\n    string s => $\"str:{s}\",\n    IEnumerable<int> e => $\"ints:{e.Count()}\",\n    _ => \"other\",\n};\n\nConsole.WriteLine(string.Join(\"|\",\n    new object?[] { null, -5, 7, \"\", \"hi\", new[] { 1, 2 }, 3.5 }.Select(Describe)));",
+      "codeLanguage": "csharp",
+      "shortAnswer": "switch expression ترتیبی است: اولین pattern مطابق برنده می‌شود. `int n when n < 0` قبل از `int` می‌آید، و `string { Length: 0 }` (property pattern) قبل از `string s`.",
+      "explanation": "نتیجه با اجرای واقعی تأیید شد. الگوهای مفید: type/constant/relational (`> 5`)/logical (`and`, `or`, `not`)/property/positional/list patterns (`[1, .., 5]`). کامپایلر برای switch expression کامل بودن (exhaustiveness) را بررسی می‌کند و اگر case باقی بماند هشدار می‌دهد؛ ترتیب باید از خاص به عام باشد وگرنه به‌خاطر subsumption خطا می‌گیری (مثلاً `_` قبل از بقیه).",
+      "commonMistake": "گذاشتن pattern کلی‌تر قبل از خاص‌تر و «unreachable» شدن case.",
+      "followUp": "list pattern (C# 11) چه امکانی می‌دهد؟",
+      "estimatedSeconds": 65,
+      "minVersion": "8",
+      "tags": [
+        "pattern-matching",
+        "switch-expression",
+        "csharp"
+      ],
+      "choices": [
+        {
+          "text": "`null|negative|int|str:|str:hi|ints:2|other`"
+        },
+        {
+          "text": "`null|int|int|empty|str:hi|other|other`"
+        },
+        {
+          "text": "`null|negative|int|empty|str:hi|ints:2|other`",
+          "isCorrect": true
+        },
+        {
+          "text": "`null|negative|negative|empty|hi|2|other`"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-collection-expressions",
+      "level": "Mid",
+      "type": "CodeOutput",
+      "text": "خروجی این کد (C# 12 collection expressions) چیست؟",
+      "codeSnippet": "int[] a = [1, 2, 3];\nList<int> b = [..a, 4];\nint[] c = [.. b.Where(x => x % 2 == 0), 100];\nConsole.WriteLine($\"{a.Length} {b.Count} {string.Join(\",\", c)}\");",
+      "codeLanguage": "csharp",
+      "shortAnswer": "collection expression با `[...]` مجموعه می‌سازد و با `..` (spread) عناصر مجموعه‌ی دیگر را در آن باز می‌کند؛ نوع مقصد (آرایه، `List<T>`, `Span<T>`, …) تعیین‌کننده‌ی نتیجه است.",
+      "explanation": "نتیجه با اجرای واقعی تأیید شد. مزیت: syntax یکنواخت برای انواع مجموعه‌ها و بهینه‌سازی کامپایلر (مثلاً برای `Span<T>` بدون allocation heap). `[]` خالی هم مجاز است (`int[] e = [];`). برای ساختن نوع سفارشی می‌توان `CollectionBuilder` attribute گذاشت.",
+      "commonMistake": "نوشتن `new[] { ... }` و `Concat` طولانی در جایی که spread ساده‌تر است.",
+      "followUp": "در C# 12 اگر نوع مقصد `IEnumerable<int>` باشد چه چیزی ساخته می‌شود؟",
+      "estimatedSeconds": 50,
+      "minVersion": "8",
+      "tags": [
+        "csharp-12",
+        "collection-expressions",
+        "spread"
+      ],
+      "choices": [
+        {
+          "text": "خطای کامپایل چون spread در آرایه مجاز نیست"
+        },
+        {
+          "text": "`3 3 2,4`"
+        },
+        {
+          "text": "`3 4 2,4,100`",
+          "isCorrect": true
+        },
+        {
+          "text": "`4 4 2,4,100`"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-primary-constructors",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "Primary constructor در کلاس (C# 12) چه چیزی می‌دهد و چه ملاحظه‌ای دارد؟",
+      "shortAnswer": "در `record` primary constructor property عمومی می‌سازد، ولی در `class`/`struct` فقط پارامتر capture می‌شود.",
+      "explanation": "```csharp\npublic sealed class OrderService(AppDbContext db, ILogger<OrderService> logger)\n{\n    public async Task<Order?> GetAsync(int id, CancellationToken ct)\n    {\n        logger.LogInformation(\"Loading {Id}\", id);\n        return await db.Orders.FindAsync([id], ct);\n    }\n}\n```\nنکته: چون پارامتر قابل تغییر است، بین متدها ممکن است اشتباهاً reassign شود؛ برای اطمینان از immutability بعضی تیم‌ها آن را در فیلد `readonly` کپی می‌کنند یا analyzer می‌گذارند. اگر پارامتری فقط در constructor استفاده شود capture نمی‌شود (هزینه‌ای ندارد).",
+      "commonMistake": "فرض اینکه primary constructor در کلاس‌ها property عمومی می‌سازد.",
+      "followUp": "تفاوت primary constructor در `record` و `class` چیست؟",
+      "estimatedSeconds": 55,
+      "minVersion": "8",
+      "tags": [
+        "csharp-12",
+        "primary-constructors",
+        "di"
+      ],
+      "choices": [
+        {
+          "text": "پارامترهای سازنده را در کل کلاس در دسترس می‌کند (مثلاً برای DI بدون فیلد و constructor تکراری)، ولی پارامترها property/فیلد readonly خودکار نمی‌شوند و قابل تغییرند",
+          "isCorrect": true
+        },
+        {
+          "text": "برای `class` معمولی هم property عمومی immutable می‌سازد"
+        },
+        {
+          "text": "فقط در `record` مجاز است"
+        },
+        {
+          "text": "باعث می‌شود پارامترها در runtime حذف شوند"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-typed-results-minimal",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "در Minimal APIs استفاده از `TypedResults` و `Results<T1, T2>` چه مزیتی دارد؟",
+      "shortAnswer": "`Results.Ok(...)` نوع `IResult` عمومی برمی‌گرداند و اطلاعات کمی برای OpenAPI می‌دهد، ولی `TypedResults.Ok(x)` نوع دقیق را حفظ می‌کند.",
+      "explanation": "```csharp\napp.MapGet(\"/users/{id:int}\", async Task<Results<Ok<UserDto>, NotFound>> (int id, AppDb db) =>\n    await db.Users.FindAsync(id) is { } u\n        ? TypedResults.Ok(new UserDto(u.Id, u.Name))\n        : TypedResults.NotFound());\n```\nمستندسازی OpenAPI (`Microsoft.AspNetCore.OpenApi` و `MapOpenApi()` از .NET 9) responseها را از همین نوع‌ها می‌خواند؛ نیازی به `Produces` دستی نیست. در تست: `var result = await Handler(...)` و بررسی `Assert.IsType<Ok<UserDto>>(result.Result)`.",
+      "commonMistake": "برگرداندن `Results.*` و سپس نوشتن دستی metadata برای هر status.",
+      "followUp": "`Results<TResult1, TResult2>` چطور به OpenAPI کمک می‌کند؟",
+      "estimatedSeconds": 55,
+      "minVersion": "8",
+      "tags": [
+        "minimal-apis",
+        "typedresults",
+        "openapi"
+      ],
+      "choices": [
+        {
+          "text": "باعث می‌شود endpoint فقط JSON برگرداند"
+        },
+        {
+          "text": "نوع پاسخ‌های ممکن در امضای endpoint دیده می‌شود (برای OpenAPI و تست type-safe) و تست واحد بدون HTTP ساده‌تر است",
+          "isCorrect": true
+        },
+        {
+          "text": "جایگزین `[ApiController]` است"
+        },
+        {
+          "text": "فقط سرعت اجرا را دو برابر می‌کند"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-gc-generations",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "GC در .NET چگونه کار می‌کند؟ نسل‌ها، LOH و سناریوهای مشکل‌ساز را توضیح بده.",
+      "shortAnswer": "GC نسلی (generational) و compacting است: اشیای جدید در Gen0، بازمانده‌ها به Gen1 و سپس Gen2 ارتقا می‌یابند. فرض «اکثر اشیا زود می‌میرند» باعث می‌شود جمع‌آوری Gen0 ارزان باشد. اشیای بزرگ (≥ حدود ۸۵ هزار بایت) در Large Object Heap (LOH) تخصیص می‌یابند که با Gen2 جمع می‌شود و ممکن است fragmentation ایجاد کند.",
+      "explanation": "نکات عملی:\n- **Server GC** (پردازنده‌های بیشتر، throughput بالا) در برابر **Workstation GC**؛ **Concurrent/Background GC** برای کاهش pauseها. در کانتینر روی محدودیت CPU/حافظه دقت کن (`DOTNET_GCHeapHardLimit`).\n- الگوهای مشکل‌ساز: allocation زیاد در مسیر داغ (رشته/LINQ/boxing)، آرایه‌های بزرگ موقت (LOH)، نگه داشتن reference (event handler، static cache، closure) که نشت ایجاد می‌کند، finalizerها.\n- ابزارها: `dotnet-counters` (نرخ GC، heap size)، `dotnet-trace`، `dotnet-dump`/`dotnet-gcdump`، PerfView، Visual Studio Diagnostic Tools.\n- بهینه‌سازی: `ArrayPool<T>`/`MemoryPool`، `Span<T>`/`stackalloc`، reuse بافر، `struct` مناسب، پرهیز از boxing، `ValueTask` در مسیرهای اغلب sync، object pooling (`ObjectPool<T>`).\n- `GC.Collect()` دستی تقریباً هرگز درست نیست.\n\nقبل از بهینه‌سازی اندازه‌گیری کن: مشکل واقعی معمولاً الگوریتم یا I/O است نه GC.",
+      "commonMistake": "فراخوانی `GC.Collect()` برای «تمیز کردن حافظه» و بدتر کردن pauseها.",
+      "followUp": "چرا event handler که unsubscribe نمی‌شود باعث نشت می‌شود؟",
+      "estimatedSeconds": 160,
+      "minVersion": "8",
+      "tags": [
+        "gc",
+        "memory",
+        "performance"
+      ]
+    },
+    {
+      "id": "dotnet-span-stackalloc",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "`Span<T>` چه مشکلی را حل می‌کند و چه محدودیتی دارد؟",
+      "shortAnswer": "`Span<T>`/`ReadOnlySpan<T>` (و `Memory<T>` برای موارد async) برش دادن و پردازش داده را بدون کپی می‌کنند: parsing، بافر شبکه، رشته‌ها (`AsSpan()`).",
+      "explanation": "```csharp\nstatic int CountCommas(ReadOnlySpan<char> text)\n{\n    int n = 0;\n    foreach (var c in text) if (c == ',') n++;\n    return n;\n}\nvar s = \"a,b,c,d\";\nCountCommas(s.AsSpan(2, 3));      // بدون Substring و allocation\n\nSpan<byte> buffer = stackalloc byte[256];   // روی stack\n```\nمحدودیت‌ها: `ref struct` است؛ قابل capture در lambda/async نیست؛ برای async از `Memory<T>` استفاده کن. `stackalloc` را فقط برای اندازه‌های کوچک و کنترل‌شده (وگرنه StackOverflow). در .NET 9/10 پشتیبانی زبان از Span بیشتر شده (تبدیل‌های ضمنی span و `params ReadOnlySpan`)؛ ولی این بهینه‌سازی‌ها را فقط در مسیر داغ و با benchmark (BenchmarkDotNet) وارد کن.",
+      "commonMistake": "استفاده از Span/stackalloc در همه‌جا بدون اندازه‌گیری و پیچیده کردن کد.",
+      "followUp": "`Memory<T>` چه زمانی به‌جای `Span<T>` لازم است؟",
+      "estimatedSeconds": 75,
+      "minVersion": "8",
+      "tags": [
+        "span",
+        "performance",
+        "memory"
+      ],
+      "choices": [
+        {
+          "text": "نسخه‌ی thread-safe از `List<T>` است"
+        },
+        {
+          "text": "نمای بدون کپی و بدون allocation روی بخشی از حافظه‌ی پیوسته (آرایه، stack، native)؛ چون `ref struct` است نمی‌تواند روی heap (فیلد کلاس معمولی، async متد) نگه‌داری شود",
+          "isCorrect": true
+        },
+        {
+          "text": "فقط برای رشته‌ها کار می‌کند"
+        },
+        {
+          "text": "می‌تواند در متد async بین `await`ها نگه داشته شود"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-channels-async-streams",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "`IAsyncEnumerable<T>` و `Channel<T>` هرکدام چه زمانی مناسب‌اند؟",
+      "shortAnswer": "`IAsyncEnumerable` با `yield return` در متد async عناصر را یکی‌یکی و بدون بارگذاری همه در حافظه تولید می‌کند (streaming). `System.Threading.Channels` صف async با ظرفیت محدود/نامحدود است.",
+      "explanation": "```csharp\n// streaming از دیتابیس/API\npublic async IAsyncEnumerable<Order> StreamAsync([EnumeratorCancellation] CancellationToken ct = default)\n{\n    await foreach (var o in _db.Orders.AsNoTracking().AsAsyncEnumerable().WithCancellation(ct))\n        yield return o;\n}\napp.MapGet(\"/orders\", (Repo r, CancellationToken ct) => r.StreamAsync(ct));   // JSON آرایه‌ی استریم\n\n// صف پس‌زمینه\nvar channel = Channel.CreateBounded<Job>(new BoundedChannelOptions(100) { FullMode = BoundedChannelFullMode.Wait });\nawait channel.Writer.WriteAsync(job, ct);              // producer (backpressure با ظرفیت)\nawait foreach (var j in channel.Reader.ReadAllAsync(ct)) { /* consumer */ }\n```\nانتخاب `Bounded` مهم است: صف نامحدود می‌تواند حافظه را پر کند. برای پردازش پس‌زمینه در ASP.NET Core معمولاً `BackgroundService` + Channel است؛ برای پایداری واقعی (retry، ماندگاری) از message broker/صف خارجی استفاده کن.",
+      "commonMistake": "صف نامحدود که با تولیدکننده‌ی سریع حافظه را پر می‌کند.",
+      "followUp": "backpressure یعنی چه و `BoundedChannelFullMode.Wait` چطور آن را اعمال می‌کند؟",
+      "estimatedSeconds": 85,
+      "minVersion": "8",
+      "tags": [
+        "channels",
+        "async-streams",
+        "concurrency"
+      ],
+      "choices": [
+        {
+          "text": "`Channel<T>` فقط در Blazor کار می‌کند"
+        },
+        {
+          "text": "`IAsyncEnumerable<T>` همه‌ی عناصر را ابتدا در حافظه جمع می‌کند"
+        },
+        {
+          "text": "هر دو فقط برای خواندن فایل‌ها هستند"
+        },
+        {
+          "text": "`IAsyncEnumerable<T>` برای تولید/مصرف دنباله‌ی async به‌صورت pull (`await foreach`)؛ `Channel<T>` برای صف producer/consumer thread-safe (با backpressure) بین چند وظیفه",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "dotnet-lock-semaphore-async",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "چرا نمی‌توان داخل `lock` از `await` استفاده کرد و جایگزین چیست؟",
+      "shortAnswer": "کامپایلر `await` داخل `lock` را خطا می‌دهد (CS1996). `SemaphoreSlim(1,1)` یک mutex async فراهم می‌کند.",
+      "explanation": "```csharp\nprivate readonly SemaphoreSlim _gate = new(1, 1);\n\npublic async Task RefreshAsync(CancellationToken ct)\n{\n    await _gate.WaitAsync(ct);\n    try { await ReloadCacheAsync(ct); }\n    finally { _gate.Release(); }         // همیشه در finally\n}\n```\nبرای قفل سینکرون در .NET 9/C# 13 نوع `System.Threading.Lock` اضافه شد که با `lock (myLock)` بهتر و سریع‌تر از قفل روی `object` است (کامپایلر آن را می‌شناسد). قفل‌های async فقط داخل یک پروسس کار می‌کنند؛ برای هماهنگی بین چند instance به قفل توزیع‌شده (Redis/DB) نیاز است. راه بهتر اغلب طراحی بدون قفل است: `Lazy<Task<T>>`، `ConcurrentDictionary`، یا کش با محافظت stampede (HybridCache).",
+      "commonMistake": "نگه داشتن قفل در طول یک I/O طولانی و ایجاد گلوگاه.",
+      "followUp": "`System.Threading.Lock` نسبت به `lock(object)` چه فرقی دارد؟",
+      "estimatedSeconds": 75,
+      "minVersion": "8",
+      "tags": [
+        "locking",
+        "concurrency",
+        "semaphoreslim"
+      ],
+      "choices": [
+        {
+          "text": "با `volatile` جایگزین می‌شود"
+        },
+        {
+          "text": "می‌شود و مشکلی ندارد"
+        },
+        {
+          "text": "باید از `Thread.Sleep` استفاده کرد"
+        },
+        {
+          "text": "چون `lock` به thread خاصی وابسته است ولی `await` ممکن است ادامه را روی thread دیگری اجرا کند؛ برای قفل async از `SemaphoreSlim` (`WaitAsync`) استفاده می‌شود",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "dotnet-hybridcache",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "`HybridCache` (از .NET 9) چه مشکلی را حل می‌کند؟",
+      "shortAnswer": "بدون محافظت، وقتی یک key منقضی شود صدها درخواست همزمان همه به دیتابیس می‌روند (stampede). HybridCache درخواست‌های همزمان یک key را یکی می‌کند.",
+      "explanation": "```csharp\nbuilder.Services.AddHybridCache();          // پکیج Microsoft.Extensions.Caching.Hybrid\n\nvar product = await cache.GetOrCreateAsync(\n    $\"product:{id}\",\n    async ct => await db.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id, ct),\n    new HybridCacheEntryOptions { Expiration = TimeSpan.FromMinutes(10) },\n    tags: [\"products\"], cancellationToken: ct);\n\nawait cache.RemoveByTagAsync(\"products\", ct);\n```\nنکات: کلیدها باید شامل همه‌ی پارامترهای مؤثر باشند (tenant، زبان)؛ داده‌ی L2 serialize می‌شود (سازگاری نسخه‌ی مدل)؛ TTL کوتاه‌تر برای داده‌ی حساس به تازگی؛ برای invalidation از tag استفاده کن؛ داده‌ی شخصی/امنیتی را با کلید کاربر جدا کن و آن را cache مشترک نکن. جایگزین‌ها: Output Caching (پاسخ HTTP) و Response Caching.",
+      "commonMistake": "ساختن کلید cache بدون tenant/کاربر و نشت داده بین کاربران.",
+      "followUp": "cache stampede چیست و چطور جلویش را می‌گیری؟",
+      "estimatedSeconds": 75,
+      "minVersion": "9",
+      "tags": [
+        "caching",
+        "hybridcache",
+        "performance"
+      ],
+      "choices": [
+        {
+          "text": "برای ذخیره‌ی داده در session مرورگر است"
+        },
+        {
+          "text": "فقط نسخه‌ی جدیدتر `IMemoryCache` بدون هیچ قابلیت اضافه است"
+        },
+        {
+          "text": "cache دو‌سطحی (in-memory L1 + توزیع‌شده L2 مثل Redis) با محافظت در برابر cache stampede (فقط یک تولیدکننده برای یک key همزمان) و API ساده‌ی `GetOrCreateAsync`",
+          "isCorrect": true
+        },
+        {
+          "text": "جایگزین دیتابیس است"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-rate-limiting-builtin",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "چطور در ASP.NET Core (از .NET 7) rate limiting را بدون کتابخانه‌ی خارجی اعمال می‌کنی؟",
+      "shortAnswer": "middleware رتبه‌بندی داخلی ASP.NET Core چند الگوریتم و partitioning (مثلاً بر اساس کاربر/IP) دارد.",
+      "explanation": "```csharp\nbuilder.Services.AddRateLimiter(o =>\n{\n    o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;\n    o.AddPolicy(\"per-user\", ctx => RateLimitPartition.GetTokenBucketLimiter(\n        ctx.User.Identity?.Name ?? ctx.Connection.RemoteIpAddress?.ToString() ?? \"anon\",\n        _ => new TokenBucketRateLimiterOptions\n        { TokenLimit = 20, TokensPerPeriod = 10, ReplenishmentPeriod = TimeSpan.FromSeconds(1), QueueLimit = 0 }));\n});\napp.UseRateLimiter();\napp.MapPost(\"/login\", Login).RequireRateLimiting(\"per-user\");\n```\nمراقب باش partition بر اساس IP پشت proxy/CDN باید با `ForwardedHeaders` درست باشد وگرنه همه یک IP دیده می‌شوند. rate limiting داخلی per-instance است؛ برای چند instance به limiter توزیع‌شده (API gateway، Redis) نیاز داری. هدف: محافظت در برابر brute force، سوءاستفاده و اضافه‌بار. پاسخ 429 با `Retry-After` مفید است.",
+      "commonMistake": "partition بر اساس IP بدون پیکربندی ForwardedHeaders پشت proxy.",
+      "followUp": "limiter per-instance در محیط چند‌نمونه‌ای چه محدودیتی دارد؟",
+      "estimatedSeconds": 70,
+      "minVersion": "8",
+      "tags": [
+        "rate-limiting",
+        "security",
+        "aspnet-core"
+      ],
+      "choices": [
+        {
+          "text": "با `Thread.Sleep` در هر action"
+        },
+        {
+          "text": "فقط با nginx ممکن است و در .NET پشتیبانی نمی‌شود"
+        },
+        {
+          "text": "با middleware داخلی `AddRateLimiter`/`UseRateLimiter` و الگوریتم‌هایی مثل fixed window، sliding window، token bucket و concurrency limiter؛ سیاست‌ها را با `RequireRateLimiting` به endpoint اعمال می‌کنی",
+          "isCorrect": true
+        },
+        {
+          "text": "با `[Authorize]`"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-native-aot",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "Native AOT در .NET چیست و چه محدودیت‌هایی برای ASP.NET Core دارد؟",
+      "shortAnswer": "Native AOT کد را در زمان publish به باینری بومی کامپایل می‌کند (بدون JIT): startup سریع‌تر، حافظه‌ی کمتر و حجم deploy کوچک‌تر (مناسب کانتینر، serverless و ابزار CLI). هزینه: reflection و کد پویا محدود، و همه‌ی کتابخانه‌ها باید trimming/AOT-compatible باشند.",
+      "explanation": "در ASP.NET Core: از `WebApplication.CreateSlimBuilder`/`CreateEmptyBuilder` و Minimal APIs استفاده می‌شود؛ Controllers/MVC و Razor به‌طور کامل AOT-سازگار نیستند. نکات:\n- `System.Text.Json` باید با **source generator** (`JsonSerializerContext`) استفاده شود، نه reflection.\n- `PublishAot=true` در csproj و آنالایزر AOT warnings را جدی بگیر.\n- EF Core تا حد زیادی روی AOT محدودیت دارد (query pre-compilation در حال پیشرفت است)؛ برای دسترسی داده Dapper AOT یا SQL مستقیم را بسنج.\n- ابزارهایی مثل Reflection-based DI/serializer/mapper (AutoMapper، Newtonsoft) مشکل‌ساز هستند.\n- در Linux باید نصب toolchain (clang) در CI انجام شود.\n\nتصمیم: اگر cold start و مصرف حافظه گلوگاه است (Lambda/Functions، سرویس‌های کوچک) AOT عالی است؛ برای اپ MVC بزرگ و EF-محور معمولاً ارزشش را ندارد. همیشه با benchmark واقعی تصمیم بگیر.",
+      "commonMistake": "فعال کردن AOT روی پروژه‌ای با reflection زیاد و ناسازگاری در runtime.",
+      "followUp": "trimming و AOT چه ارتباطی دارند؟",
+      "estimatedSeconds": 140,
+      "minVersion": "8",
+      "tags": [
+        "native-aot",
+        "performance",
+        "deployment"
+      ]
+    },
+    {
+      "id": "dotnet-ef-core-performance",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "برای بهبود کارایی دسترسی به داده با EF Core چه تکنیک‌هایی را به‌کار می‌بری؟",
+      "shortAnswer": "ابتدا SQL تولیدشده و plan را بررسی می‌کنم (لاگ، profiler)، سپس: projection فقط ستون‌های لازم، `AsNoTracking`، رفع N+1، ایندکس مناسب، pagination درست (keyset به‌جای offset بزرگ)، bulk operations (`ExecuteUpdate/ExecuteDelete` بدون بارگذاری entity)، compiled queries برای مسیرهای داغ، و `AsSplitQuery` برای includeهای collection بزرگ.",
+      "explanation": "نمونه:\n```csharp\n// به‌روزرسانی انبوه در یک SQL\nawait db.Orders.Where(o => o.Status == Status.Pending && o.CreatedAt < cutoff)\n    .ExecuteUpdateAsync(s => s.SetProperty(o => o.Status, Status.Expired), ct);\n\n// keyset pagination\nvar page = await db.Posts.Where(p => p.Id < lastId).OrderByDescending(p => p.Id).Take(20).ToListAsync(ct);\n```\nموارد دیگر: `EF.CompileAsyncQuery` برای query تکراری؛ اجتناب از `Contains` با لیست بسیار بزرگ؛ `AddDbContextPool`؛ اتصال connection pooling؛ read replica برای query سنگین؛ و انتخاب سطح ایزولیشن مناسب. جایی که EF کافی نیست (گزارش‌های پیچیده) از SQL خام/`FromSql` یا Dapper استفاده کن. در EF Core 10 پشتیبانی از جوین‌های `LeftJoin/RightJoin`، named query filters و بهبودهای ترجمه‌ی query اضافه شده که نوشتن query های پیچیده را ساده‌تر می‌کند؛ نسخه‌ی هدف را در مستندات بخوان.",
+      "commonMistake": "بهینه‌سازی با حدس و بدون نگاه به SQL و execution plan.",
+      "followUp": "چرا offset pagination بزرگ کند است و keyset چطور کمک می‌کند؟",
+      "estimatedSeconds": 140,
+      "minVersion": "8",
+      "tags": [
+        "ef-core",
+        "performance",
+        "sql"
+      ]
+    },
+    {
+      "id": "dotnet-optimistic-concurrency",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "در EF Core چطور از overwrite کردن تغییرات همزمان دو کاربر روی یک رکورد جلوگیری می‌کنی؟",
+      "shortAnswer": "در optimistic concurrency قفل نگه نمی‌داریم؛ هنگام ذخیره بررسی می‌کنیم رکورد از زمان خواندن عوض نشده باشد.",
+      "explanation": "```csharp\npublic class Product\n{\n    public int Id { get; set; }\n    [Timestamp] public byte[] RowVersion { get; set; } = [];   // SQL Server rowversion\n}\n\ntry { await db.SaveChangesAsync(ct); }\ncatch (DbUpdateConcurrencyException ex)\n{\n    // گزینه‌ها: reload و نمایش تعارض به کاربر، merge خودکار، یا retry\n    return Results.Conflict(\"رکورد توسط شخص دیگری تغییر کرده است\");\n}\n```\nدر API معمولاً `ETag`/`If-Match` (نسخه‌ی رکورد) به کلاینت داده می‌شود و 412/409 برگردانده می‌شود. برای Postgres از ستون سیستمی `xmin` یا یک ستون version دستی استفاده می‌شود. برای سناریوهای پر‌تعارض (موجودی) شاید قفل pessimistic (`SELECT ... FOR UPDATE`) یا اتمی‌سازی در SQL (`UPDATE ... SET qty = qty - 1 WHERE qty > 0`) مناسب‌تر باشد.",
+      "commonMistake": "نادیده گرفتن concurrency و «آخرین نوشتن برنده است» بی‌صدا.",
+      "followUp": "optimistic و pessimistic locking هرکدام کجا مناسب‌اند؟",
+      "estimatedSeconds": 80,
+      "minVersion": "8",
+      "tags": [
+        "ef-core",
+        "concurrency",
+        "data-integrity"
+      ],
+      "choices": [
+        {
+          "text": "با `Thread.Sleep` بین درخواست‌ها"
+        },
+        {
+          "text": "این کار در EF Core ممکن نیست"
+        },
+        {
+          "text": "با غیرفعال کردن SaveChanges"
+        },
+        {
+          "text": "با optimistic concurrency: یک concurrency token (مثل `rowversion` یا `[Timestamp]`) در WHERE بروزرسانی اضافه می‌شود و در صورت تغییر رکورد توسط دیگری `DbUpdateConcurrencyException` پرتاب می‌شود",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "dotnet-outbox-transactions",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "مشکل «ذخیره‌ی دیتابیس + ارسال پیام» را چطور بدون ناسازگاری حل می‌کنی؟ (Outbox)",
+      "shortAnswer": "ذخیره‌ی داده و انتشار پیام دو سیستم جدا هستند و تراکنش توزیع‌شده (2PC) معمولاً عملی نیست. الگوی Outbox: پیام را در همان تراکنش دیتابیس در جدول `Outbox` می‌نویسیم و یک پردازش‌گر جدا (BackgroundService/CDC) آن را به broker می‌فرستد و علامت‌گذاری می‌کند. مصرف‌کننده باید idempotent باشد چون تحویل «حداقل یک‌بار» است.",
+      "explanation": "```csharp\nawait using var tx = await db.Database.BeginTransactionAsync(ct);\ndb.Orders.Add(order);\ndb.Outbox.Add(new OutboxMessage(Guid.NewGuid(), \"OrderCreated\", JsonSerializer.Serialize(evt)));\nawait db.SaveChangesAsync(ct);          // هر دو در یک تراکنش (یا با یک SaveChanges)\nawait tx.CommitAsync(ct);\n```\nنکات: dispatcher پیام‌های `Processed = false` را با ترتیب و batch می‌خواند؛ failure بین «ارسال» و «علامت‌گذاری» باعث ارسال تکراری می‌شود → مصرف‌کننده با `MessageId` dedupe کند؛ پاک‌سازی دوره‌ای؛ برای مقیاس بالا CDC (Debezium) یا ابزارهایی مثل MassTransit/Wolverine outbox داخلی. الگوی مکمل: Inbox برای dedupe. اگر همه‌چیز در یک سرویس و یک دیتابیس است شاید نیازی به پیچیدگی نباشد.",
+      "commonMistake": "ارسال پیام بعد از `SaveChanges` بدون تضمین و از دست رفتن پیام هنگام crash.",
+      "followUp": "چرا مصرف‌کننده باید idempotent باشد؟",
+      "estimatedSeconds": 140,
+      "minVersion": "8",
+      "tags": [
+        "outbox",
+        "transactions",
+        "distributed-systems"
+      ]
+    },
+    {
+      "id": "dotnet-observability-dotnet",
+      "level": "Senior",
+      "type": "ShortAnswer",
+      "text": "observability (لاگ، متریک، تریس) را در یک سرویس ASP.NET Core چطور راه‌اندازی می‌کنی؟",
+      "shortAnswer": "لاگ ساختاریافته با `ILogger` (message template و property نام‌دار) و sink مرکزی؛ متریک و تریس با OpenTelemetry (`AddOpenTelemetry().WithTracing().WithMetrics()` با instrumentation برای ASP.NET Core، HttpClient، EF Core) و export به OTLP/Prometheus/Jaeger؛ health checks (`/health/live`, `/health/ready`) برای orchestrator؛ و correlation/trace id در همه‌ی لاگ‌ها.",
+      "explanation": "```csharp\nbuilder.Services.AddOpenTelemetry()\n    .WithTracing(t => t.AddAspNetCoreInstrumentation().AddHttpClientInstrumentation().AddOtlpExporter())\n    .WithMetrics(m => m.AddAspNetCoreInstrumentation().AddRuntimeInstrumentation().AddOtlpExporter());\n\nlogger.LogInformation(\"Order {OrderId} paid by {UserId}\", order.Id, userId);   // نه string interpolation\nbuilder.Services.AddHealthChecks().AddDbContextCheck<AppDbContext>();\n```\nنکات: از interpolation در پیام لاگ پرهیز کن (ساختار از دست می‌رود)؛ `LoggerMessage` source generator برای مسیرهای داغ؛ داده‌ی شخصی/secret را لاگ نکن؛ سطح لاگ را از config کنترل کن؛ `ActivitySource` سفارشی برای تریس منطق دامنه؛ متریک‌های سفارشی با `Meter`؛ alert روی SLI ها (نرخ خطا، latency p95/p99). .NET Aspire dashboard برای dev/دیباگ محلی ابزار مفیدی است.",
+      "commonMistake": "لاگ کردن اطلاعات حساس یا رشته‌های interpolated بدون ساختار.",
+      "followUp": "liveness و readiness probe چه فرقی دارند؟",
+      "estimatedSeconds": 100,
+      "minVersion": "8",
+      "tags": [
+        "observability",
+        "opentelemetry",
+        "logging"
+      ]
+    },
+    {
+      "id": "dotnet-dotnet10-features",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "کدام گزینه یکی از ویژگی‌های C# 14 است (همراه .NET 10)؟",
+      "shortAnswer": "C# 14 با .NET 10 آمد. `field` جایگزین تعریف دستی backing field برای property هایی با منطق ساده در setter/getter است و extension members اجازه‌ی extension property و static extension را می‌دهد. همچنین null-conditional assignment (`obj?.Prop = value`).",
+      "explanation": "ویژگی‌های زیر را با SDK .NET 10 اجرا و تأیید کردم:\n```csharp\nclass Person\n{\n    public string Name { get => field; set => field = value?.Trim() ?? throw new ArgumentNullException(nameof(value)); }\n}\nstatic class Ext\n{\n    extension(IEnumerable<int> source)\n    {\n        public bool IsEmpty => !source.Any();\n        public int SumOfSquares() => source.Sum(x => x * x);\n    }\n}\nNode? n = null; n?.Label = \"x\";        // بدون exception\nConsole.WriteLine(nameof(List<>));     // \"List\": nameof با generic باز\n```\n`record struct` (C# 10)، primary constructor برای کلاس (C# 12) و collection expressions (C# 12) قدیمی‌ترند. نکات .NET 10 در ASP.NET Core: اعتبارسنجی داخلی Minimal APIs (`AddValidation`)، پشتیبانی Server-Sent Events، و OpenAPI 3.1. همیشه ویژگی را با `LangVersion`/SDK پروژه هماهنگ کن.",
+      "commonMistake": "استفاده از ویژگی جدید زبان در پروژه‌ای با SDK/LangVersion قدیمی‌تر.",
+      "followUp": "چه زمانی به‌جای backing field دستی از `field` استفاده می‌کنی؟",
+      "estimatedSeconds": 65,
+      "minVersion": "10",
+      "tags": [
+        "csharp-14",
+        "dotnet-10",
+        "language-features"
+      ],
+      "choices": [
+        {
+          "text": "collection expressions (`[1, 2, 3]`)"
+        },
+        {
+          "text": "record struct"
+        },
+        {
+          "text": "کلیدواژه‌ی `field` برای دسترسی به backing field خودکار داخل accessor یک property، و extension members (`extension(...) { ... }`)",
+          "isCorrect": true
+        },
+        {
+          "text": "primary constructor برای کلاس‌ها"
+        }
+      ]
+    },
+    {
+      "id": "dotnet-architecture-tradeoffs",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "Clean Architecture/CQRS در .NET چه زمانی ارزش دارد و چه هزینه‌هایی دارد؟",
+      "shortAnswer": "لایه‌بندی (Domain، Application، Infrastructure، API) وابستگی‌ها را به سمت داخل و دامنه را مستقل از فریمورک نگه می‌دارد و تست‌پذیری و تغییر زیرساخت را ساده می‌کند. برای دامنه‌ی پیچیده و تیم بزرگ ارزشمند است؛ برای CRUD ساده بی‌دلیل بویلرپلیت و indirection می‌سازد. مصالحه: اندازه‌ی دامنه، عمر پروژه و تیم.",
+      "explanation": "نکات کلیدی:\n- **مرزها مهم‌تر از پوشه‌ها**: Application به Infrastructure وابسته نباشد (اینترفیس در Application و پیاده‌سازی در Infrastructure).\n- **CQRS/MediatR**: جداسازی command/query و pipeline behaviors برای cross-cutting. توجه: MediatR (و AutoMapper) از نسخه‌های اخیر مدل لایسنس تجاری دارند؛ قبل از استفاده لایسنس را بررسی کن یا با سرویس‌های ساده/کتابخانه‌های جایگزین (مثل Wolverine، Mediator با source generator) کار کن.\n- **Vertical Slice**: سازمان‌دهی بر اساس feature به‌جای لایه؛ برای بسیاری از APIها ساده‌تر و منسجم‌تر.\n- **EF Core مستقیم در handler** اغلب کافی است؛ لایه‌ی Repository روی EF ممکن است انتزاع اضافی باشد.\n- **Modular Monolith** قبل از میکروسرویس: مرز ماژول‌ها را با ساختار و تست‌های معماری (NetArchTest) حفظ کن.\n\nقاعده: با ساده‌ترین ساختاری که نیازها را می‌پوشاند شروع کن و وقتی درد واقعی (تغییر، تست، مقیاس تیم) دیدی معماری را تکامل بده.",
+      "commonMistake": "پیاده‌سازی کامل Clean Architecture + CQRS + Repository برای یک CRUD ساده.",
+      "followUp": "vertical slice با معماری لایه‌ای چه فرقی دارد؟",
+      "estimatedSeconds": 140,
+      "minVersion": "8",
+      "tags": [
+        "architecture",
+        "clean-architecture",
+        "cqrs"
+      ]
+    },
+    {
+      "id": "dotnet-memory-leak-diagnostics",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "یک سرویس .NET در production حافظه‌اش مدام بالا می‌رود؛ چطور بررسی می‌کنی؟",
+      "shortAnswer": "اول تأیید می‌کنم نشت واقعی است (نه رشد عادی cache/GC lazy): با `dotnet-counters` (`gc-heap-size`, `gen-2-gc-count`, `alloc-rate`) و نمودار مصرف حافظه در طول زمان. سپس dump بگیرم (`dotnet-gcdump collect` یا `dotnet-dump collect`) در دو زمان و مقایسه کنم تا نوع‌های در حال رشد و ریشه‌ی نگه‌دارنده (GC roots) را پیدا کنم.",
+      "explanation": "علت‌های رایج:\n- event handler یا subscription که unsubscribe نمی‌شود.\n- `static` collection/cache بدون سقف یا expiry (استفاده از `MemoryCache` با `SizeLimit`).\n- `HttpClient`/`DbContext` نادرست (context طولانی‌عمر که entityها را انباشته می‌کند).\n- تایمر و Task رها‌شده، closure که شیء بزرگ را نگه می‌دارد.\n- LOH fragmentation با آرایه‌های بزرگ.\n- native memory (Unmanaged) که `Dispose` نشده.\n\nابزار: `dotnet-gcdump analyze`، PerfView، Visual Studio memory profiler، JetBrains dotMemory. در کانتینر: مراقب limit حافظه و تنظیم GC (`DOTNET_GCHeapHardLimitPercent`)؛ چون GC ممکن است حافظه را به OS برنگرداند و «مصرف بالا» لزوماً نشت نیست. بعد از رفع، با load test تأیید کن.",
+      "commonMistake": "ری‌استارت دوره‌ای به‌جای پیدا کردن ریشه‌ی نشت.",
+      "followUp": "چطور تفاوت «نشت» و «heap بزرگ ولی عادی به‌خاطر Server GC» را تشخیص می‌دهی؟",
+      "estimatedSeconds": 130,
+      "minVersion": "8",
+      "tags": [
+        "memory",
+        "diagnostics",
+        "troubleshooting"
+      ]
+    },
+    {
+      "id": "dotnet-integration-testing-webapplicationfactory",
+      "level": "Senior",
+      "type": "ShortAnswer",
+      "text": "تست یکپارچه‌ی یک ASP.NET Core API را چطور طراحی می‌کنی؟",
+      "shortAnswer": "با `WebApplicationFactory<Program>` برنامه را در حافظه بالا می‌آورم، `HttpClient` واقعی می‌سازم و از ابتدا تا انتها (routing، middleware، DI، DB) تست می‌کنم. وابستگی‌های بیرونی (سرویس ثالث) را جایگزین و دیتابیس را ایزوله می‌کنم (SQLite موقت یا Testcontainers برای دیتابیس واقعی).",
+      "explanation": "```csharp\npublic class ApiFactory : WebApplicationFactory<Program>\n{\n    protected override void ConfigureWebHost(IWebHostBuilder b)\n    {\n        b.ConfigureAppConfiguration((_, c) => c.AddInMemoryCollection(new Dictionary<string, string?>\n        {\n            [\"ConnectionStrings:Default\"] = $\"Data Source={Path.GetTempFileName()}\",\n        }));\n        b.ConfigureTestServices(s => s.AddSingleton<IEmailSender, FakeEmailSender>());\n    }\n}\n```\nنکات: در `Program.cs` خط `public partial class Program;` لازم است؛ تنظیمات را طوری بخوان که override تست اثر کند (مثلاً connection string را تنبل از `IConfiguration` بگیر، نه قبل از build) (اشتباه رایج: خواندن eager تنظیمات در Program.cs که override تست را بی‌اثر می‌کند)؛ دیتابیس هر کلاس تست ایزوله؛ تست‌های مرزی (خطا، 404، اعتبارسنجی)؛ Testcontainers برای رفتار واقعی SQL Server/Postgres (SQLite رفتار متفاوت دارد)؛ هرم تست: بیشتر unit برای منطق و تعداد کمتری تست یکپارچه برای مسیرهای حیاتی.",
+      "commonMistake": "تست با in-memory provider EF که رفتار واقعی SQL (constraint، transaction) را نشان نمی‌دهد.",
+      "followUp": "چرا EF InMemory provider برای تست رفتار دیتابیس توصیه نمی‌شود؟",
+      "estimatedSeconds": 110,
+      "minVersion": "8",
+      "tags": [
+        "testing",
+        "webapplicationfactory",
+        "integration-tests"
+      ]
+    },
+    {
+      "id": "dotnet-web-security-basics-dotnet",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "چه اقدامات امنیتی پایه‌ای برای یک Web API ASP.NET Core در نظر می‌گیری؟",
+      "shortAnswer": "ورودی را اعتبارسنجی کن، کوئری‌ها را پارامتریک نگه دار (EF/Dapper با پارامتر، نه الحاق رشته)، HTTPS و HSTS را اعمال کن، CORS را محدود به origin مشخص کن، احراز هویت/مجوز را در هر endpoint حساس بررسی کن، secretها را خارج از کد نگه دار، rate limit بگذار و خطاها را بدون افشای جزئیات برگردان.",
+      "explanation": "چک‌لیست:\n- **Injection**: پارامتر SQL؛ در `FromSqlRaw` از `FromSqlInterpolated` یا پارامتر استفاده کن.\n- **AuthZ**: چک مالکیت منبع (IDOR)، policy-based authorization، اصل کمترین دسترسی.\n- **CORS**: `WithOrigins(\"https://app.example.com\")` نه `AllowAnyOrigin` همراه credentials.\n- **Transport/headers**: `UseHttpsRedirection`, `UseHsts`، هدرهای امنیتی (CSP، X-Content-Type-Options).\n- **Secrets**: user-secrets، Key Vault/Secrets Manager، متغیر محیطی؛ هرگز در repo.\n- **Data Protection API** برای cookie/antiforgery و کلیدها در محیط چند‌instance به اشتراک گذاشته شوند.\n- **Mass assignment/over-posting**: DTO جدا از entity، `required` و فیلد صریح.\n- **Dependency**: به‌روزرسانی وابستگی‌ها (`dotnet list package --vulnerable`)، Dependabot.\n- **Logging**: PII/توکن لاگ نشود؛ audit برای عملیات حساس.\n- **Rate limiting و brute-force protection**؛ lockout برای login.\n\nابزارها: analyzerهای امنیتی، OWASP ZAP، و بازبینی بر اساس OWASP API Security Top 10.",
+      "commonMistake": "bind کردن مستقیم entity دیتابیس به ورودی (over-posting) و اجازه‌ی تغییر فیلدهایی مثل `IsAdmin`.",
+      "followUp": "mass assignment/over-posting چیست و چطور جلوی آن را می‌گیری؟",
+      "estimatedSeconds": 130,
+      "minVersion": "8",
+      "tags": [
+        "security",
+        "owasp",
+        "aspnet-core"
+      ]
+    },
+    {
+      "id": "dotnet-string-equality",
+      "level": "Junior",
+      "type": "CodeOutput",
+      "text": "خروجی این کد چیست؟",
+      "codeSnippet": "string a = \"hello\";\nstring b = new string(\"hello\".ToCharArray());\nobject o1 = a; object o2 = b;\nConsole.WriteLine($\"{a == b} {o1 == o2} {a.Equals(b)}\");",
+      "codeLanguage": "csharp",
+      "shortAnswer": "عملگر `==` روی دو متغیر از نوع `string` مقدار (محتوا) را مقایسه می‌کند چون `string` آن را overload کرده است. ولی وقتی هر دو به‌صورت `object` تایپ شده باشند `==` مقایسه‌ی ارجاعی (reference) است؛ دو شیء رشته‌ای متفاوت با محتوای یکسان برابر ارجاعی نیستند.",
+      "explanation": "نتیجه با اجرای واقعی تأیید شد. `a.Equals(b)` محتوا را مقایسه می‌کند. این یک مثال از «static type تعیین‌کننده‌ی overload عملگر» است، نه نوع runtime. نکات: برای مقایسه‌ی حساس به فرهنگ/حروف از `string.Equals(a, b, StringComparison.OrdinalIgnoreCase)` استفاده کن؛ `string.Intern` و literalها ممکن است یک instance مشترک بدهند و نتیجه‌ی مقایسه‌ی ارجاعی را «گاهی true» کنند؛ پس هرگز به آن تکیه نکن.",
+      "commonMistake": "تکیه بر مقایسه‌ی ارجاعی رشته‌ها (که به interning وابسته است).",
+      "followUp": "چرا `StringComparison.Ordinal` برای شناسه‌ها/کلیدها توصیه می‌شود؟",
+      "estimatedSeconds": 55,
+      "minVersion": "8",
+      "tags": [
+        "strings",
+        "equality",
+        "csharp"
+      ],
+      "choices": [
+        {
+          "text": "`True True True`"
+        },
+        {
+          "text": "`True False True`",
+          "isCorrect": true
+        },
+        {
+          "text": "`False False True`"
+        },
+        {
+          "text": "`True False False`"
+        }
+      ]
+    }
+  ]
+}
