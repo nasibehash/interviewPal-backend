@@ -37,6 +37,11 @@ public record AnswerDto(
 
 public record QuestionDetailDto(QuestionDto Question, AnswerDto Answer);
 
-public record ReportQuestionRequest(
-    [property: Required] ReportReason? Reason,
-    [property: MaxLength(1000)] string? Message);
+public record ReportQuestionRequest
+{
+    [Required]
+    public ReportReason? Reason { get; init; }
+
+    [MaxLength(1000)]
+    public string? Message { get; init; }
+}
