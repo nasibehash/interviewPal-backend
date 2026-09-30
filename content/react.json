@@ -1,0 +1,1436 @@
+{
+  "technology": {
+    "slug": "react",
+    "name": "React",
+    "currentVersion": "19.3",
+    "supportedFrom": "18"
+  },
+  "questions": [
+    {
+      "id": "react-jsx-basics",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "کدام گزینه درباره‌ی JSX درست است؟",
+      "shortAnswer": "JSX فقط «قند نحوی» است و توسط Babel/SWC/TypeScript به کد JavaScript تبدیل می‌شود. چون `class` کلمه‌ی رزرو‌شده‌ی JS است از `className` و برای `for` از `htmlFor` استفاده می‌شود.",
+      "explanation": "```jsx\nfunction Hello({ name }) {\n  return (\n    <>\n      <h1 className=\"title\">سلام {name}</h1>\n      <p>متن</p>\n    </>\n  );\n}\n```\n`<>...</>` همان `Fragment` است و DOM اضافه نمی‌سازد. داخل `{}` هر عبارت JavaScript مجاز است (نه دستور مثل `if`). ویژگی‌ها camelCase هستند (`onClick`, `tabIndex`). مقدارهای `true/false/null/undefined` چیزی رندر نمی‌کنند، ولی عدد `0` رندر می‌شود.",
+      "commonMistake": "نوشتن `class` به‌جای `className` و برگرداندن دو عنصر هم‌سطح بدون Fragment.",
+      "followUp": "JSX transform جدید (`react/jsx-runtime`) چه فرقی با `React.createElement` دارد و آیا هنوز باید `import React` کرد؟",
+      "estimatedSeconds": 50,
+      "minVersion": "18",
+      "tags": [
+        "jsx",
+        "fundamentals",
+        "components"
+      ],
+      "choices": [
+        {
+          "text": "JSX یک زبان قالب‌نویسی جدا است که مرورگر مستقیم اجرا می‌کند"
+        },
+        {
+          "text": "در JSX باید به‌جای `className` از `class` استفاده کرد"
+        },
+        {
+          "text": "JSX سینتکس است که به فراخوانی توابع (مثل `jsx()`) کامپایل می‌شود؛ برای کلاس CSS باید `className` نوشت و هر کامپوننت باید یک عنصر ریشه (یا Fragment) برگرداند",
+          "isCorrect": true
+        },
+        {
+          "text": "یک کامپوننت می‌تواند چند عنصر هم‌سطح را بدون هیچ wrapper برگرداند"
+        }
+      ]
+    },
+    {
+      "id": "react-props-vs-state",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "تفاوت props و state چیست؟",
+      "shortAnswer": "جریان داده در React یک‌طرفه است: والد ← فرزند از طریق props. فرزند برای اثر گذاشتن روی والد callback دریافت می‌کند.",
+      "explanation": "```jsx\nfunction Parent() {\n  const [n, setN] = useState(0);\n  return <Child value={n} onInc={() => setN(n + 1)} />;\n}\nfunction Child({ value, onInc }) {\n  // value را نمی‌شود تغییر داد؛ فقط onInc را صدا می‌زنیم\n  return <button onClick={onInc}>{value}</button>;\n}\n```\nتغییر مستقیم متغیر یا mutate کردن state باعث رندر مجدد نمی‌شود چون React از تغییر آگاه نمی‌شود. مقدار مشتق‌شده (مثل `fullName = first + last`) را state نکن؛ در هر رندر محاسبه کن.",
+      "commonMistake": "نگه داشتن داده‌ی مشتق‌شده در state و ایجاد ناهماهنگی بین دو منبع حقیقت.",
+      "followUp": "چه زمانی props را در state کپی می‌کنی و چه ریسکی دارد؟",
+      "estimatedSeconds": 50,
+      "minVersion": "18",
+      "tags": [
+        "props",
+        "state",
+        "fundamentals"
+      ],
+      "choices": [
+        {
+          "text": "هر دو فقط برای کلاس‌ها هستند"
+        },
+        {
+          "text": "state با تغییر مستقیم متغیر (مثل `count++`) دوباره رندر می‌کند"
+        },
+        {
+          "text": "props ورودی‌های فقط‌خواندنی‌اند که والد می‌دهد؛ state داده‌ی داخلی و قابل تغییر کامپوننت است که با تغییر آن (از طریق setter) دوباره رندر می‌شود",
+          "isCorrect": true
+        },
+        {
+          "text": "props قابل تغییر توسط خود کامپوننت‌اند و state از والد می‌آید"
+        }
+      ]
+    },
+    {
+      "id": "react-usestate-functional-update",
+      "level": "Junior",
+      "type": "CodeOutput",
+      "text": "بعد از یک کلیک روی هر دکمه، مقدار نمایش‌داده‌شده چه خواهد بود؟",
+      "codeSnippet": "function Batch() {\n  const [a, setA] = useState(0);\n  const [b, setB] = useState(0);\n  return (\n    <>\n      <button onClick={() => { setA(a + 1); setA(a + 1); setA(a + 1); }}>{a}</button>\n      <button onClick={() => { setB(x => x + 1); setB(x => x + 1); setB(x => x + 1); }}>{b}</button>\n    </>\n  );\n}",
+      "codeLanguage": "jsx",
+      "shortAnswer": "در یک رندر، متغیر `a` یک «snapshot» ثابت است. سه بار `setA(a + 1)` هر سه `setA(1)` است. ولی صورت تابعی (`x => x + 1`) روی آخرین مقدار صف‌شده اعمال می‌شود، پس سه بار افزایش می‌دهد.",
+      "explanation": "نتیجه با اجرای واقعی تست شد (React 19.3). React بروزرسانی‌های یک رویداد را batch می‌کند و فقط یک‌بار رندر می‌کند. هرگاه state جدید به مقدار قبلی وابسته است از **updater function** استفاده کن: `setCount(c => c + 1)`. این در async و closureها هم امن‌تر است.",
+      "commonMistake": "فرض اینکه `setState` مقدار را همان لحظه عوض می‌کند و خط بعدی مقدار جدید را می‌بیند.",
+      "followUp": "چرا بعد از `setCount(5)` خواندن `count` در همان تابع هنوز مقدار قدیمی را می‌دهد؟",
+      "estimatedSeconds": 60,
+      "minVersion": "18",
+      "tags": [
+        "usestate",
+        "batching",
+        "closures"
+      ],
+      "choices": [
+        {
+          "text": "هر دو `3`"
+        },
+        {
+          "text": "دکمه‌ی اول `3` و دکمه‌ی دوم `1`"
+        },
+        {
+          "text": "هر دو `1`"
+        },
+        {
+          "text": "دکمه‌ی اول `1` و دکمه‌ی دوم `3`",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "react-keys-in-lists",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "چرا در رندر لیست به هر آیتم `key` می‌دهیم و چه چیزی را باید به‌عنوان key استفاده کنیم؟",
+      "shortAnswer": "key به الگوریتم reconciliation می‌گوید کدام آیتم همان آیتم قبلی است تا DOM و state آن حفظ و فقط جابه‌جا شود.",
+      "explanation": "```jsx\n{todos.map(t => <TodoItem key={t.id} todo={t} />)}\n```\nاندیس به‌عنوان key فقط برای لیست‌های ثابت که هرگز مرتب/حذف/درج نمی‌شوند مناسب است؛ وگرنه state آیتم‌ها (مثلاً متن داخل input) به آیتم اشتباه می‌چسبد. `Math.random()` باعث می‌شود هر رندر همه‌ی آیتم‌ها remount شوند (کندی و از دست رفتن state). key فقط بین «همزاد»ها یکتا باید باشد و به‌عنوان prop به کامپوننت نمی‌رسد.",
+      "commonMistake": "استفاده از index یا مقدار تصادفی به‌عنوان key در لیست پویا.",
+      "followUp": "چطور با تغییر `key` عمداً state یک کامپوننت را ریست می‌کنی؟",
+      "estimatedSeconds": 50,
+      "minVersion": "18",
+      "tags": [
+        "keys",
+        "lists",
+        "reconciliation"
+      ],
+      "choices": [
+        {
+          "text": "key باید همیشه اندیس آرایه باشد"
+        },
+        {
+          "text": "`Math.random()` بهترین key است چون همیشه یکتاست"
+        },
+        {
+          "text": "تا React بتواند آیتم‌ها را بین رندرها شناسایی کند؛ بهترین key یک شناسه‌ی یکتا و پایدار از داده (مثل `id`) است",
+          "isCorrect": true
+        },
+        {
+          "text": "برای اینکه CSS روی آیتم‌ها اعمال شود"
+        }
+      ]
+    },
+    {
+      "id": "react-controlled-inputs",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "Input «کنترل‌شده» (controlled) چیست؟",
+      "shortAnswer": "در controlled component هر تغییر از طریق state می‌گذرد؛ این امکان اعتبارسنجی لحظه‌ای و فرمت‌دهی را می‌دهد. در uncontrolled، DOM مقدار را نگه می‌دارد و با `ref` یا `FormData` خوانده می‌شود.",
+      "explanation": "```jsx\nconst [name, setName] = useState('');\n<input value={name} onChange={e => setName(e.target.value)} />\n```\nاگر `value` بدهی و `onChange` نگذاری input فقط‌خواندنی می‌شود (و هشدار می‌گیری). تغییر ناگهانی بین uncontrolled و controlled (مثلاً `value={undefined}` بعد `''`) هشدار می‌دهد. برای فرم‌های بزرگ، با React 19 می‌شود از `<form action={fn}>` و `FormData` استفاده کرد که به state برای هر فیلد نیاز ندارد و کارایی بهتری دارد.",
+      "commonMistake": "ندادن `onChange` به input دارای `value`.",
+      "followUp": "چه زمانی uncontrolled با `FormData` را ترجیح می‌دهی؟",
+      "estimatedSeconds": 50,
+      "minVersion": "18",
+      "tags": [
+        "forms",
+        "controlled-components",
+        "state"
+      ],
+      "choices": [
+        {
+          "text": "inputی که مقدارش را با `ref` مستقیم از DOM می‌خوانیم"
+        },
+        {
+          "text": "inputی که فقط با `defaultValue` مقداردهی می‌شود"
+        },
+        {
+          "text": "inputی که مقدارش از state React می‌آید (`value`) و با `onChange` به‌روز می‌شود، پس React منبع حقیقت است",
+          "isCorrect": true
+        },
+        {
+          "text": "inputی که `readOnly` است"
+        }
+      ]
+    },
+    {
+      "id": "react-useeffect-deps",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "آرایه‌ی وابستگی (`dependency array`) در `useEffect` چه نقشی دارد؟",
+      "shortAnswer": "هر مقدار reactive (props، state، متغیرهای تعریف‌شده در بدنه‌ی کامپوننت) که effect می‌خواند باید در آرایه باشد. بدون آرایه، effect بعد از هر رندر اجرا می‌شود.",
+      "explanation": "```jsx\nuseEffect(() => {\n  const id = setInterval(tick, 1000);\n  return () => clearInterval(id);   // cleanup\n}, [tick]);\n```\nقانون eslint `react-hooks/exhaustive-deps` را جدی بگیر؛ نادیده گرفتن آن معمولاً به stale closure منجر می‌شود. اگر تابعی در deps تغییر می‌کند و اجرای مجدد نمی‌خواهی، منطق را بازطراحی کن (تابع را داخل effect ببر، یا `useCallback`/`useEffectEvent` در نسخه‌های جدید).",
+      "commonMistake": "خالی گذاشتن آرایه برای «فقط یک‌بار اجرا شود» در حالی که effect به مقدار reactive وابسته است.",
+      "followUp": "چرا effect با آرایه‌ی `[]` ممکن است مقدار قدیمی state را ببیند؟",
+      "estimatedSeconds": 55,
+      "minVersion": "18",
+      "tags": [
+        "useeffect",
+        "hooks",
+        "dependencies"
+      ],
+      "choices": [
+        {
+          "text": "effect فقط بعد از رندری اجرا می‌شود که حداقل یکی از مقدارهای آرایه نسبت به رندر قبل تغییر کرده باشد؛ آرایه‌ی خالی یعنی فقط بعد از mount",
+          "isCorrect": true
+        },
+        {
+          "text": "فقط برای خواندن props است و state را شامل نمی‌شود"
+        },
+        {
+          "text": "بدون آرایه، effect هرگز اجرا نمی‌شود"
+        },
+        {
+          "text": "مشخص می‌کند effect چند بار اجرا شود"
+        }
+      ]
+    },
+    {
+      "id": "react-useeffect-cleanup",
+      "level": "Junior",
+      "type": "ShortAnswer",
+      "text": "تابع cleanup در `useEffect` برای چیست و کی اجرا می‌شود؟",
+      "shortAnswer": "تابعی که effect برمی‌گرداند و React آن را قبل از اجرای مجدد effect (وقتی deps عوض شد) و هنگام unmount اجرا می‌کند. برای لغو اشتراک‌ها، تایمرها، listenerها و درخواست‌های در حال انجام است تا نشت حافظه و race condition نداشته باشیم.",
+      "explanation": "```jsx\nuseEffect(() => {\n  const ac = new AbortController();\n  fetch(`/api/users/${id}`, { signal: ac.signal })\n    .then(r => r.json()).then(setUser)\n    .catch(e => { if (e.name !== 'AbortError') setError(e); });\n  return () => ac.abort();      // اگر id عوض شد، درخواست قبلی لغو\n}, [id]);\n```\nبدون cleanup، اگر `id` سریع عوض شود جواب درخواست قدیمی ممکن است دیرتر برسد و state را با داده‌ی اشتباه بنویسد (race). برای دریافت داده در پروژه‌های واقعی معمولاً از کتابخانه (TanStack Query، SWR) یا از قابلیت‌های فریمورک (Server Components، `use`) استفاده می‌شود نه effect خام.",
+      "commonMistake": "فراموش کردن cleanup برای `addEventListener`/`setInterval`.",
+      "followUp": "در StrictMode توسعه، چرا effect دو بار اجرا می‌شود و این چه چیزی را نشان می‌دهد؟",
+      "estimatedSeconds": 90,
+      "minVersion": "18",
+      "tags": [
+        "useeffect",
+        "cleanup",
+        "async"
+      ]
+    },
+    {
+      "id": "react-conditional-render-zero",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "اگر `items` آرایه‌ی خالی باشد، `{items.length && <List items={items} />}` چه چیزی رندر می‌کند؟",
+      "shortAnswer": "`&&` مقدار سمت چپ را برمی‌گرداند اگر falsy باشد؛ React مقدارهای `false/null/undefined` را نادیده می‌گیرد ولی عدد `0` را به‌صورت متن رندر می‌کند.",
+      "explanation": "نتیجه با اجرای واقعی تأیید شد (خروجی `0`). راه‌حل‌ها:\n```jsx\n{items.length > 0 && <List items={items} />}\n{items.length ? <List items={items} /> : null}\n```\nیا اول یک boolean صریح بساز: `{Boolean(count) && ...}`. برای شاخه‌های چندحالته از ternary، early return یا یک تابع کمکی استفاده کن تا JSX خوانا بماند.",
+      "commonMistake": "استفاده از `&&` با عدد یا رشته‌ی خالی که خودشان رندر می‌شوند.",
+      "followUp": "چه چیزهایی در JSX رندر نمی‌شوند؟",
+      "estimatedSeconds": 45,
+      "minVersion": "18",
+      "tags": [
+        "conditional-rendering",
+        "jsx",
+        "gotchas"
+      ],
+      "choices": [
+        {
+          "text": "هیچ چیزی رندر نمی‌شود"
+        },
+        {
+          "text": "عدد `0` را روی صفحه نشان می‌دهد",
+          "isCorrect": true
+        },
+        {
+          "text": "خطای runtime می‌دهد"
+        },
+        {
+          "text": "رشته‌ی `false` نمایش داده می‌شود"
+        }
+      ]
+    },
+    {
+      "id": "react-event-handler-call",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "تفاوت `onClick={handle}` و `onClick={handle()}` چیست؟",
+      "shortAnswer": "در JSX باید «ارجاع به تابع» بدهی، نه «نتیجه‌ی اجرای تابع». برای ارسال آرگومان از arrow function استفاده کن.",
+      "explanation": "```jsx\n<button onClick={handle}>ok</button>\n<button onClick={() => handle(id)}>ok</button>   // آرگومان\n<button onClick={handle(id)}>bad</button>        // ❌ هنگام رندر اجرا می‌شود\n```\nبا اجرای واقعی تأیید شد: `handle()` یک‌بار در رندر صدا خورد. اگر آن تابع `setState` بزند، حلقه‌ی رندر بی‌نهایت ایجاد می‌شود («Too many re-renders»).",
+      "commonMistake": "صدا زدن handler با پرانتز در JSX و ایجاد حلقه‌ی رندر.",
+      "followUp": "`e.preventDefault()` و `e.stopPropagation()` هرکدام چه می‌کنند؟",
+      "estimatedSeconds": 45,
+      "minVersion": "18",
+      "tags": [
+        "events",
+        "handlers",
+        "gotchas"
+      ],
+      "choices": [
+        {
+          "text": "اولی تابع را به‌عنوان handler می‌دهد؛ دومی handle را همان لحظه‌ی رندر صدا می‌زند و نتیجه‌اش را به‌عنوان handler می‌دهد",
+          "isCorrect": true
+        },
+        {
+          "text": "هیچ تفاوتی ندارند"
+        },
+        {
+          "text": "دومی درست‌تر است چون پرانتز دارد"
+        },
+        {
+          "text": "اولی خطای کامپایل می‌دهد"
+        }
+      ]
+    },
+    {
+      "id": "react-lifting-state-up",
+      "level": "Junior",
+      "type": "ShortAnswer",
+      "text": "«Lifting state up» یعنی چه و چه زمانی انجامش می‌دهی؟",
+      "shortAnswer": "وقتی دو یا چند کامپوننت باید state یکسانی را ببینند یا تغییر دهند، آن state را به نزدیک‌ترین والد مشترک منتقل می‌کنیم و مقدار و callback تغییر آن را با props پایین می‌دهیم. این کار «منبع واحد حقیقت» می‌سازد.",
+      "explanation": "```jsx\nfunction Converter() {\n  const [celsius, setCelsius] = useState(0);\n  return (\n    <>\n      <TempInput label=\"C\" value={celsius} onChange={setCelsius} />\n      <TempInput label=\"F\" value={celsius * 9 / 5 + 32}\n                 onChange={f => setCelsius((f - 32) * 5 / 9)} />\n    </>\n  );\n}\n```\nاگر state بیش از حد بالا برده شود و از چند لایه با props عبور کند («prop drilling»)، از composition (پاس دادن `children`/slot)، Context یا کتابخانه‌ی state استفاده می‌کنیم. قاعده: state را تا حد امکان محلی و نزدیک به جایی که استفاده می‌شود نگه دار.",
+      "commonMistake": "نگه داشتن state تکراری در دو کامپوننت و همگام‌سازی دستی آنها با effect.",
+      "followUp": "prop drilling را چگونه بدون Context کم می‌کنی؟ (composition)",
+      "estimatedSeconds": 90,
+      "minVersion": "18",
+      "tags": [
+        "state",
+        "architecture",
+        "components"
+      ]
+    },
+    {
+      "id": "react-useref-usage",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "`useRef` را برای چه کارهایی استفاده می‌کنیم؟",
+      "shortAnswer": "تغییر `ref.current` رندر مجدد ایجاد نمی‌کند. برای داده‌ای که در UI نمایش داده می‌شود از state استفاده کن.",
+      "explanation": "```jsx\nconst inputRef = useRef(null);\nuseEffect(() => { inputRef.current?.focus(); }, []);\nreturn <input ref={inputRef} />;\n```\nکاربردهای دیگر: نگه‌داشتن شناسه‌ی timer، مقدار قبلی، instance کتابخانه‌ی خارجی. در React 19 `ref` برای کامپوننت‌های تابعی یک prop معمولی است (نیازی به `forwardRef` نیست). در رندر `ref.current` را نخوان/ننویس (به‌جز مقداردهی اولیه)؛ فقط در event handler و effect. در TypeScript از React 19 `useRef` باید آرگومان اولیه بگیرد.",
+      "commonMistake": "استفاده از ref به‌جای state و تعجب از اینکه UI به‌روز نمی‌شود.",
+      "followUp": "در React 19 چطور `ref` را به فرزند پاس می‌دهی؟",
+      "estimatedSeconds": 50,
+      "minVersion": "18",
+      "tags": [
+        "useref",
+        "hooks",
+        "dom"
+      ],
+      "choices": [
+        {
+          "text": "برای ذخیره‌ی state که باید UI را به‌روز کند"
+        },
+        {
+          "text": "برای جایگزین کردن `useEffect`"
+        },
+        {
+          "text": "برای نگه‌داشتن مقداری که بین رندرها حفظ شود ولی تغییرش رندر مجدد ایجاد نکند، و برای دسترسی به المان DOM",
+          "isCorrect": true
+        },
+        {
+          "text": "فقط برای المان‌های `input`"
+        }
+      ]
+    },
+    {
+      "id": "react-children-composition",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "`props.children` چیست و چه کمکی می‌کند؟",
+      "shortAnswer": "Composition ابزار اصلی React برای اشتراک کد و کاهش prop drilling است.",
+      "explanation": "```jsx\nfunction Card({ title, children }) {\n  return (\n    <section className=\"card\">\n      <h2>{title}</h2>\n      {children}\n    </section>\n  );\n}\n<Card title=\"پروفایل\"><Avatar /><Bio /></Card>\n```\nمی‌توان «slot» های نام‌دار را با props دیگر پاس داد (`header={<Header />}`). همچنین composition عملکرد را بهتر می‌کند: کامپوننت والد که children را به‌صورت prop می‌گیرد با تغییر state خودش، children را دوباره ساخته نمی‌کند (elementها از قبل ساخته شده‌اند).",
+      "commonMistake": "ساختن سلسله‌مراتب ارث‌بری کامپوننت‌ها به‌جای composition.",
+      "followUp": "چرا composition اغلب از ارث‌بری در React بهتر است؟",
+      "estimatedSeconds": 45,
+      "minVersion": "18",
+      "tags": [
+        "children",
+        "composition",
+        "components"
+      ],
+      "choices": [
+        {
+          "text": "فقط رشته‌های متنی را می‌پذیرد"
+        },
+        {
+          "text": "آرایه‌ی فرزندان state کامپوننت"
+        },
+        {
+          "text": "محتوایی که بین تگ باز و بسته‌ی کامپوننت قرار می‌گیرد؛ به کامپوننت‌های layout/wrapper اجازه می‌دهد بدون دانستن محتوا آن را رندر کنند",
+          "isCorrect": true
+        },
+        {
+          "text": "هر کامپوننت باید children را حتماً بپذیرد"
+        }
+      ]
+    },
+    {
+      "id": "react-fragments-key",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "چه زمانی به‌جای `<>...</>` باید `<Fragment key={...}>` بنویسی؟",
+      "shortAnswer": "سینتکس کوتاه `<>` نمی‌تواند prop (مثل key) بگیرد. فرم کامل `Fragment` می‌تواند `key` بپذیرد و از React 19.3 `ref` هم می‌گیرد (ref به یک «Fragment instance» با متدهایی مثل `focus()` و `blur()` اشاره می‌کند؛ روی نسخه‌ی 19.3 تأیید شد).",
+      "explanation": "```jsx\n{items.map(item => (\n  <Fragment key={item.id}>\n    <dt>{item.term}</dt>\n    <dd>{item.desc}</dd>\n  </Fragment>\n))}\n```\nFragment هیچ المان DOM اضافه‌ای نمی‌سازد و برای جداول، لیست تعریف و layoutهای CSS Grid/Flex که wrapper اضافه آن را می‌شکند بسیار مفید است.",
+      "commonMistake": "اضافه کردن `div` بی‌دلیل که ساختار جدول یا grid را خراب می‌کند.",
+      "followUp": "Fragment چه تفاوتی با `div` در DOM دارد؟",
+      "estimatedSeconds": 40,
+      "minVersion": "18",
+      "tags": [
+        "fragment",
+        "jsx",
+        "lists"
+      ],
+      "choices": [
+        {
+          "text": "هرگاه بیش از دو فرزند داری"
+        },
+        {
+          "text": "فقط در کامپوننت‌های کلاسی"
+        },
+        {
+          "text": "وقتی چند گروه عنصر را در یک `map` رندر می‌کنی و به هر گروه key لازم است",
+          "isCorrect": true
+        },
+        {
+          "text": "وقتی می‌خواهی Fragment استایل داشته باشد"
+        }
+      ]
+    },
+    {
+      "id": "react-immutable-state-updates",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "کدام روش به‌روزرسانی state آرایه درست است؟",
+      "shortAnswer": "React برای تشخیص تغییر state مقدار جدید را با قبلی از نظر **reference** مقایسه می‌کند (`Object.is`). اگر همان آرایه را mutate و دوباره set کنی reference تغییر نکرده و رندر مجدد انجام نمی‌شود.",
+      "explanation": "نتیجه با اجرای واقعی تأیید شد: `push` روی state و `setL(l)` باعث رندر نشد. الگوهای امن:\n```js\nsetItems([...items, x]);                         // افزودن\nsetItems(items.filter(i => i.id !== id));        // حذف\nsetItems(items.map(i => i.id === id ? { ...i, done: true } : i));  // ویرایش\nsetUser(u => ({ ...u, address: { ...u.address, city } }));         // تو در تو\n```\nبرای ساختارهای عمیق `immer` (یا `useImmer`) نوشتن را ساده می‌کند. متدهای غیرمخرب `toSorted`, `toSpliced`, `with` هم به این کار کمک می‌کنند.",
+      "commonMistake": "mutate کردن آرایه/شیء state و سپس set کردن همان reference.",
+      "followUp": "چرا `React.memo` هم به immutability وابسته است؟",
+      "estimatedSeconds": 55,
+      "minVersion": "18",
+      "tags": [
+        "state",
+        "immutability",
+        "arrays"
+      ],
+      "choices": [
+        {
+          "text": "`setItems([...items, newItem])` — ساختن آرایه‌ی جدید",
+          "isCorrect": true
+        },
+        {
+          "text": "`items[0] = x; setItems(items)`"
+        },
+        {
+          "text": "`items.push(newItem); setItems(items)`"
+        },
+        {
+          "text": "`setItems(items.sort())` روی همان آرایه‌ی state"
+        }
+      ]
+    },
+    {
+      "id": "react-strictmode-double-effects",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "چرا در حالت توسعه با `<StrictMode>` effect در mount دو بار اجرا می‌شود؟",
+      "codeSnippet": "function Chat({ roomId }) {\n  useEffect(() => {\n    const conn = createConnection(roomId);\n    conn.connect();\n    return () => conn.disconnect();\n  }, [roomId]);\n  return null;\n}",
+      "codeLanguage": "jsx",
+      "shortAnswer": "StrictMode در dev رندرها را هم دو بار اجرا می‌کند تا ناخالصی (impurity) کشف شود. مقصود: کد شما باید در برابر mount/unmount چندباره مقاوم باشد (که Activity، Fast Refresh و ... هم به آن نیاز دارند).",
+      "explanation": "با اجرای واقعی: `mounts = 2` و `cleanups = 1`. راه رفع درست اضافه کردن cleanup مناسب است، نه حذف StrictMode:\n```jsx\nuseEffect(() => {\n  const conn = createConnection(id);\n  conn.connect();\n  return () => conn.disconnect();   // با mount/unmount مکرر سازگار\n}, [id]);\n```\nراه‌های «فقط یک‌بار» با `useRef` flag هک هستند و رفتار واقعی (مثلاً remount در Activity/Suspense) را نمی‌پوشانند. اگر یک درخواست دوبار می‌رود، در dev قابل پذیرش است و در production یک‌بار اجرا می‌شود؛ ولی برای جلوگیری از رفتار اشتباه از abort/کش استفاده کن.",
+      "commonMistake": "حذف StrictMode یا گذاشتن flag برای «دوبار اجرا نشو» به‌جای نوشتن cleanup.",
+      "followUp": "چطور effectی که آنالیتیکس می‌فرستد را نسبت به StrictMode امن می‌کنی؟",
+      "estimatedSeconds": 60,
+      "minVersion": "18",
+      "tags": [
+        "strictmode",
+        "useeffect",
+        "lifecycle"
+      ],
+      "choices": [
+        {
+          "text": "باگی در React است که در نسخه‌ی بعد رفع می‌شود"
+        },
+        {
+          "text": "چون کامپوننت دو بار در DOM ساخته شده است"
+        },
+        {
+          "text": "فقط وقتی `useEffect` آرایه‌ی وابستگی خالی دارد رخ می‌دهد و در production هم اجرا می‌شود"
+        },
+        {
+          "text": "React عمداً effect را mount ← cleanup ← mount می‌کند تا effectهایی که cleanup ندارند یا ناسازگارند را آشکار کند؛ در production این اتفاق نمی‌افتد",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "react-rerender-children",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "وقتی state یک کامپوننت تغییر می‌کند چه چیزی دوباره رندر می‌شود؟",
+      "shortAnswer": "«رندر» یعنی فراخوانی تابع کامپوننت و محاسبه‌ی JSX جدید؛ بعد React با DOM فعلی مقایسه می‌کند (reconciliation) و فقط تفاوت‌ها را در «commit» به DOM اعمال می‌کند. پس رندر مجدد لزوماً به معنای بازنویسی DOM نیست.",
+      "explanation": "پس‌رندرهای اضافه معمولاً مشکل نیستند تا وقتی رندر ارزان باشد. اگر کند بود: اول profile کن (React DevTools Profiler)، بعد state را پایین‌تر ببر، از composition (`children`) استفاده کن، و آخرین راه `memo`. با React Compiler (پایدار از نسخه‌ی 1.0) بسیاری از memoهای دستی خودکار انجام می‌شود.",
+      "commonMistake": "ریختن `useMemo/useCallback/memo` روی همه‌چیز بدون اندازه‌گیری.",
+      "followUp": "چرا نگه‌داشتن state در والد بالاتر از حد لازم باعث رندرهای اضافی می‌شود؟",
+      "estimatedSeconds": 55,
+      "minVersion": "18",
+      "tags": [
+        "rendering",
+        "reconciliation",
+        "performance"
+      ],
+      "choices": [
+        {
+          "text": "فقط والدها"
+        },
+        {
+          "text": "خود کامپوننت و به‌طور پیش‌فرض همه‌ی فرزندانش (مگر با `memo` یا composition از رندر مجدد جلوگیری شده باشد)",
+          "isCorrect": true
+        },
+        {
+          "text": "کل برنامه از ریشه"
+        },
+        {
+          "text": "فقط المان DOM ای که مقدارش تغییر کرده"
+        }
+      ]
+    },
+    {
+      "id": "react-usememo-usecallback",
+      "level": "Mid",
+      "type": "Conceptual",
+      "text": "`useMemo`، `useCallback` و `React.memo` را چه زمانی استفاده می‌کنی؟ React Compiler چه تغییری ایجاد کرده؟",
+      "shortAnswer": "برای جلوگیری از محاسبه‌ی سنگین تکراری (`useMemo`)، پایدار نگه داشتن reference تابع/شیء که به فرزند memo‌شده یا وابستگی effect پاس می‌شود (`useCallback`)، و رد کردن رندر فرزند وقتی props همان است (`memo`). فقط پس از اندازه‌گیری مشکل کارایی. React Compiler (نسخه‌ی 1.0 پایدار) این memoization را در build خودکار انجام می‌دهد.",
+      "explanation": "نمونه:\n```jsx\nconst visible = useMemo(() => filterAndSort(items, q), [items, q]);\nconst onSelect = useCallback(id => setSelected(id), []);\nconst Row = memo(function Row({ item, onSelect }) { ... });\n```\n`memo` بدون props پایدار بی‌اثر است (اگر هر رندر `onSelect` جدید بسازی مقایسه‌ی سطحی همیشه شکست می‌خورد). `useMemo` تضمین معنایی نیست بلکه بهینه‌سازی است؛ React می‌تواند cache را دور بریزد.\n\nReact Compiler: با `babel-plugin-react-compiler` (یا پشتیبانی داخلی Next 16) کد را تحلیل می‌کند و memoization دقیق می‌افزاید؛ شرط: کد باید قواعد React (رندر خالص، عدم mutate) را رعایت کند. با آن، نیاز به `useMemo/useCallback` دستی کمتر می‌شود ولی برای مواردی که معنای «پایداری identity» برای effect لازم است هنوز مفیدند.",
+      "commonMistake": "memo کردن همه‌جا بدون profile و بی‌اثر شدن آن به‌خاطر props ناپایدار.",
+      "followUp": "چرا `useMemo` نباید برای «تضمین اجرای یک‌بار» استفاده شود؟",
+      "estimatedSeconds": 150,
+      "minVersion": "18",
+      "tags": [
+        "memoization",
+        "performance",
+        "react-compiler"
+      ]
+    },
+    {
+      "id": "react-context-rerender",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "چه مشکلی ممکن است با یک Context بزرگ که مقدارش هر رندر شیء جدید است پیش بیاید؟",
+      "shortAnswer": "تغییر `value` (مقایسه با `Object.is`) همه‌ی مصرف‌کننده‌ها را رندر می‌کند. Context ابزار «انتقال» است، نه مدیریت state پرتغییر.",
+      "explanation": "راه‌حل‌ها:\n- Context را به چند Context کوچک (state و dispatch جدا) بشکن.\n- `value` را با `useMemo` پایدار نگه دار.\n- برای state پرتغییر از کتابخانه با selector (Zustand، Jotai، Redux Toolkit) یا `useSyncExternalStore` استفاده کن.\n```jsx\n<ThemeContext value={theme}>            {/* React 19: نیازی به .Provider نیست */}\n  <App />\n</ThemeContext>\n```\nبا اجرای واقعی تأیید شد که در React 19 می‌شود `<Context value=...>` را مستقیم استفاده کرد. همچنین با `use(Context)` می‌توان Context را در شرط/حلقه هم خواند (برخلاف `useContext`).",
+      "commonMistake": "ریختن کل state برنامه در یک Context و رندرهای گسترده.",
+      "followUp": "چرا جدا کردن state و dispatch در دو Context کمک می‌کند؟",
+      "estimatedSeconds": 65,
+      "minVersion": "18",
+      "tags": [
+        "context",
+        "performance",
+        "state-management"
+      ],
+      "choices": [
+        {
+          "text": "React خودکار مصرف‌کننده‌ها را بر اساس فیلد مصرف‌شده فیلتر می‌کند"
+        },
+        {
+          "text": "Context اصلاً به‌روز نمی‌شود"
+        },
+        {
+          "text": "فقط والد مستقیم Provider رندر می‌شود"
+        },
+        {
+          "text": "همه‌ی کامپوننت‌های مصرف‌کننده‌ی آن Context با هر تغییر `value` دوباره رندر می‌شوند، حتی اگر فقط بخش کوچکی از آن را بخوانند",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "react-usereducer-when",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "چه زمانی `useReducer` را به `useState` ترجیح می‌دهی؟",
+      "shortAnswer": "`useReducer` تابع خالص `(state, action) => newState` را از UI جدا می‌کند. تست‌کردن reducer ساده است و منطق در یک نقطه دیده می‌شود.",
+      "explanation": "```jsx\nfunction reducer(state, action) {\n  switch (action.type) {\n    case 'added': return { ...state, items: [...state.items, action.item] };\n    case 'removed': return { ...state, items: state.items.filter(i => i.id !== action.id) };\n    default: throw new Error('unknown action ' + action.type);\n  }\n}\nconst [state, dispatch] = useReducer(reducer, { items: [] });\n```\nترکیب `useReducer` + Context الگوی رایج state سراسری سبک است. reducer باید خالص باشد (بدون fetch، random، Date.now). حالت‌های واقعاً پیچیده (state machine) را می‌توان با union تایپ‌دار یا XState مدل کرد.",
+      "commonMistake": "نوشتن side effect داخل reducer.",
+      "followUp": "چرا reducer باید خالص باشد؟ (StrictMode آن را دو بار اجرا می‌کند)",
+      "estimatedSeconds": 55,
+      "minVersion": "18",
+      "tags": [
+        "usereducer",
+        "state",
+        "patterns"
+      ],
+      "choices": [
+        {
+          "text": "useReducer فقط با Redux کار می‌کند"
+        },
+        {
+          "text": "هرگاه بخواهی از async/await استفاده کنی"
+        },
+        {
+          "text": "وقتی state ساختار پیچیده دارد یا چند فیلد به‌هم‌وابسته با قواعد گذار (transition) مشخص تغییر می‌کنند و می‌خواهی منطق تغییر را متمرکز و قابل تست کنی",
+          "isCorrect": true
+        },
+        {
+          "text": "وقتی فقط یک عدد ساده داری"
+        }
+      ]
+    },
+    {
+      "id": "react-custom-hooks",
+      "level": "Mid",
+      "type": "ShortAnswer",
+      "text": "Custom hook چیست و چه زمانی می‌نویسی؟ قواعد آن چیست؟",
+      "shortAnswer": "تابعی که با `use` شروع می‌شود و می‌تواند از hookهای دیگر استفاده کند تا منطق stateful قابل استفاده‌ی مجدد را از UI جدا کند. هر فراخوانی state جدا دارد (state به‌اشتراک گذاشته نمی‌شود). قواعد hooks: فقط در سطح بالای کامپوننت/hook و نه داخل شرط/حلقه/تابع تودرتو، و فقط از کامپوننت یا hook تابعی.",
+      "explanation": "```jsx\nfunction useOnlineStatus() {\n  return useSyncExternalStore(\n    cb => { window.addEventListener('online', cb); window.addEventListener('offline', cb);\n            return () => { window.removeEventListener('online', cb); window.removeEventListener('offline', cb); }; },\n    () => navigator.onLine,\n    () => true,   // مقدار سمت سرور\n  );\n}\n```\nمزیت: منطق واحد، قابل تست، و کامپوننت‌ها ساده می‌مانند. از ساختن hook‌های «انتزاعی زودرس» پرهیز کن؛ وقتی الگو دو-سه بار تکرار شد استخراجش کن. قاعده‌ی eslint `rules-of-hooks` را همیشه فعال نگه دار. ترتیب فراخوانی hookها باید در هر رندر ثابت باشد چون React آنها را با «ترتیب» به state نگاشت می‌کند.",
+      "commonMistake": "فرض اینکه دو کامپوننت که یک custom hook را صدا می‌زنند state مشترک دارند.",
+      "followUp": "چرا hook را نمی‌شود داخل `if` صدا زد؟",
+      "estimatedSeconds": 110,
+      "minVersion": "18",
+      "tags": [
+        "custom-hooks",
+        "hooks",
+        "reuse"
+      ]
+    },
+    {
+      "id": "react-stale-closure",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "در این کد، چرا شمارنده روی `1` گیر می‌کند و مقدار `count` در `setInterval` همیشه `0` است؟",
+      "codeSnippet": "function Timer() {\n  const [count, setCount] = useState(0);\n  useEffect(() => {\n    const id = setInterval(() => setCount(count + 1), 1000);\n    return () => clearInterval(id);\n  }, []);\n  return <h1>{count}</h1>;\n}",
+      "codeLanguage": "jsx",
+      "shortAnswer": "هر رندر closure مخصوص خودش را دارد. effect با `[]` فقط closure رندر اول را نگه می‌دارد؛ پس `count` همیشه `0` است و `setCount(0 + 1)` هر بار `1` می‌گذارد.",
+      "explanation": "با اجرای واقعی تأیید شد (مقدار دیده‌شده در interval: `[0,0,0,...]` و نمایش `1`). راه‌حل‌ها به ترتیب ترجیح:\n1. **updater**: `setCount(c => c + 1)` و حذف وابستگی به `count`.\n2. `count` را در deps بگذار و interval هر بار دوباره ساخته شود (cleanup درست).\n3. `useEffectEvent` (React 19.2) برای خواندن آخرین مقدار بدون اجرای مجدد effect:\n```jsx\nconst onTick = useEffectEvent(() => log(count));\nuseEffect(() => { const id = setInterval(onTick, 1000); return () => clearInterval(id); }, []);\n```\n4. `useRef` برای نگه‌داشتن آخرین مقدار (الگوی قدیمی‌تر).",
+      "commonMistake": "نادیده گرفتن هشدار `exhaustive-deps` با `// eslint-disable`.",
+      "followUp": "`useEffectEvent` چه فرقی با `useCallback` دارد؟",
+      "estimatedSeconds": 80,
+      "minVersion": "18",
+      "tags": [
+        "closures",
+        "useeffect",
+        "hooks"
+      ],
+      "choices": [
+        {
+          "text": "چون باید از `useLayoutEffect` استفاده می‌شد"
+        },
+        {
+          "text": "چون effect فقط یک‌بار (deps خالی) اجرا شده و closureاش `count` همان رندر اول (0) را می‌بیند؛ باید از updater (`setCount(c => c + 1)`) استفاده کرد",
+          "isCorrect": true
+        },
+        {
+          "text": "چون `useState` مقدار را cache نمی‌کند"
+        },
+        {
+          "text": "چون `setInterval` در React کار نمی‌کند"
+        }
+      ]
+    },
+    {
+      "id": "react-reset-state-with-key",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "چطور می‌توان state داخلی یک کامپوننت (مثلاً فرم) را وقتی `userId` عوض شد کاملاً ریست کرد؟",
+      "shortAnswer": "React state را به «جایگاه در درخت + نوع + key» وصل می‌کند. تغییر key یعنی «این یک کامپوننت متفاوت است» و state قبلی دور ریخته می‌شود.",
+      "explanation": "با اجرای واقعی: تغییر key از `1` به `2` مقدار تایپ‌شده در input را پاک کرد. این راه اصولی‌تر از effect برای ریست کردن است، چون effect یک رندر با state قدیمی هم می‌بیند (فلیکر). الگوی مشابه: آیا باید state را ریست کنی یا «تنظیم state هنگام تغییر prop» (در بدنه‌ی رندر با شرط) — که در بیشتر موارد با key یا derive کردن مقدار بی‌نیاز می‌شود.",
+      "commonMistake": "ریست کردن state با `useEffect(() => setX(''), [id])` که یک رندر با مقدار قدیمی نشان می‌دهد.",
+      "followUp": "چه چیزهایی باعث می‌شوند state کامپوننت در بین رندرها حفظ شود؟",
+      "estimatedSeconds": 60,
+      "minVersion": "18",
+      "tags": [
+        "key",
+        "state",
+        "reconciliation"
+      ],
+      "choices": [
+        {
+          "text": "`key` متفاوت به کامپوننت بدهی (مثلاً `<Profile key={userId} />`) تا React نمونه‌ی قبلی را unmount و نمونه‌ی جدید بسازد",
+          "isCorrect": true
+        },
+        {
+          "text": "با `useEffect` که همه‌ی stateها را دستی صفر کند تنها راه است"
+        },
+        {
+          "text": "با صدا زدن `forceUpdate`"
+        },
+        {
+          "text": "React هر بار props عوض شود state را ریست می‌کند"
+        }
+      ]
+    },
+    {
+      "id": "react-memo-referential",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "چرا `memo(Child)` گاهی جلوی رندر مجدد را نمی‌گیرد؟",
+      "shortAnswer": "`memo` props را با `Object.is` (مقایسه‌ی سطحی) می‌سنجد. `{}`، `[]` و `() => {}` در هر رندر مقدار جدید می‌شوند.",
+      "explanation": "```jsx\nconst Child = memo(function Child({ style, onClick }) { ... });\n\n// ❌ هر رندر reference جدید\n<Child style={{ color: 'red' }} onClick={() => save()} />\n\n// ✅ پایدار\nconst style = useMemo(() => ({ color: 'red' }), []);\nconst onClick = useCallback(() => save(), []);\n```\nیا مقدار ثابت را بیرون از کامپوننت تعریف کن. با React Compiler این پایداری خودکار تأمین می‌شود. `memo` را اضافه کردن قبل از اندازه‌گیری، هزینه‌ی مقایسه را بی‌دلیل اضافه می‌کند.",
+      "commonMistake": "پاس دادن arrow function/object literal به کامپوننت memo‌شده.",
+      "followUp": "چه زمانی `memo` را با comparator سفارشی (دومین آرگومان) استفاده می‌کنی؟",
+      "estimatedSeconds": 60,
+      "minVersion": "18",
+      "tags": [
+        "memo",
+        "performance",
+        "referential-equality"
+      ],
+      "choices": [
+        {
+          "text": "چون `memo` فقط `state` را مقایسه می‌کند"
+        },
+        {
+          "text": "چون والد در هر رندر یک شیء/تابع جدید (reference جدید) به‌عنوان prop می‌فرستد و مقایسه‌ی سطحی props شکست می‌خورد",
+          "isCorrect": true
+        },
+        {
+          "text": "چون React در dev همیشه همه چیز را دوباره رندر می‌کند"
+        },
+        {
+          "text": "چون `memo` فقط روی کامپوننت‌های کلاسی کار می‌کند"
+        }
+      ]
+    },
+    {
+      "id": "react-transition-deferred",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "`useTransition` و `useDeferredValue` برای چه کاری‌اند؟",
+      "shortAnswer": "در رندر همزمان (Concurrent) React می‌تواند رندر کم‌اولویت را وسط کار قطع کند و ابتدا به رویداد کاربر پاسخ دهد.",
+      "explanation": "```jsx\nconst [isPending, startTransition] = useTransition();\nfunction onChange(e) {\n  setQuery(e.target.value);                 // فوری\n  startTransition(() => setFiltered(filter(e.target.value)));   // قابل‌تعویق\n}\n\nconst deferredQuery = useDeferredValue(query);   // نسخه‌ی «عقب‌افتاده» مقدار\nconst results = useMemo(() => search(deferredQuery), [deferredQuery]);\n```\n`isPending` برای نشان دادن حالت loading است. اینها کار را سریع‌تر نمی‌کنند، فقط اولویت‌بندی می‌کنند؛ اگر رندر خیلی کند است باید خود هزینه را کم کنی (virtualization، memo). ترنزیشن با Suspense هم تعامل دارد: به‌جای جایگزین شدن UI با fallback، UI قبلی می‌ماند تا داده‌ی جدید آماده شود. در React 19.3 ترنزیشن‌ها مستقل‌تر رندر می‌شوند تا یک ترنزیشن کند دیگران را نگه ندارد.",
+      "commonMistake": "فرض اینکه `startTransition` کار سنگین را به thread دیگر می‌برد.",
+      "followUp": "در `startTransition` می‌شود از callback async استفاده کرد؟ (Actions در React 19)",
+      "estimatedSeconds": 65,
+      "minVersion": "18",
+      "tags": [
+        "concurrent",
+        "usetransition",
+        "performance"
+      ],
+      "choices": [
+        {
+          "text": "برای تأخیر انداختن `useEffect`"
+        },
+        {
+          "text": "برای لغو درخواست‌های شبکه"
+        },
+        {
+          "text": "برای علامت‌گذاری به‌روزرسانی‌های کم‌اولویت تا UI در برابر رندر سنگین پاسخگو بماند و ورودی‌های فوری (مثل تایپ) مسدود نشوند",
+          "isCorrect": true
+        },
+        {
+          "text": "برای اجرای کد روی thread جدا (Web Worker)"
+        }
+      ]
+    },
+    {
+      "id": "react-suspense-use-hook",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "در React 19 با `use(promise)` چه کاری می‌شود کرد و چه شرطی دارد؟",
+      "shortAnswer": "`use` یک API ویژه است که برخلاف hookهای دیگر می‌تواند داخل شرط و حلقه صدا زده شود. برای خواندن promise و Context به کار می‌رود.",
+      "explanation": "```jsx\nfunction Comments({ commentsPromise }) {\n  const comments = use(commentsPromise);   // suspend تا آماده شود\n  return comments.map(c => <p key={c.id}>{c.text}</p>);\n}\n\n<Suspense fallback={<Spinner />}>\n  <Comments commentsPromise={commentsPromise} />\n</Suspense>\n```\nساختن promise جدید در هر رندر در Client Component باعث می‌شود هر بار دوباره suspend شود (حلقه). promise را در Server Component بساز و پاس بده یا با کتابخانه‌ی cache کن. خطاها را با Error Boundary مدیریت کن.",
+      "commonMistake": "ساختن promise داخل کامپوننت کلاینتی و پاس دادن به `use` در همان رندر.",
+      "followUp": "تفاوت `use(promise)` و `await` در Server Component چیست؟",
+      "estimatedSeconds": 70,
+      "minVersion": "19.0",
+      "tags": [
+        "use",
+        "suspense",
+        "data-fetching"
+      ],
+      "choices": [
+        {
+          "text": "`use` جایگزین `useState` است"
+        },
+        {
+          "text": "می‌شود در رندر روی promise «منتظر ماند» (کامپوننت suspend می‌شود و نزدیک‌ترین `<Suspense>` نمایش داده می‌شود)؛ promise باید بین رندرها پایدار باشد (مثلاً از والد/کش یا Server Component بیاید)",
+          "isCorrect": true
+        },
+        {
+          "text": "می‌توان داخل خود کامپوننت `use(fetch(url))` نوشت و هر رندر promise جدید ساخت"
+        },
+        {
+          "text": "`use` فقط داخل `useEffect` کار می‌کند"
+        }
+      ]
+    },
+    {
+      "id": "react-form-actions",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "در React 19 `useActionState` و `<form action={fn}>` چه امکانی می‌دهند؟",
+      "shortAnswer": "«Actions» در React 19: توابعی که در transition اجرا می‌شوند و pending، error، optimistic update و ترتیب را پشتیبانی می‌کنند.",
+      "explanation": "```jsx\nfunction SaveForm() {\n  const [state, submit, isPending] = useActionState(async (prev, formData) => {\n    const err = await save(formData.get('name'));\n    return err ? { error: err } : { ok: true };\n  }, { ok: false });\n\n  return (\n    <form action={submit}>\n      <input name=\"name\" />\n      <button disabled={isPending}>ذخیره</button>\n      {state.error && <p>{state.error}</p>}\n    </form>\n  );\n}\n```\n`useFormStatus` (از `react-dom`) داخل فرزندان فرم وضعیت pending را می‌دهد و برای کامپوننت دکمه‌ی submit مفید است. بعد از موفقیت action فرم‌های uncontrolled به‌طور خودکار ریست می‌شوند. در فریمورک‌هایی مثل Next.js، `action` می‌تواند Server Function باشد.",
+      "commonMistake": "نوشتن دستی state برای pending/error در همه‌ی فرم‌ها به‌جای استفاده از Actions.",
+      "followUp": "`useActionState` قبلاً چه نام داشت؟ (`useFormState`)",
+      "estimatedSeconds": 70,
+      "minVersion": "19.0",
+      "tags": [
+        "actions",
+        "forms",
+        "react-19"
+      ],
+      "choices": [
+        {
+          "text": "فرم را با تابع (sync/async) به‌جای `onSubmit` می‌فرستی؛ React خودش state انتظار (pending)، نتیجه و ریست فرم را مدیریت می‌کند و می‌توان نتیجه‌ی action را در state گرفت",
+          "isCorrect": true
+        },
+        {
+          "text": "جایگزین `fetch` است"
+        },
+        {
+          "text": "فقط برای فرم‌هایی است که به سرور Node وصل هستند"
+        },
+        {
+          "text": "`action` همان `onSubmit` است و هیچ قابلیت جدیدی ندارد"
+        }
+      ]
+    },
+    {
+      "id": "react-use-optimistic",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "`useOptimistic` چه کاری می‌کند؟",
+      "shortAnswer": "مثلاً پیام تازه‌ی چت بلافاصله با علامت «در حال ارسال» ظاهر می‌شود، حتی قبل از تأیید سرور.",
+      "explanation": "```jsx\nconst [optimisticMsgs, addOptimistic] = useOptimistic(\n  messages,\n  (state, text) => [...state, { id: crypto.randomUUID(), text, sending: true }],\n);\n\nasync function send(formData) {\n  const text = formData.get('text');\n  addOptimistic(text);              // فوری\n  await sendToServer(text);         // بعد از اتمام، messages واقعی جایگزین می‌شود\n}\n```\nباید داخل یک Action/transition صدا زده شود. اگر action خطا بدهد مقدار خوش‌بینانه دور ریخته می‌شود؛ خطا را به کاربر نشان بده. ID موقت را با ID سرور جایگزین کن تا key تغییر نکند و remount نشود.",
+      "commonMistake": "نشان دادن نتیجه‌ی خوش‌بینانه و مدیریت نکردن حالت شکست.",
+      "followUp": "چه چیزهایی را نباید خوش‌بینانه به‌روز کرد؟ (پرداخت، عملیات غیرقابل‌بازگشت)",
+      "estimatedSeconds": 60,
+      "minVersion": "19.0",
+      "tags": [
+        "useoptimistic",
+        "actions",
+        "ux"
+      ],
+      "choices": [
+        {
+          "text": "رندر را به تعویق می‌اندازد تا داده کامل شود"
+        },
+        {
+          "text": "state را در `localStorage` ذخیره می‌کند"
+        },
+        {
+          "text": "درخواست‌ها را خودکار retry می‌کند"
+        },
+        {
+          "text": "یک نسخه‌ی موقت (خوش‌بینانه) از state را فوراً نشان می‌دهد تا وقتی action async تمام شود؛ بعد به مقدار واقعی برمی‌گردد (یا در خطا rollback می‌شود)",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "react-ref-as-prop",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "در React 19 برای پاس دادن `ref` به کامپوننت تابعی چه تغییری اتفاق افتاده است؟",
+      "shortAnswer": "در React 19 کامپوننت تابعی `ref` را مثل prop دریافت می‌کند. همچنین callback ref می‌تواند تابع cleanup برگرداند.",
+      "explanation": "با اجرای واقعی تأیید شد:\n```jsx\nfunction MyInput({ ref, ...props }) {\n  return <input ref={ref} {...props} />;\n}\n<MyInput ref={inputRef} />\n```\nتفاوت‌ها: callback ref می‌تواند cleanup بدهد: `ref={el => { observe(el); return () => unobserve(el); }}`. کدهای قدیمی با `forwardRef` همچنان کار می‌کنند و codemod رسمی وجود دارد. در TypeScript باید `useRef` مقدار اولیه بگیرد (`useRef<HTMLInputElement>(null)`).",
+      "commonMistake": "نوشتن ref را داخل props destructure نکردن و گیج شدن.",
+      "followUp": "`useImperativeHandle` چه زمانی هنوز لازم است؟",
+      "estimatedSeconds": 55,
+      "minVersion": "19.0",
+      "tags": [
+        "ref",
+        "react-19",
+        "forwardref"
+      ],
+      "choices": [
+        {
+          "text": "`ref` یک prop معمولی است و دیگر برای کامپوننت‌های تابعی نیازی به `forwardRef` نیست (`forwardRef` در آینده deprecated می‌شود)",
+          "isCorrect": true
+        },
+        {
+          "text": "`forwardRef` اجباری‌تر شده است"
+        },
+        {
+          "text": "ref فقط برای کلاس‌ها کار می‌کند"
+        },
+        {
+          "text": "`ref` دیگر پشتیبانی نمی‌شود و باید از `document.querySelector` استفاده کرد"
+        }
+      ]
+    },
+    {
+      "id": "react-layout-effect",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "`useLayoutEffect` چه تفاوتی با `useEffect` دارد و کی لازم است؟",
+      "shortAnswer": "`useEffect` پس از paint اجرا می‌شود (اجرا نمی‌شود اگر tab پنهان باشد و ...). `useLayoutEffect` قبل از paint اجرا و رندر را مسدود می‌کند.",
+      "explanation": "نمونه: قرار دادن tooltip بر اساس اندازه‌ی واقعی المان:\n```jsx\nuseLayoutEffect(() => {\n  const { height } = ref.current.getBoundingClientRect();\n  setTooltipTop(y - height);      // قبل از paint، بدون پرش\n}, []);\n```\nهزینه: کار سنگین داخل آن UI را قفل می‌کند. در SSR هشدار می‌دهد چون روی سرور اجرا نمی‌شود؛ اگر لازم است از `useEffect` یا کنترل `typeof window` استفاده کن. اکثر کارها با `useEffect` کافی است و فقط برای فلیکر layout به `useLayoutEffect` می‌رویم.",
+      "commonMistake": "استفاده‌ی پیش‌فرض از `useLayoutEffect` و کند کردن رندر.",
+      "followUp": "چرا `useLayoutEffect` در SSR هشدار می‌دهد؟",
+      "estimatedSeconds": 55,
+      "minVersion": "18",
+      "tags": [
+        "uselayouteffect",
+        "useeffect",
+        "rendering"
+      ],
+      "choices": [
+        {
+          "text": "فقط در سمت سرور کار می‌کند"
+        },
+        {
+          "text": "بعد از paint و همیشه سریع‌تر از useEffect است"
+        },
+        {
+          "text": "بعد از تغییر DOM ولی قبل از اینکه مرورگر روی صفحه بکشد (paint) به‌صورت synchronous اجرا می‌شود؛ برای اندازه‌گیری/تنظیم layout بدون فلیکر",
+          "isCorrect": true
+        },
+        {
+          "text": "دقیقاً معادل `useEffect` است"
+        }
+      ]
+    },
+    {
+      "id": "react-error-boundary",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "Error Boundary چیست و چه خطاهایی را نمی‌گیرد؟",
+      "shortAnswer": "Error Boundary با `static getDerivedStateFromError` و `componentDidCatch` ساخته می‌شود. برای خطای event handler باید `try/catch` بنویسی و در صورت نیاز state خطا را set کنی تا boundary آن را نشان دهد.",
+      "explanation": "```jsx\nclass Boundary extends React.Component {\n  state = { error: null };\n  static getDerivedStateFromError(error) { return { error }; }\n  componentDidCatch(error, info) { report(error, info.componentStack); }\n  render() { return this.state.error ? <Fallback /> : this.props.children; }\n}\n```\nدر React 19 گزینه‌های `onCaughtError`, `onUncaughtError`, `onRecoverableError` روی `createRoot` برای لاگ مرکزی خطاها اضافه شد. boundary را در چند سطح (کل برنامه، هر صفحه، ویجت‌های مستقل) بگذار تا خطای یک بخش کل صفحه را خراب نکند. با Suspense و `use` هم خطای promise به نزدیک‌ترین boundary می‌رسد.",
+      "commonMistake": "گذاشتن فقط یک boundary در بالاترین سطح و سفید شدن کل صفحه با هر خطا.",
+      "followUp": "چطور خطاهای async را به Error Boundary می‌رسانی؟",
+      "estimatedSeconds": 60,
+      "minVersion": "18",
+      "tags": [
+        "error-boundary",
+        "errors",
+        "suspense"
+      ],
+      "choices": [
+        {
+          "text": "کامپوننتی (فعلاً کلاسی، یا کتابخانه‌ی `react-error-boundary`) که خطای رندر فرزندانش را می‌گیرد و UI جایگزین نشان می‌دهد؛ خطاهای داخل event handler، کد async و SSR خودش را نمی‌گیرد",
+          "isCorrect": true
+        },
+        {
+          "text": "فقط خطاهای شبکه را می‌گیرد"
+        },
+        {
+          "text": "همه‌ی خطاها از جمله داخل `onClick` و `setTimeout` را می‌گیرد"
+        },
+        {
+          "text": "با `useState` و `try/catch` در JSX ساخته می‌شود"
+        }
+      ]
+    },
+    {
+      "id": "react-portals-events",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "Portal (`createPortal`) چه مشکلی را حل می‌کند و رویدادها در آن چطور رفتار می‌کنند؟",
+      "shortAnswer": "مودال، tooltip و dropdown اغلب باید از overflow/z-index والد رها شوند. Portal این کار را می‌کند بدون اینکه Context و ساختار منطقی را بشکند.",
+      "explanation": "```jsx\nreturn createPortal(\n  <div className=\"modal\" role=\"dialog\">{children}</div>,\n  document.body,\n);\n```\nنکات: Context از والد React به Portal هم می‌رسد؛ رویداد click داخل Portal به onClick والد React (نه والد DOM) حباب می‌کند؛ مدیریت focus trap و `aria-modal` با توست (یا از کتابخانه/`<dialog>` استفاده کن). در SSR باید مطمئن شوی `document` وجود دارد.",
+      "commonMistake": "فراموش کردن مدیریت فوکوس و دسترسی‌پذیری در مودال.",
+      "followUp": "المان `<dialog>` بومی را در React چطور با مودال سفارشی مقایسه می‌کنی؟",
+      "estimatedSeconds": 55,
+      "minVersion": "18",
+      "tags": [
+        "portal",
+        "modal",
+        "events"
+      ],
+      "choices": [
+        {
+          "text": "فقط برای SSR است"
+        },
+        {
+          "text": "state کامپوننت را جدا می‌کند"
+        },
+        {
+          "text": "فرزند را در یک گره‌ی DOM دیگر (مثلاً `document.body`) رندر می‌کند ولی در درخت React همان‌جا می‌ماند، پس رویدادها به والدهای React حباب می‌کنند",
+          "isCorrect": true
+        },
+        {
+          "text": "رویدادها فقط تا والدهای DOM حباب می‌کنند و React آنها را نمی‌بیند"
+        }
+      ]
+    },
+    {
+      "id": "react-lazy-suspense-splitting",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "چطور یک کامپوننت سنگین را lazy-load می‌کنی؟",
+      "shortAnswer": "`lazy` با dynamic `import()` یک chunk جدا می‌سازد که فقط هنگام اولین رندر دانلود می‌شود. Suspense حالت انتظار را مدیریت می‌کند.",
+      "explanation": "```jsx\nconst Chart = lazy(() => import('./Chart'));\n\n<Suspense fallback={<Skeleton />}>\n  {show && <Chart data={data} />}\n</Suspense>\n```\nمناسب برای route-level و بخش‌های سنگین و کم‌استفاده (ادیتور، نمودار، مودال). ماژول باید `default export` داشته باشد. در فریمورک‌هایی مثل Next.js از `next/dynamic` (و خود App Router) استفاده می‌شود. برای جلوگیری از waterfall می‌توان با `startTransition` یا prefetch (در hover) chunk را زودتر گرفت.",
+      "commonMistake": "lazy کردن کامپوننت کوچک که فقط درخواست شبکه‌ی اضافه می‌سازد.",
+      "followUp": "چرا lazy-load کردن کامپوننت‌های above-the-fold می‌تواند LCP را بدتر کند؟",
+      "estimatedSeconds": 55,
+      "minVersion": "18",
+      "tags": [
+        "lazy",
+        "suspense",
+        "code-splitting"
+      ],
+      "choices": [
+        {
+          "text": "با `useEffect` و `require` داخل رندر"
+        },
+        {
+          "text": "با `import Heavy from './Heavy'` معمولی چون bundler خودش تقسیم می‌کند"
+        },
+        {
+          "text": "با `React.lazy(() => import('./Heavy'))` و پیچیدن آن داخل `<Suspense fallback={...}>`",
+          "isCorrect": true
+        },
+        {
+          "text": "با `React.memo(Heavy)`"
+        }
+      ]
+    },
+    {
+      "id": "react-useid-hook",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "`useId` را برای چه چیزی به‌جای `Math.random()` استفاده می‌کنیم؟",
+      "shortAnswer": "`Math.random()`/شمارنده‌ی سراسری روی سرور و کلاینت مقدار متفاوت می‌دهند و باعث mismatch می‌شوند. `useId` با ساختار درخت هم‌خوان است.",
+      "explanation": "```jsx\nfunction Field({ label }) {\n  const id = useId();\n  return (<><label htmlFor={id}>{label}</label><input id={id} /></>);\n}\n```\nبرای key لیست‌ها از id داده استفاده کن نه `useId`. فرمت رشته‌ی خروجی جزئیات پیاده‌سازی است و نباید در CSS selector یا منطق به آن وابسته شوی (در 19.2 فرمت عوض شد).",
+      "commonMistake": "تولید id با `Math.random()` و خطای hydration.",
+      "followUp": "چرا نباید از خروجی `useId` در CSS selector استفاده کرد؟",
+      "estimatedSeconds": 45,
+      "minVersion": "18",
+      "tags": [
+        "useid",
+        "ssr",
+        "accessibility"
+      ],
+      "choices": [
+        {
+          "text": "ساختن UUID برای ارسال به سرور"
+        },
+        {
+          "text": "ثبت کامپوننت در DevTools"
+        },
+        {
+          "text": "ساختن key برای آیتم‌های لیست"
+        },
+        {
+          "text": "ساختن شناسه‌ی پایدار و یکتا (مثلاً برای `htmlFor`/`aria-describedby`) که بین رندر سرور و کلاینت یکسان است و hydration mismatch نمی‌سازد",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "react-react-compiler",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "React Compiler چیست، چه شرایطی دارد و چه چیزهایی را تغییر می‌دهد؟",
+      "shortAnswer": "ابزاری در زمان build (پلاگین Babel/SWC) که کامپوننت‌ها و hookها را تحلیل و memoization دقیق (در سطح مقدار و JSX) اضافه می‌کند تا رندرهای غیرضروری خودکار حذف شوند. نسخه‌ی 1.0 پایدار است و کد را بدون تغییر منطقی بهینه می‌کند، به شرط اینکه کد قواعد React را رعایت کند.",
+      "explanation": "شرایط: رندر خالص، عدم mutate کردن props/state، قواعد hooks. کامپایلر بخش‌هایی که قواعد را نقض می‌کنند رد می‌کند (بدون شکستن برنامه). ابزارها: `babel-plugin-react-compiler`, `eslint-plugin-react-hooks` (قواعد کامپایلر)، و پشتیبانی داخلی Next.js 16 (پایدار ولی به‌صورت پیش‌فرض خاموش).\n\nتأثیر عملی:\n- نیاز به `useMemo/useCallback/memo` دستی تقریباً از بین می‌رود؛ کد ساده‌تر می‌شود.\n- هنوز برای مواردی که «پایداری identity» معنایی دارد (وابستگی effect) ممکن است لازم باشند.\n- مهاجرت تدریجی: با `compilationMode: 'annotation'` یا با directive `\"use memo\"`/`\"use no memo\"` فقط بخشی را فعال/غیرفعال کن و با React DevTools ✨ نشانه‌ی memoized ببین.\n\nهشدار: کامپایلر رفع‌کننده‌ی الگوریتم کند یا state بد‌طراحی‌شده نیست؛ فقط رندر مجدد را کم می‌کند.",
+      "commonMistake": "فرض اینکه با کامپایلر دیگر نباید نگران mutate کردن state یا رندر خالص بود؛ برعکس، قواعد مهم‌ترند.",
+      "followUp": "چطور می‌فهمی یک کامپوننت توسط کامپایلر بهینه شده؟",
+      "estimatedSeconds": 140,
+      "minVersion": "19.0",
+      "tags": [
+        "react-compiler",
+        "performance",
+        "build"
+      ]
+    },
+    {
+      "id": "react-server-components",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "Server Components و Client Components چه تفاوتی دارند و مرز `'use client'` چه معنایی دارد؟",
+      "shortAnswer": "Server Component فقط روی سرور اجرا می‌شود، JS آن به کلاینت ارسال نمی‌شود، می‌تواند async باشد و مستقیم به دیتابیس/فایل/secret دسترسی داشته باشد، ولی state، effect، event handler و API مرورگر ندارد. Client Component با `'use client'` علامت می‌خورد، در مرورگر هم hydrate می‌شود و تعاملی است. مرز `'use client'` همه‌ی ماژول‌هایی را که import می‌کند هم کلاینتی می‌کند.",
+      "explanation": "```jsx\n// Server Component (پیش‌فرض در App Router)\nexport default async function Page({ params }) {\n  const { id } = await params;\n  const product = await db.product.find(id);     // بدون API میانی\n  return <><ProductInfo p={product} /><AddToCart id={id} /></>;\n}\n\n// AddToCart.jsx\n'use client';\nexport function AddToCart({ id }) { const [n, setN] = useState(1); ... }\n```\nقواعد: props عبوری از Server به Client باید serializable باشند (بدون تابع/کلاس)؛ Client Component می‌تواند Server Component را به‌عنوان `children` بگیرد؛ Server Component نمی‌تواند Client-only APIها را import کند. مزایا: باندل کوچک‌تر، دسترسی امن‌تر به داده، streaming با Suspense. هزینه: پیچیدگی مدل ذهنی و محدودیت‌ها. برای هر بخش بپرس «آیا این تعاملی است؟»؛ بخش‌های تعاملی را کوچک و در برگ‌های درخت نگه دار.",
+      "commonMistake": "گذاشتن `'use client'` در ریشه‌ی برنامه و از دست دادن مزایای RSC.",
+      "followUp": "چه چیزی را می‌توان از Server Component به Client Component پاس داد؟",
+      "estimatedSeconds": 150,
+      "minVersion": "19.0",
+      "tags": [
+        "server-components",
+        "rsc",
+        "architecture"
+      ]
+    },
+    {
+      "id": "react-server-functions-security",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "درباره‌ی Server Functions/Actions (`'use server'`) از نظر امنیتی کدام گزینه درست است؟",
+      "shortAnswer": "فراخوانی از کلاینت به Server Function یک درخواست POST است که هر مهاجمی می‌تواند مستقیم بسازد. TypeScript و UI جلوی ورودی مخرب را نمی‌گیرند.",
+      "explanation": "```ts\n'use server';\nexport async function deletePost(formData: FormData) {\n  const session = await getSession();\n  if (!session) throw new Error('Unauthorized');            // احراز هویت\n  const parsed = z.object({ id: z.string().uuid() }).parse({ id: formData.get('id') }); // اعتبارسنجی\n  const post = await db.post.find(parsed.id);\n  if (post.ownerId !== session.userId) throw new Error('Forbidden');   // مجوز (IDOR)\n  await db.post.delete(parsed.id);\n  revalidatePath('/posts');\n}\n```\nهمچنین: هرگز secret را به prop کلاینت نده، از `server-only` استفاده کن، rate limit و CSRF (فریمورک معمولاً Origin را چک می‌کند) را در نظر بگیر، و توابع export‌شده‌ی فایل `'use server'` همه عمومی‌اند حتی اگر در UI استفاده نشوند. آسیب‌پذیری‌های امنیتی متعددی در RSC/Next گزارش و وصله شده؛ نسخه‌ها را به‌روز نگه دار.",
+      "commonMistake": "تکیه بر اینکه «فقط دکمه‌ی UI این را صدا می‌زند» و حذف بررسی مجوز.",
+      "followUp": "IDOR چیست و چطور در Server Function رخ می‌دهد؟",
+      "estimatedSeconds": 90,
+      "minVersion": "19.0",
+      "tags": [
+        "server-actions",
+        "security",
+        "rsc"
+      ],
+      "choices": [
+        {
+          "text": "فقط کاربران لاگین‌شده می‌توانند آنها را صدا بزنند"
+        },
+        {
+          "text": "آرگومان‌ها به‌صورت خودکار sanitize و type-check می‌شوند"
+        },
+        {
+          "text": "هر Server Function یک endpoint عمومی HTTP است؛ باید مثل هر API احراز هویت، مجوز و اعتبارسنجی ورودی داشته باشد و ورودی‌ها را هرگز معتبر فرض نکرد",
+          "isCorrect": true
+        },
+        {
+          "text": "چون فقط از UI صدا زده می‌شود نیاز به اعتبارسنجی ندارد"
+        }
+      ]
+    },
+    {
+      "id": "react-concurrent-rendering",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "رندر همزمان (Concurrent Rendering) چیست و چه مشکلی را حل می‌کند؟",
+      "shortAnswer": "در React 18 به بعد، رندر می‌تواند قابل قطع و اولویت‌بندی‌شده باشد: به‌روزرسانی‌های فوری (تایپ، کلیک) روی به‌روزرسانی‌های کم‌اولویت (لیست بزرگ، تغییر صفحه) مقدم می‌شوند. رندر در حافظه انجام می‌شود و فقط وقتی کامل شد commit می‌گردد؛ پس ممکن است یک رندر شروع، رها و دوباره اجرا شود.",
+      "explanation": "پیامدهای مهم برای کد:\n1. **رندر باید خالص باشد**: ممکن است چندبار و بدون commit اجرا شود (StrictMode آن را تست می‌کند).\n2. عوارض جانبی در effect/handler، نه در رندر.\n3. برای store خارجی از `useSyncExternalStore` استفاده کن تا tearing (نمایش دو مقدار متفاوت در یک رندر) رخ ندهد.\n\nابزارها: `startTransition`/`useTransition`، `useDeferredValue`، Suspense. در 19.3 ترنزیشن‌ها مستقل رندر می‌شوند (entanglement کمتر) تا ترنزیشن کند مانع بقیه نشود. Automatic batching (React 18) همه‌ی state updateها (حتی در timeout و promise) را در یک رندر جمع می‌کند.\n\nاین قابلیت‌ها سرعت خام را افزایش نمی‌دهند، **پاسخگویی درک‌شده** را بهتر می‌کنند.",
+      "commonMistake": "نوشتن رندر با side effect (لاگ، mutate) که در رندر همزمان رفتار نامطمئن می‌دهد.",
+      "followUp": "tearing چیست و `useSyncExternalStore` چطور جلویش را می‌گیرد؟",
+      "estimatedSeconds": 150,
+      "minVersion": "18",
+      "tags": [
+        "concurrent",
+        "rendering",
+        "react-18"
+      ]
+    },
+    {
+      "id": "react-use-effect-event",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "`useEffectEvent` (React 19.2) چه مشکلی را حل می‌کند؟",
+      "shortAnswer": "بعضی مقدارها «reactive» نیستند از دید منطق effect (مثلاً theme هنگام نمایش اعلان)، ولی چون در closure خوانده می‌شوند باید در deps باشند و باعث reconnect/اجرای مجدد می‌شوند. `useEffectEvent` آن بخش «غیرواکنشی» را جدا می‌کند.",
+      "explanation": "```jsx\nfunction Room({ roomId, theme }) {\n  const onConnected = useEffectEvent(() => showNotification('متصل شد', theme));\n\n  useEffect(() => {\n    const conn = createConnection(roomId);\n    conn.on('connected', () => onConnected());\n    conn.connect();\n    return () => conn.disconnect();\n  }, [roomId]);          // theme لازم نیست در deps باشد\n}\n```\nقواعد: فقط داخل effect یا event دیگر Effect Event صدا زده شود (نه در رندر یا به فرزند پاس داده شود). این جایگزین الگوی قدیمی «ref برای آخرین مقدار» است. از آن برای دور زدن deps به‌صورت بی‌اصول استفاده نکن: فقط برای منطق واقعاً غیرواکنشی.",
+      "commonMistake": "استفاده از `useEffectEvent` برای خاموش کردن هشدار deps وقتی مقدار واقعاً باید effect را دوباره اجرا کند.",
+      "followUp": "چه فرقی بین «مقدار reactive» و «منطق event» در effect وجود دارد؟",
+      "estimatedSeconds": 75,
+      "minVersion": "19.2",
+      "tags": [
+        "useeffectevent",
+        "useeffect",
+        "react-19.2"
+      ],
+      "choices": [
+        {
+          "text": "effect را روی سرور اجرا می‌کند"
+        },
+        {
+          "text": "effect را async می‌کند"
+        },
+        {
+          "text": "جایگزین `useCallback` برای همه‌ی handlerهاست"
+        },
+        {
+          "text": "اجازه می‌دهد داخل effect به آخرین props/state دسترسی داشته باشی بدون اینکه آنها به‌عنوان وابستگی effect باعث اجرای مجدد آن شوند",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "react-activity-component",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "کامپوننت `<Activity>` (React 19.2) چه کاری می‌کند؟",
+      "shortAnswer": "`<Activity mode=\"visible\" | \"hidden\">` جایگزین دو الگوی مشکل‌دار است: `display: none` دستی (effectها همچنان اجرا می‌شوند) و unmount کامل (از دست رفتن state مثل متن فرم یا اسکرول).",
+      "explanation": "```jsx\n<Activity mode={tab === 'inbox' ? 'visible' : 'hidden'}>\n  <Inbox />          {/* state و اسکرول حفظ می‌شود */}\n</Activity>\n```\nکاربردها: tabهای پیچیده، ناوبری با بازگشت سریع (back/forward)، پیش‌رندر بخش‌هایی که احتمالاً بعداً نمایش داده می‌شوند. چون effectهای بخش پنهان cleanup می‌شوند، کدت باید در برابر mount/unmount مکرر مقاوم باشد (همان قاعده‌ی StrictMode). DOM المان‌های پنهان معمولاً با `display: none` مخفی می‌شود، پس مراقب هزینه‌ی حافظه در تعداد زیاد Activity باش.",
+      "commonMistake": "نگه داشتن ده‌ها Activity پنهان سنگین که حافظه را مصرف می‌کنند.",
+      "followUp": "تفاوت Activity با فقط «`display: none`» چیست؟",
+      "estimatedSeconds": 70,
+      "minVersion": "19.2",
+      "tags": [
+        "activity",
+        "react-19.2",
+        "state"
+      ],
+      "choices": [
+        {
+          "text": "درخواست شبکه را cache می‌کند"
+        },
+        {
+          "text": "بخشی از UI را پنهان می‌کند ولی state داخلی‌اش را نگه می‌دارد؛ در حالت پنهان effectها cleanup می‌شوند و رندرها کم‌اولویت‌اند",
+          "isCorrect": true
+        },
+        {
+          "text": "فقط برای لاگ کردن فعالیت کاربر است"
+        },
+        {
+          "text": "کامپوننت را کاملاً unmount و state را پاک می‌کند"
+        }
+      ]
+    },
+    {
+      "id": "react-effects-not-needed",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "عبارت «You Might Not Need an Effect» یعنی چه؟ چند مثال از استفاده‌ی اشتباه Effect بزن.",
+      "shortAnswer": "Effect برای همگام‌سازی با سیستم بیرونی (شبکه، DOM API، کتابخانه‌ی غیر React) است. استفاده از آن برای تبدیل داده‌ی داخلی یا واکنش به رویداد کاربر معمولاً اشتباه است و باعث رندرهای اضافی، فلیکر و باگ می‌شود.",
+      "explanation": "نمونه‌های اشتباه و جایگزین:\n| الگوی اشتباه | جایگزین |\n|---|---|\n| `useEffect(() => setFull(a + b), [a, b])` | محاسبه در رندر: `const full = a + b` |\n| فیلتر لیست با effect و state | `useMemo` (یا محاسبه‌ی ساده) |\n| reset state با effect هنگام تغییر prop | `key` یا derive کردن state |\n| ارسال POST بعد از کلیک با effect | مستقیم در event handler |\n| زنجیره‌ی effectها که یکی state دیگری را می‌نویسد | یک handler که همه‌ی تغییرات را با هم انجام دهد |\n| دریافت داده با effect خام | کتابخانه‌ی کش (TanStack Query)، `use`/Suspense، یا Server Component |\n\nاستفاده‌ی درست: اتصال به WebSocket، subscription به رویداد window، مقداردهی کتابخانه‌ی خارجی (چارت/نقشه)، analytics هنگام نمایش. راه‌حل کلی: «اگر کد در پاسخ به یک تعامل کاربر است در handler بنویس؛ اگر به‌خاطر نمایش کامپوننت است، effect.»",
+      "commonMistake": "ساختن زنجیره‌ی effectها که هر کدام state بعدی را set می‌کنند و رندرهای چندباره می‌سازند.",
+      "followUp": "چرا دریافت داده با `useEffect` در پروژه‌ی واقعی مشکل‌ساز است؟ (race، waterfall، cache)",
+      "estimatedSeconds": 140,
+      "minVersion": "18",
+      "tags": [
+        "useeffect",
+        "best-practices",
+        "state"
+      ]
+    },
+    {
+      "id": "react-use-sync-external-store",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "`useSyncExternalStore` برای چه سناریویی است؟",
+      "shortAnswer": "در رندر همزمان اگر store خارجی وسط رندر تغییر کند، بخشی از UI مقدار قدیمی و بخشی مقدار جدید نشان می‌دهد (tearing). این hook همیشه snapshot یکسان بین رندر و commit را تضمین می‌کند.",
+      "explanation": "```jsx\nfunction useStore(store, selector) {\n  return useSyncExternalStore(\n    store.subscribe,\n    () => selector(store.getState()),\n    () => selector(store.getServerState()),   // برای SSR/hydration\n  );\n}\n```\nقواعد: `subscribe` باید پایدار باشد (تابع جدید در هر رندر باعث اشتراک مجدد می‌شود)؛ `getSnapshot` باید برای همان state مقدار **ثابت (===)** بدهد وگرنه حلقه‌ی رندر. کتابخانه‌هایی مثل Redux، Zustand و Jotai همین را داخلاً استفاده می‌کنند. در کد اپلیکیشن معمولاً مستقیم نمی‌نویسی مگر برای ساختن abstraction یا API مرورگر.",
+      "commonMistake": "برگرداندن شیء جدید از `getSnapshot` در هر فراخوانی و ایجاد حلقه‌ی بی‌نهایت.",
+      "followUp": "چرا `getServerSnapshot` لازم است؟",
+      "estimatedSeconds": 70,
+      "minVersion": "18",
+      "tags": [
+        "usesyncexternalstore",
+        "external-store",
+        "concurrent"
+      ],
+      "choices": [
+        {
+          "text": "فقط برای Redux کاربرد دارد"
+        },
+        {
+          "text": "ذخیره‌ی state در `localStorage` به‌صورت خودکار"
+        },
+        {
+          "text": "خواندن state خارج از React (store سفارشی، `navigator.onLine`، matchMedia) به‌صورت سازگار با رندر همزمان و بدون tearing؛ با پشتیبانی از snapshot سمت سرور",
+          "isCorrect": true
+        },
+        {
+          "text": "جایگزین `useState` برای همه‌ی stateهای محلی"
+        }
+      ]
+    },
+    {
+      "id": "react-hydration-mismatch",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "کدام کد باعث hydration mismatch می‌شود و رفع اصولی آن چیست؟",
+      "shortAnswer": "Hydration فرض می‌کند HTML سرور با اولین رندر کلاینت یکسان است. اگر نباشد React خطا می‌دهد و ممکن است بخشی از صفحه را دوباره از صفر رندر کند (کندی و پرش).",
+      "explanation": "علت‌های رایج: زمان/تصادفی، `localStorage`/`window.innerWidth` در رندر، HTML نامعتبر (`<div>` داخل `<p>`)، افزونه‌های مرورگر، locale/timezone متفاوت.\n```jsx\nfunction Clock() {\n  const [now, setNow] = useState(null);           // سرور و اولین رندر کلاینت: null\n  useEffect(() => setNow(new Date()), []);         // بعد از mount\n  return <span>{now ? now.toLocaleTimeString() : '--:--'}</span>;\n}\n```\nدر React 19.3 تابع `browser()` از `react-dom` (وجود export آن تأیید شد) زیردرخت‌های فقط-مرورگر را علامت می‌زند تا بدون خطای recoverable در سرور نادیده گرفته شوند؛ جزئیات دقیق را از مستندات نسخه‌ی هدف بخوان. برای مقدارهایی مثل useId از خود React استفاده کن. `suppressHydrationWarning` فقط برای اختلاف‌های ناچیز و عمدی (مثل timestamp) روی همان المان مجاز است و نباید برای پنهان کردن باگ استفاده شود.",
+      "commonMistake": "پنهان کردن خطا با `suppressHydrationWarning` روی المان‌های بزرگ.",
+      "followUp": "چطور HTML نامعتبر باعث mismatch می‌شود؟",
+      "estimatedSeconds": 85,
+      "minVersion": "18",
+      "tags": [
+        "hydration",
+        "ssr",
+        "debugging"
+      ],
+      "choices": [
+        {
+          "text": "استفاده از `Date.now()`/`Math.random()`/`window` مستقیم در رندر که خروجی سرور و کلاینت را متفاوت می‌کند؛ رفع: مقدار را از سرور پاس بده یا بعد از mount در effect تنظیم کن",
+          "isCorrect": true
+        },
+        {
+          "text": "نوشتن کامپوننت به‌صورت تابعی"
+        },
+        {
+          "text": "استفاده از `useState` در کامپوننت"
+        },
+        {
+          "text": "استفاده از `key` روی لیست‌ها"
+        }
+      ]
+    },
+    {
+      "id": "react-list-performance",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "لیست بلند (مثلاً ۱۰ هزار ردیف) کند است؛ چطور تحلیل و رفع می‌کنی؟",
+      "shortAnswer": "اول با React DevTools Profiler و Performance tab اندازه بگیر: چند کامپوننت رندر می‌شوند و کجا زمان می‌رود. سپس به ترتیب اثر: کم کردن تعداد المان‌های DOM (virtualization)، کم کردن رندرهای اضافه (state پایین‌تر، memo/Compiler)، و سبک کردن هر ردیف.",
+      "explanation": "راه‌ها:\n1. **Virtualization/windowing** با `@tanstack/react-virtual` یا `react-window`: فقط ردیف‌های قابل‌دیدن رندر می‌شوند (بیشترین برد).\n2. **key پایدار** و جلوگیری از remount.\n3. `memo` روی Row با props پایدار (یا React Compiler)، و callback پایدار؛ اجتناب از ساختن شیء/تابع جدید به‌ازای هر ردیف.\n4. **state را محلی‌تر کن**: تایپ در input نباید کل لیست را رندر کند (state فرم جدا از لیست، یا `useDeferredValue`).\n5. صفحه‌بندی/infinite scroll و فیلتر سمت سرور.\n6. CSS `content-visibility: auto` برای بخش‌های بیرون از دید.\n7. اجتناب از layout thrashing و انیمیشن‌های `top/left` (به‌جای آن `transform`).\n\nگزارش قبل/بعد (مثلاً زمان commit در Profiler) را نگه دار و در CI با ابزارهایی مثل Lighthouse/بودجه‌ی کارایی رگرسیون را بگیر.",
+      "commonMistake": "memo کردن ردیف‌ها بدون مشکل اصلی که تعداد DOM node است.",
+      "followUp": "چه محدودیت‌های دسترسی‌پذیری (a11y) و جستجوی داخل صفحه با virtualization پیش می‌آید؟",
+      "estimatedSeconds": 140,
+      "minVersion": "18",
+      "tags": [
+        "performance",
+        "virtualization",
+        "profiling"
+      ]
+    },
+    {
+      "id": "react-state-management-choice-react",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "مدیریت state را در یک اپ React بزرگ چطور دسته‌بندی و انتخاب می‌کنی؟",
+      "shortAnswer": "state را بر اساس نوع جدا کن: (۱) state سرور (داده‌ی راه دور با کش، refetch، خطا) ← TanStack Query/SWR یا Server Components/`use`. (۲) state UI محلی ← `useState/useReducer`. (۳) state مشترک کلاینتی ← Context برای مقدارهای کم‌تغییر (theme, auth)، Zustand/Jotai/Redux Toolkit برای state پرتغییر با selector. (۴) state URL ← query string/router. (۵) state فرم ← React 19 Actions یا کتابخانه‌ی فرم (React Hook Form).",
+      "explanation": "قاعده‌ی سرانگشتی:\n| نوع | ابزار |\n|---|---|\n| داده‌ی سرور | TanStack Query / RSC + Suspense |\n| محلی UI | `useState`/`useReducer` |\n| سراسری کلاینتی سبک | Context یا Zustand |\n| پیچیده/قابل ردیابی | Redux Toolkit |\n| قابل اشتراک‌گذاری لینک | URL |\n\nاشتباه رایج: کپی داده‌ی سرور در store سراسری و همگام‌سازی دستی. اصل: state را حداقلی نگه دار، مقدار مشتق را محاسبه کن، و منبع حقیقت را یکی کن. ابزار را با اندازه‌ی مسئله و تیم انتخاب کن؛ Redux برای اپ کوچک بی‌دلیل سنگین و Context برای state پرتغییر مشکل‌ساز است.",
+      "commonMistake": "شروع پروژه با یک store سراسری برای همه چیز از جمله داده‌ی سرور.",
+      "followUp": "چرا داده‌ی سرور را «state کلاینت» حساب نمی‌کنیم؟",
+      "estimatedSeconds": 130,
+      "minVersion": "18",
+      "tags": [
+        "state-management",
+        "architecture",
+        "data-fetching"
+      ]
+    },
+    {
+      "id": "react-suspense-streaming",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "Streaming SSR با Suspense چه مزیتی دارد؟",
+      "shortAnswer": "در React 18+ هر مرز `<Suspense>` یک «واحد streaming» و «hydration انتخابی» است: بخش‌ها مستقل hydrate می‌شوند و کاربر می‌تواند زودتر با بخش‌های آماده تعامل کند.",
+      "explanation": "```jsx\n<Layout>\n  <Header />\n  <Suspense fallback={<FeedSkeleton />}>\n    <Feed />           {/* داده‌ی کند */}\n  </Suspense>\n  <Suspense fallback={<SidebarSkeleton />}>\n    <Sidebar />\n  </Suspense>\n</Layout>\n```\nمرزها را بر اساس اولویت محتوا بگذار (محتوای اصلی، نه همه‌چیز در یک boundary). fallbackها باید هم‌اندازه‌ی محتوا باشند تا CLS ایجاد نشود. در 19.2 نمایش مرزهای Suspense در SSR به‌صورت دسته‌ای هماهنگ شد (batching reveals) تا با کلاینت یکسان رفتار کند. برای SEO محتوای نهایی در HTML استریم‌شده هست ولی حتماً کندی بیش از حد یک boundary باید کنترل شود.",
+      "commonMistake": "کل صفحه را در یک Suspense گذاشتن که مزیت streaming را از بین می‌برد.",
+      "followUp": "hydration انتخابی (selective hydration) چیست؟",
+      "estimatedSeconds": 80,
+      "minVersion": "18",
+      "tags": [
+        "suspense",
+        "streaming",
+        "ssr"
+      ],
+      "choices": [
+        {
+          "text": "باعث می‌شود SEO از بین برود"
+        },
+        {
+          "text": "کل صفحه را فقط یک‌بار و بعد از آماده شدن همه‌ی داده‌ها می‌فرستد"
+        },
+        {
+          "text": "فقط برای کلاینت‌رندرینگ است"
+        },
+        {
+          "text": "بخش‌های آماده‌ی صفحه بلافاصله به مرورگر فرستاده می‌شوند و بخش‌های کند با fallback نمایش و بعداً وقتی آماده شدند جایگزین می‌شوند، بدون اینکه کل صفحه منتظر کندترین داده بماند",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "react-testing-library-approach",
+      "level": "Senior",
+      "type": "ShortAnswer",
+      "text": "استراتژی تست کامپوننت‌های React را چطور تعریف می‌کنی؟",
+      "shortAnswer": "تست رفتار قابل مشاهده‌ی کاربر (نه جزئیات پیاده‌سازی) با React Testing Library: عنصرها را با role/label/text پیدا کن، تعامل را با `userEvent` شبیه‌سازی کن و نتیجه‌ی DOM را assert کن. شبکه را در سطح مرز mock کن (MSW) نه توابع داخلی. هرم تست: تست واحد برای منطق/hookها، تست کامپوننت/یکپارچه برای بیشتر رفتار، و تعداد محدود e2e (Playwright).",
+      "explanation": "```jsx\nit('پس از ارسال پیام موفقیت را نشان می‌دهد', async () => {\n  const user = userEvent.setup();\n  render(<ContactForm />);\n  await user.type(screen.getByLabelText('ایمیل'), 'a@b.co');\n  await user.click(screen.getByRole('button', { name: 'ارسال' }));\n  expect(await screen.findByText('ارسال شد')).toBeInTheDocument();\n});\n```\nنکات: به‌جای `getByTestId` اولویت با `getByRole`/`getByLabelText` (دسترسی‌پذیری را هم تست می‌کند)؛ از `findBy*` برای async؛ `act` را خود RTL مدیریت می‌کند؛ تست state داخلی/متدها شکننده است. در React 19 `act` از `react` (نه `react-dom/test-utils`) import می‌شود. Server Components را معمولاً با تست یکپارچه/e2e پوشش بده چون رندر آن‌ها async و سمت سرور است.",
+      "commonMistake": "تست جزئیات داخلی (state، نام متد) که با refactor می‌شکند.",
+      "followUp": "چرا `getByRole` را به `getByTestId` ترجیح می‌دهی؟",
+      "estimatedSeconds": 110,
+      "minVersion": "18",
+      "tags": [
+        "testing",
+        "testing-library",
+        "quality"
+      ]
+    },
+    {
+      "id": "react-viewtransition-api",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "`<ViewTransition>` که در React 19.3 اضافه شده چه کاری می‌کند؟",
+      "shortAnswer": "`ViewTransition` (در React 19.3 موجود است؛ وجود export آن در پکیج نصب‌شده تأیید شد) با ترنزیشن‌ها هماهنگ می‌شود: هنگام `startTransition` تغییرات DOM داخل یک view transition مرورگر اجرا می‌شود.",
+      "explanation": "ایده‌ی استفاده:\n```jsx\n<ViewTransition>\n  <Photo key={photo.id} src={photo.src} />\n</ViewTransition>\n\nstartTransition(() => setSelected(next));   // تغییر با انیمیشن\n```\nملاحظات: به پشتیبانی مرورگر (View Transitions API) وابسته است و در مرورگرهای بدون پشتیبانی بدون انیمیشن ولی بدون خطا اجرا می‌شود؛ باید به `prefers-reduced-motion` احترام بگذاری؛ جزئیات prop ها (مثل نام‌گذاری گروه‌ها و `addTransitionType`) را از مستندات رسمی نسخه‌ی هدف بخوان. Next.js 16 هم از این قابلیت پشتیبانی/مستندسازی کرده است.",
+      "commonMistake": "فراموش کردن `prefers-reduced-motion` و ساختن انیمیشن آزاردهنده برای کاربران حساس.",
+      "followUp": "چرا این نوع انیمیشن‌ها بهتر است با ترنزیشن‌ها ترکیب شوند؟",
+      "estimatedSeconds": 60,
+      "minVersion": "19.3",
+      "tags": [
+        "view-transitions",
+        "react-19.3",
+        "animation"
+      ],
+      "choices": [
+        {
+          "text": "کامپوننت را فقط سمت سرور رندر می‌کند"
+        },
+        {
+          "text": "مانند `memo` رندر مجدد را متوقف می‌کند"
+        },
+        {
+          "text": "انیمیشن گذار بین دو حالت UI را با View Transitions API مرورگر اعمال می‌کند، بدون اینکه خودت `document.startViewTransition` را دستی مدیریت کنی",
+          "isCorrect": true
+        },
+        {
+          "text": "درخواست‌های شبکه را با هم ترکیب می‌کند"
+        }
+      ]
+    },
+    {
+      "id": "react-react-19-migration",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "مهاجرت از React 18 به 19 چه تغییرات شکننده‌ای دارد و چطور برنامه‌ریزی می‌کنی؟",
+      "shortAnswer": "ابتدا به آخرین 18.3 ارتقا بده (هشدارهای deprecation را رفع کن)، JSX transform جدید را مطمئن شو و بعد به 19 برو. با codemodهای رسمی (`npx codemod react/19/migration-recipe`) بخش بزرگی خودکار اصلاح می‌شود.",
+      "explanation": "تغییرات مهم:\n- حذف `propTypes` و `defaultProps` برای کامپوننت‌های تابعی (از default parameter و TypeScript استفاده کن).\n- حذف `ReactDOM.render`/`hydrate` (استفاده از `createRoot`/`hydrateRoot`) و `unmountComponentAtNode`.\n- حذف string refs، `React.createFactory`، `findDOMNode`، legacy Context، و UMD builds.\n- `act` را از `react` import کن (نه `react-dom/test-utils`).\n- خطاها دیگر دوباره throw نمی‌شوند؛ به‌جای آن `onCaughtError/onUncaughtError` روی root.\n- در TypeScript: `useRef` آرگومان می‌خواهد، نوع `ReactElement['props']` به `unknown`، و حذف `JSX` namespace سراسری (به `React.JSX`).\n- `useFormState` → `useActionState`.\n\nقابلیت‌های جدید که ارزش سازگاری دارند: Actions، `use`، `useOptimistic`، `ref` به‌عنوان prop، `<Context>` به‌عنوان provider، متادیتای سند (`<title>` در کامپوننت)، و کامپایلر. سپس تست کامل، بررسی سازگاری کتابخانه‌های ثالث (peerDependencies) و انتشار تدریجی (feature flag/canary).",
+      "commonMistake": "ارتقای مستقیم بدون رفع هشدارهای 18.3 و بدون بررسی کتابخانه‌های ثالث.",
+      "followUp": "چه چیزی را قبل از ارتقا در CI اضافه می‌کنی؟",
+      "estimatedSeconds": 120,
+      "minVersion": "19.0",
+      "tags": [
+        "migration",
+        "react-19",
+        "upgrade"
+      ]
+    },
+    {
+      "id": "react-composition-avoid-rerender",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "کدام روش بدون `memo` جلوی رندر مجدد بخش سنگین را وقتی state سریع عوض می‌شود می‌گیرد؟",
+      "shortAnswer": "وقتی state در کامپوننتی تغییر می‌کند فقط عناصر JSX که «در همان کامپوننت ساخته می‌شوند» دوباره ساخته می‌شوند. اگر `children` از بیرون (والد بالاتر) بیاید، همان عناصر قبلی است و React از رندر مجدد آنها صرف‌نظر می‌کند.",
+      "explanation": "```jsx\n// ❌ تایپ در input کل ExpensiveTree را دوباره رندر می‌کند\nfunction App() {\n  const [text, setText] = useState('');\n  return <><input value={text} onChange={e => setText(e.target.value)} /><ExpensiveTree /></>;\n}\n\n// ✅ state را به کامپوننت کوچک ببر\nfunction App() { return <><SearchBox /><ExpensiveTree /></>; }\n\n// ✅ یا با children\nfunction Tracker({ children }) {\n  const [pos, setPos] = useState({ x: 0, y: 0 });\n  return <div onPointerMove={e => setPos({ x: e.clientX, y: e.clientY })}>{children}</div>;\n}\n```\nاین تکنیک «move state down / lift content up» ارزان‌ترین بهینه‌سازی است و قبل از `memo` باید امتحان شود.",
+      "commonMistake": "پرش سریع به `memo`/`useMemo` بدون بازطراحی محل state.",
+      "followUp": "چرا `memo` بدون props پایدار اغلب بی‌اثر است؟",
+      "estimatedSeconds": 60,
+      "minVersion": "18",
+      "tags": [
+        "composition",
+        "performance",
+        "rendering"
+      ],
+      "choices": [
+        {
+          "text": "صدا زدن `forceUpdate` روی فرزند"
+        },
+        {
+          "text": "خالی گذاشتن `useEffect` در والد"
+        },
+        {
+          "text": "گذاشتن `key={Math.random()}` روی بخش سنگین"
+        },
+        {
+          "text": "جدا کردن بخش state‌دار در یک کامپوننت کوچک (یا پاس دادن بخش سنگین به‌عنوان `children`) تا بخش سنگین با تغییر آن state دوباره ساخته نشود",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "react-react-cache-server",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "تابع `cache()` در React Server Components چه می‌کند؟",
+      "shortAnswer": "`cache` از `react` برای dedupe داده در یک رندر سرور است، نه کش بین درخواست‌ها. زندگی cache به همان درخواست محدود است، پس داده‌ی یک کاربر به کاربر دیگر نشت نمی‌کند.",
+      "explanation": "```ts\nimport { cache } from 'react';\nexport const getCurrentUser = cache(async () => {\n  return db.user.find(await getSessionUserId());     // در یک درخواست فقط یک‌بار اجرا می‌شود\n});\n\n// در Header و Sidebar و Page می‌توان هر کدام await getCurrentUser() بنویسی\n```\nبرای کش بین درخواست‌ها باید از مکانیزم‌های فریمورک (مثل `'use cache'` در Next.js یا کش HTTP/CDN) استفاده کنی. در React 19.2 `cacheSignal` هم اضافه شد که یک `AbortSignal` می‌دهد و نشان می‌دهد عمر cache تمام شده تا کارهای در حال اجرا (مثلاً fetch) لغو شوند (هر دو export در پکیج 19.3 تأیید شدند). آرگومان‌ها با مقایسه‌ی reference/primitive کلید می‌شوند: پس شیء جدید هر بار cache را بی‌اثر می‌کند.",
+      "commonMistake": "پاس دادن شیء جدید (`{ id }`) به تابع cache‌شده در هر فراخوانی و بی‌اثر شدن dedupe.",
+      "followUp": "چرا `cache` باعث نشت داده بین کاربران نمی‌شود؟",
+      "estimatedSeconds": 75,
+      "minVersion": "19.0",
+      "tags": [
+        "cache",
+        "server-components",
+        "data-fetching"
+      ],
+      "choices": [
+        {
+          "text": "نتیجه‌ی یک تابع را برای آرگومان‌های یکسان فقط در طول یک درخواست سرور (render pass) memoize می‌کند تا فراخوانی‌های تکراری در درخت (مثل چند بار خواندن کاربر جاری) یک‌بار اجرا شوند",
+          "isCorrect": true
+        },
+        {
+          "text": "نتیجه را برای همه‌ی کاربران و درخواست‌ها تا ابد ذخیره می‌کند"
+        },
+        {
+          "text": "فقط در کلاینت کار می‌کند و state می‌سازد"
+        },
+        {
+          "text": "جایگزین `useMemo` در Client Componentها است"
+        }
+      ]
+    }
+  ]
+}
