@@ -11,8 +11,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure(
-    builder.Configuration.GetConnectionString("Default") ?? "Data Source=interviewpal.db");
+builder.Services.AddInfrastructure();
 
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
 builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
