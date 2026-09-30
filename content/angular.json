@@ -1,0 +1,1387 @@
+{
+  "technology": {
+    "slug": "angular",
+    "name": "Angular",
+    "currentVersion": "22",
+    "supportedFrom": "20"
+  },
+  "questions": [
+    {
+      "id": "angular-standalone-default",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "در Angular مدرن (۱۹ به بعد) کدام گزینه درباره‌ی کامپوننت‌ها درست است؟",
+      "shortAnswer": "از Angular 19 مقدار پیش‌فرض `standalone` برابر `true` است؛ `NgModule` هنوز پشتیبانی می‌شود ولی برای پروژه‌ی جدید لازم نیست.",
+      "explanation": "```ts\n@Component({\n  selector: 'app-user-card',\n  imports: [DatePipe, RouterLink],   // مستقیم در خود کامپوننت\n  template: `<a routerLink=\"/u\">{{ joined | date }}</a>`,\n})\nexport class UserCard { joined = new Date(); }\n```\nاپلیکیشن با `bootstrapApplication(App, appConfig)` بالا می‌آید و providerها در `app.config.ts` (مثل `provideRouter`, `provideHttpClient`) تعریف می‌شوند. مزیت: مرز وابستگی هر کامپوننت روشن است، tree-shaking بهتر و boilerplate کمتر. نکته: در راهنمای سبک جدید (از v20) نام کلاس/فایل‌های تولیدشده توسط CLI پسوند `Component`/`Service` را الزاماً ندارند.",
+      "commonMistake": "نوشتن `standalone: true` در همه‌جا از روی عادت و هنوز فکر کردن به `NgModule` برای هر feature.",
+      "followUp": "چگونه یک `NgModule` قدیمی را به‌تدریج به standalone مهاجرت می‌دهی؟",
+      "estimatedSeconds": 55,
+      "minVersion": "20",
+      "tags": [
+        "standalone",
+        "components",
+        "fundamentals"
+      ],
+      "choices": [
+        {
+          "text": "برای standalone بودن باید همیشه `standalone: true` نوشت"
+        },
+        {
+          "text": "standalone فقط برای کامپوننت‌های lazy-load معنی دارد"
+        },
+        {
+          "text": "هر کامپوننت حتماً باید در `declarations` یک `NgModule` ثبت شود"
+        },
+        {
+          "text": "کامپوننت‌ها به‌صورت پیش‌فرض standalone هستند و وابستگی‌هایشان را در آرایه‌ی `imports` خودشان اعلام می‌کنند، بدون نیاز به `NgModule`",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "angular-control-flow-for-track",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "درباره‌ی `@for` در قالب Angular کدام گزینه درست است؟",
+      "shortAnswer": "Control flow داخلی (`@if`, `@for`, `@switch`) جایگزین `*ngIf`/`*ngFor` شده است (این دایرکتیوهای ساختاری از v20 deprecated هستند). `track` باعث می‌شود Angular هنگام تغییر لیست DOM را برای آیتم‌های تکراری دوباره استفاده کند.",
+      "explanation": "```html\n@for (user of users(); track user.id) {\n  <li>{{ user.name }} ({{ $index + 1 }})</li>\n} @empty {\n  <li>کاربری پیدا نشد</li>\n}\n\n@if (loading()) { <spinner /> } @else if (error()) { ... } @else { ... }\n```\nمتغیرهای ضمنی: `$index`, `$first`, `$last`, `$even`, `$odd`, `$count`. برای لیست‌های ثابت که ترتیب و آیتم‌شان تغییر نمی‌کند `track $index` قابل قبول است؛ ولی برای داده‌های قابل مرتب‌سازی/حذف همیشه id واقعی را track کن. بدون track درست، با هر تغییر کل DOM دوباره ساخته می‌شود و state داخلی (مثل input) از بین می‌رود.",
+      "commonMistake": "`track $index` روی لیستی که ترتیبش عوض می‌شود و باگ‌های عجیب state ورودی‌ها.",
+      "followUp": "چرا `track item` (identity خود شیء) با داده‌ی دوباره‌ی گرفته‌شده از سرور خوب عمل نمی‌کند؟",
+      "estimatedSeconds": 55,
+      "minVersion": "17",
+      "tags": [
+        "control-flow",
+        "templates",
+        "for"
+      ],
+      "choices": [
+        {
+          "text": "`track` اختیاری است و اگر ننویسی خودکار index استفاده می‌شود"
+        },
+        {
+          "text": "برای `@for` باید حتماً `CommonModule` را import کنی"
+        },
+        {
+          "text": "`@for` فقط روی آرایه کار می‌کند و روی Observable خطا می‌دهد"
+        },
+        {
+          "text": "عبارت `track` اجباری است و برای شناسایی هر آیتم (ترجیحاً یک id یکتا) استفاده می‌شود؛ بلوک `@empty` هم برای لیست خالی وجود دارد",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "angular-binding-types",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "کدام گزینه سینتکس درست برای «property binding»، «event binding» و «two-way binding» است؟",
+      "shortAnswer": "`[prop]` داده را از کلاس به DOM/کامپوننت می‌فرستد، `(event)` رویداد را از DOM به کلاس می‌آورد و `[(x)]` («banana in a box») ترکیب هر دو است.",
+      "explanation": "`[(ngModel)]=\"name\"` قند نحوی برای `[ngModel]=\"name\" (ngModelChange)=\"name = $event\"` است. برای کامپوننت‌های خودت با signal: `value = model('')` یک ورودی + خروجی `valueChange` می‌سازد که با `[(value)]=\"text\"` قابل استفاده است.\n\nتفاوت interpolation و property binding: `{{ }}` همیشه رشته می‌سازد ولی `[disabled]=\"isDisabled\"` مقدار boolean را مستقیم می‌فرستد. همچنین به property DOM (نه attribute) bind می‌شوی؛ برای attribute از `[attr.aria-label]` و برای کلاس/استایل از `[class.active]` و `[style.width.px]` استفاده کن.",
+      "commonMistake": "نوشتن `disabled=\"{{ flag }}\"` و تعجب از اینکه رشته‌ی `'false'` هم truthy است.",
+      "followUp": "تفاوت property و attribute در binding چیست؟",
+      "estimatedSeconds": 45,
+      "minVersion": "17",
+      "tags": [
+        "templates",
+        "data-binding",
+        "fundamentals"
+      ],
+      "choices": [
+        {
+          "text": "`[value]`, `(click)`, `((ngModel))`"
+        },
+        {
+          "text": "`(value)=\"x\"`, `[click]=\"fn()\"`, `[ngModel]=\"x\"`"
+        },
+        {
+          "text": "`[value]=\"x\"`, `(click)=\"fn()\"`, `[(ngModel)]=\"x\"`",
+          "isCorrect": true
+        },
+        {
+          "text": "`{{value}}`, `[click]`, `(ngModel)`"
+        }
+      ]
+    },
+    {
+      "id": "angular-signal-basics-output",
+      "level": "Junior",
+      "type": "CodeOutput",
+      "text": "خروجی `double()` در انتهای این کد چیست؟",
+      "codeSnippet": "const count = signal(1);\nconst double = computed(() => count() * 2);\n\ncount.update(v => v + 2);\ncount.set(count() + 1);\n\nconsole.log(double());",
+      "codeLanguage": "typescript",
+      "shortAnswer": "مقدار `count` ابتدا `1` است، با `update(v => v + 2)` می‌شود `3`، و با `set(count() + 1)` می‌شود `4`؛ `double` مشتق از آن است پس `8`.",
+      "explanation": "Signal یک ظرف مقدار reactive است: با `signal(x)` ساخته، با `count()` خوانده، و با `set`/`update` نوشته می‌شود. `computed` مقداری مشتق‌شده و **فقط‌خواندنی** است که وابستگی‌هایش را خودکار ردیابی می‌کند. نکته: signal همیشه مقدار جاری دارد (برخلاف Observable) و خواندنش synchronous است.",
+      "commonMistake": "نوشتن `count = count + 1` یا `count++` روی خود signal به‌جای `set/update` و فراموش کردن پرانتز هنگام خواندن (`count()`).",
+      "followUp": "چرا `computed` را نمی‌شود با `.set()` مقداردهی کرد؟",
+      "estimatedSeconds": 45,
+      "minVersion": "17",
+      "tags": [
+        "signals",
+        "computed",
+        "reactivity"
+      ],
+      "choices": [
+        {
+          "text": "`4`"
+        },
+        {
+          "text": "`8`",
+          "isCorrect": true
+        },
+        {
+          "text": "`2`"
+        },
+        {
+          "text": "`6`"
+        }
+      ]
+    },
+    {
+      "id": "angular-signal-inputs-outputs",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "کدام گزینه درباره‌ی API مبتنی بر signal برای ورودی و خروجی کامپوننت درست است؟",
+      "shortAnswer": "Angular از v17.1 به بعد توابع `input()`, `output()`, `model()`, `viewChild()` را ارائه کرده (و در v19 پایدار شدند) که جایگزین decoratorهای `@Input`, `@Output`, `@ViewChild` هستند.",
+      "explanation": "```ts\nexport class UserCard {\n  id = input.required<number>();            // اجباری\n  size = input('md');                       // پیش‌فرض\n  count = input(0, { transform: numberAttribute });\n  saved = output<string>();\n  value = model('');                        // two-way\n\n  label = computed(() => `#${this.id()} (${this.size()})`);\n}\n```\nمزیت‌ها: مقدار به‌صورت signal است پس با `computed`/`effect` ترکیب می‌شود (نیازی به `ngOnChanges` نیست)، نوع بهتر (`required` در compile-time)، و ورودی‌ها فقط‌خواندنی‌اند: از داخل کامپوننت نمی‌توانی `this.id = ...` بزنی.",
+      "commonMistake": "تلاش برای مقداردهی مستقیم `this.id.set(...)` روی input؛ برای حالت قابل نوشتن `model()` یا `linkedSignal` استفاده کن.",
+      "followUp": "چه زمانی `model()` را به `input()` + `output()` جدا ترجیح می‌دهی؟",
+      "estimatedSeconds": 55,
+      "minVersion": "19",
+      "tags": [
+        "signals",
+        "inputs",
+        "outputs"
+      ],
+      "choices": [
+        {
+          "text": "`id = input.required<number>()` یک ورودی اجباری می‌سازد که به‌صورت `id()` خوانده می‌شود و `saved = output<string>()` خروجی است که با `saved.emit(...)` فعال می‌شود",
+          "isCorrect": true
+        },
+        {
+          "text": "`output()` یک signal است و با `.set()` رویداد می‌فرستد"
+        },
+        {
+          "text": "`input()` مقدار را مستقیم به‌صورت property ساده (بدون پرانتز) برمی‌گرداند"
+        },
+        {
+          "text": "ورودی را باید حتماً با `@Input()` و سپس تبدیل دستی به signal ساخت"
+        }
+      ]
+    },
+    {
+      "id": "angular-di-providedin-root",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "`@Injectable({ providedIn: 'root' })` روی یک سرویس چه معنایی دارد؟",
+      "shortAnswer": "Angular سرویس را lazily و اولین‌بار که injectشود می‌سازد و همان نمونه را به همه می‌دهد. برای دریافت آن معمولاً از `inject()` استفاده می‌شود.",
+      "explanation": "```ts\n@Injectable({ providedIn: 'root' })\nexport class CartService {\n  private items = signal<Item[]>([]);\n  readonly count = computed(() => this.items().length);\n}\n\nexport class Header {\n  cart = inject(CartService);   // به‌جای constructor parameter\n}\n```\nاگر سرویس را در `providers` خود یک کامپوننت بگذاری، برای هر نمونه‌ی آن کامپوننت (و فرزندانش) یک نمونه‌ی جدا ساخته می‌شود؛ مفید برای state محلی. `inject()` تابعی است که فقط در «injection context» (constructor، field initializer، factory) کار می‌کند.",
+      "commonMistake": "فکر اینکه `providedIn: 'root'` یعنی سرویس در شروع برنامه ساخته می‌شود؛ در واقع lazy است.",
+      "followUp": "چه فرقی است بین `providedIn: 'root'` و ثبت سرویس در `providers` یک کامپوننت؟",
+      "estimatedSeconds": 50,
+      "minVersion": "17",
+      "tags": [
+        "dependency-injection",
+        "services",
+        "inject"
+      ],
+      "choices": [
+        {
+          "text": "سرویس در زمان build به‌صورت ثابت داخل bundle کپی می‌شود"
+        },
+        {
+          "text": "یک نمونه‌ی singleton در injector ریشه‌ی برنامه ساخته می‌شود و اگر هیچ‌جا استفاده نشود tree-shake می‌شود",
+          "isCorrect": true
+        },
+        {
+          "text": "برای هر کامپوننت یک نمونه‌ی جدید ساخته می‌شود"
+        },
+        {
+          "text": "سرویس فقط در ماژول ریشه (`AppModule`) قابل استفاده است"
+        }
+      ]
+    },
+    {
+      "id": "angular-services-state-sharing",
+      "level": "Junior",
+      "type": "ShortAnswer",
+      "text": "سرویس در Angular برای چه کاری است و چطور بین چند کامپوننت state مشترک نگه می‌داری؟",
+      "shortAnswer": "سرویس محل منطق و state مشترک (دسترسی به API، cache، احراز هویت) است که با DI تزریق می‌شود و کامپوننت‌ها را از منطق غیر UI جدا می‌کند. برای state مشترک ساده، یک سرویس singleton با `signal` و `computed` کافی است.",
+      "explanation": "```ts\n@Injectable({ providedIn: 'root' })\nexport class ThemeService {\n  private readonly _mode = signal<'light' | 'dark'>('light');\n  readonly mode = this._mode.asReadonly();      // فقط خواندنی برای بیرون\n  toggle() { this._mode.update(m => (m === 'light' ? 'dark' : 'light')); }\n}\n```\nاصول: state را خصوصی و قابل‌نوشتن نگه دار، نسخه‌ی `asReadonly()` را export کن و تغییرات را فقط از طریق متدهای سرویس انجام بده. برای state بزرگ‌تر با جریان‌های پیچیده‌ی async از NgRx (Store یا SignalStore) استفاده می‌شود.",
+      "commonMistake": "در کامپوننت مستقیم به `signal` نوشتنی سرویس دسترسی دادن و پخش شدن منطق تغییر state در کل برنامه.",
+      "followUp": "چرا expose کردن `asReadonly()` بهتر از expose کردن خود signal است؟",
+      "estimatedSeconds": 90,
+      "minVersion": "17",
+      "tags": [
+        "services",
+        "state",
+        "signals"
+      ]
+    },
+    {
+      "id": "angular-lifecycle-order",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "ترتیب درست اجرای اولیه‌ی چرخه‌ی حیات یک کامپوننت کدام است؟",
+      "shortAnswer": "اول constructor (برای DI و مقداردهی ساده)، بعد `ngOnChanges` (فقط اگر ورودی `@Input` دارد و وقتی ورودی‌ها عوض شوند)، سپس `ngOnInit` (یک‌بار)، `ngDoCheck` (در هر change detection)، بعد hooks مربوط به content و view و در آخر `ngOnDestroy`.",
+      "explanation": "قواعد عملی:\n- کار سنگین و HTTP در constructor نه؛ در `ngOnInit` یا بهتر با `resource`/signalها.\n- به المان‌های view (`viewChild`) از `ngAfterViewInit` یا `afterNextRender` دسترسی داشته باش.\n- پاک‌سازی: `ngOnDestroy` یا `inject(DestroyRef).onDestroy(...)`.\n- با ورودی‌های signal، `ngOnChanges` تقریباً لازم نیست؛ از `computed`/`effect` استفاده کن.\n\nبرای کد فقط-مرورگر (DOM، `window`) در حضور SSR از `afterNextRender` استفاده کن.",
+      "commonMistake": "خواندن ورودی‌ها در constructor (هنوز مقداردهی نشده‌اند) و فراموش کردن unsubscribe در `ngOnDestroy`.",
+      "followUp": "چرا در constructor نباید به ورودی‌های `@Input` تکیه کرد؟",
+      "estimatedSeconds": 50,
+      "minVersion": "17",
+      "tags": [
+        "lifecycle",
+        "components",
+        "fundamentals"
+      ],
+      "choices": [
+        {
+          "text": "`ngOnChanges` ← `constructor` ← `ngDoCheck` ← `ngOnInit` ← `ngAfterViewInit`"
+        },
+        {
+          "text": "`constructor` ← `ngOnInit` ← `ngOnChanges` ← `ngDoCheck` ← `ngAfterViewInit`"
+        },
+        {
+          "text": "`ngOnInit` ← `constructor` ← `ngOnChanges` ← `ngAfterViewInit` ← `ngDoCheck`"
+        },
+        {
+          "text": "`constructor` ← `ngOnChanges` ← `ngOnInit` ← `ngDoCheck` ← `ngAfterViewInit`",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "angular-async-pipe",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "`async` pipe در قالب چه مزیتی دارد؟",
+      "shortAnswer": "`async` مدیریت subscription را از دست توسعه‌دهنده برمی‌دارد و از نشت حافظه جلوگیری می‌کند.",
+      "explanation": "```html\n@if (user$ | async; as user) {\n  <h2>{{ user.name }}</h2>\n}\n```\nهشدار: هر `| async` جدید یک subscription جدید است؛ اگر `user$` یک `http.get` سرد باشد و در قالب سه بار استفاده شود سه درخواست می‌رود. راه‌حل: نگه داشتن نتیجه با `@if (...; as x)` یا `@let x = user$ | async;`، یا `shareReplay`، یا تبدیل به signal با `toSignal`. در پروژه‌های signal-محور `toSignal` جایگزین رایج `async` pipe است.",
+      "commonMistake": "استفاده‌ی چندباره از `| async` روی یک Observable سرد و ارسال درخواست‌های تکراری.",
+      "followUp": "`toSignal` نسبت به `async` pipe چه مزیتی دارد؟",
+      "estimatedSeconds": 55,
+      "minVersion": "17",
+      "tags": [
+        "rxjs",
+        "async-pipe",
+        "templates"
+      ],
+      "choices": [
+        {
+          "text": "به Observable/Promise به‌صورت خودکار subscribe و هنگام destroy شدن unsubscribe می‌کند و view را برای بررسی علامت می‌زند",
+          "isCorrect": true
+        },
+        {
+          "text": "فقط برای درخواست‌های HTTP کار می‌کند"
+        },
+        {
+          "text": "باعث می‌شود Observable فقط یک‌بار در کل برنامه subscribe شود"
+        },
+        {
+          "text": "مقدار Observable را به‌صورت synchronous و بدون subscribe می‌خواند"
+        }
+      ]
+    },
+    {
+      "id": "angular-routing-lazy",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "چطور یک صفحه را lazy-load می‌کنی؟",
+      "shortAnswer": "`loadComponent` (برای یک کامپوننت) و `loadChildren` (برای مجموعه‌ای از routeها) با dynamic `import()` باندل جداگانه می‌سازند که فقط هنگام ورود به آن مسیر دانلود می‌شود.",
+      "explanation": "```ts\nexport const routes: Routes = [\n  { path: '', component: Home },\n  { path: 'admin', loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES) },\n  { path: 'users/:id', loadComponent: () => import('./user').then(m => m.User) },\n];\n```\nبا `provideRouter(routes, withComponentInputBinding())` پارامترهای route، query params و data مستقیم به ورودی‌های کامپوننت (`id = input.required<string>()`) bind می‌شوند و نیازی به `ActivatedRoute` نیست. برای preload می‌توانی `withPreloading(PreloadAllModules)` بدهی.",
+      "commonMistake": "import کردن همه‌ی صفحات در فایل route و بزرگ شدن باندل اولیه.",
+      "followUp": "چطور پارامتر `:id` را بدون `ActivatedRoute` می‌گیری؟",
+      "estimatedSeconds": 50,
+      "minVersion": "17",
+      "tags": [
+        "routing",
+        "lazy-loading",
+        "performance"
+      ],
+      "choices": [
+        {
+          "text": "`{ path: 'admin', loadComponent: () => import('./admin').then(m => m.Admin) }`",
+          "isCorrect": true
+        },
+        {
+          "text": "`{ path: 'admin', lazy: true, component: Admin }`"
+        },
+        {
+          "text": "با `providedIn: 'lazy'` روی کامپوننت"
+        },
+        {
+          "text": "`{ path: 'admin', component: import('./admin') }`"
+        }
+      ]
+    },
+    {
+      "id": "angular-httpclient-cold",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "کد `this.http.get('/api/users');` (بدون `subscribe` و بدون async pipe) چه می‌کند؟",
+      "shortAnswer": "`HttpClient` یک Observable برمی‌گرداند که تنبل است؛ هر `subscribe` یک درخواست جدید می‌فرستد.",
+      "explanation": "```ts\n// app.config.ts\nprovideHttpClient(withInterceptors([authInterceptor]))\n\n// service\nusers$ = this.http.get<User[]>('/api/users');       // هنوز اجرا نشده\nusers = toSignal(this.users$, { initialValue: [] });  // اینجا subscribe می‌شود\n```\nپس دو بار subscribe = دو درخواست. برای به‌اشتراک‌گذاری از `shareReplay({ bufferSize: 1, refCount: true })` استفاده کن. در پروژه‌های جدید `httpResource`/`resource` هم برای دریافت داده به‌صورت signal وجود دارد.",
+      "commonMistake": "فراموش کردن subscribe و تعجب از اینکه Network tab خالی است.",
+      "followUp": "تفاوت Observable سرد و داغ (cold/hot) چیست؟",
+      "estimatedSeconds": 50,
+      "minVersion": "17",
+      "tags": [
+        "http",
+        "rxjs",
+        "observables"
+      ],
+      "choices": [
+        {
+          "text": "درخواست یک‌بار ارسال و نتیجه cache می‌شود"
+        },
+        {
+          "text": "هیچ درخواستی ارسال نمی‌شود چون Observable سرد (cold) است و فقط با subscribe شروع می‌شود",
+          "isCorrect": true
+        },
+        {
+          "text": "خطای کامپایل می‌دهد"
+        },
+        {
+          "text": "درخواست بلافاصله ارسال می‌شود و نتیجه دور ریخته می‌شود"
+        }
+      ]
+    },
+    {
+      "id": "angular-let-and-template-vars",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "`@let` در قالب Angular چه کاری می‌کند؟",
+      "shortAnswer": "`@let` (معرفی‌شده در Angular 18.1) برای جلوگیری از تکرار عبارت‌های پرهزینه یا طولانی در قالب است.",
+      "explanation": "```html\n@let total = price() * qty();\n@let name = (user$ | async)?.name ?? 'مهمان';\n\n<p>جمع: {{ total }}</p>\n<button [disabled]=\"total === 0\">پرداخت</button>\n```\nدر scope همان بلوک قالب و فرزندانش دیده می‌شود و قبل از تعریف قابل استفاده نیست. برای مرجع به المان یا کامپوننت از template reference variable (`#box`) استفاده می‌شود که کار دیگری است.",
+      "commonMistake": "ایجاد تغییر (assign) روی `@let` در event handler؛ این متغیر read-only است.",
+      "followUp": "template reference variable (`#ref`) چه فرقی با `@let` دارد؟",
+      "estimatedSeconds": 45,
+      "minVersion": "18.1",
+      "tags": [
+        "templates",
+        "let",
+        "syntax"
+      ],
+      "choices": [
+        {
+          "text": "یک متغیر عمومی در کلاس کامپوننت تعریف می‌کند"
+        },
+        {
+          "text": "مثل `let` جاوااسکریپت اجازه‌ی مقداردهی مجدد در قالب می‌دهد"
+        },
+        {
+          "text": "یک متغیر محلی فقط‌خواندنی در قالب می‌سازد که مقدارش هر بار خودکار از عبارت به‌روز می‌شود",
+          "isCorrect": true
+        },
+        {
+          "text": "فقط داخل `@for` قابل استفاده است"
+        }
+      ]
+    },
+    {
+      "id": "angular-pure-pipes-vs-methods",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "چرا صدا زدن متد در قالب (`{{ format(x) }}`) نسبت به pipe خالص (pure pipe) می‌تواند هزینه‌بر باشد؟",
+      "shortAnswer": "Pure pipe نتیجه را برای همان ورودی cache می‌کند. متدهای قالب در هر دور change detection صدا زده می‌شوند، بنابراین منطق سنگین در آنها باعث افت کارایی می‌شود.",
+      "explanation": "راه‌های بهتر:\n1. `computed()` برای مقدار مشتق‌شده‌ی مبتنی بر signal (cache شده و lazy).\n2. pure pipe سفارشی برای فرمت‌کردن.\n3. محاسبه‌ی مقدار یک‌بار در کلاس و bind کردن آن.\n\n```ts\n@Pipe({ name: 'initials' })\nexport class InitialsPipe implements PipeTransform {\n  transform(name: string) { return name.split(' ').map(p => p[0]).join(''); }\n}\n```\npipe ناخالص (`pure: false`) هم مثل متد در هر CD اجرا می‌شود و باید کم استفاده شود. با signalها، خواندن `computed` در قالب ارزان است چون مقدارش cache می‌شود.",
+      "commonMistake": "نوشتن فیلتر/مرتب‌سازی سنگین داخل متد قالب.",
+      "followUp": "چرا mutate کردن آرایه‌ی ورودی یک pure pipe باعث نمی‌شود pipe دوباره اجرا شود؟",
+      "estimatedSeconds": 55,
+      "minVersion": "17",
+      "tags": [
+        "pipes",
+        "performance",
+        "templates"
+      ],
+      "choices": [
+        {
+          "text": "هیچ تفاوتی ندارند"
+        },
+        {
+          "text": "چون متدها در قالب مجاز نیستند"
+        },
+        {
+          "text": "متد در هر change detection دوباره اجرا می‌شود ولی pure pipe فقط وقتی ورودی‌اش (با مقایسه‌ی reference) عوض شود اجرا می‌شود",
+          "isCorrect": true
+        },
+        {
+          "text": "چون pipe ها همیشه async هستند"
+        }
+      ]
+    },
+    {
+      "id": "angular-content-projection",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "برای اینکه یک کامپوننت `Card` دو ناحیه‌ی جدا (سربرگ و بدنه) از والد بگیرد از چه چیزی استفاده می‌کنی؟",
+      "shortAnswer": "Content projection به والد اجازه می‌دهد محتوای HTML یا کامپوننت را به «شکاف‌های» تعریف‌شده در فرزند بدهد؛ الگوی پایه‌ی کامپوننت‌های layout و UI kit.",
+      "explanation": "```html\n<!-- card.html -->\n<header><ng-content select=\"[card-header]\" /></header>\n<section><ng-content /></section>\n\n<!-- استفاده -->\n<app-card>\n  <h3 card-header>عنوان</h3>\n  <p>متن بدنه</p>\n</app-card>\n```\nبرای محتوای شرطی/تکراری با کنترل والد از `<ng-template>` و `ngTemplateOutlet` یا `contentChild(TemplateRef)` استفاده می‌شود. محتوای projected در والد ساخته می‌شود (حتی اگر فرزند آن را نشان ندهد) مگر اینکه با `@defer` یا `ng-template` تنبل شود.",
+      "commonMistake": "استفاده از `innerHTML` برای انتقال قالب که sanitization و بقیه‌ی امکانات Angular را دور می‌زند.",
+      "followUp": "تفاوت `ng-content` و `ng-template` چیست؟",
+      "estimatedSeconds": 55,
+      "minVersion": "17",
+      "tags": [
+        "content-projection",
+        "components",
+        "templates"
+      ],
+      "choices": [
+        {
+          "text": "`<router-outlet>` با نام‌گذاری"
+        },
+        {
+          "text": "چند کامپوننت تو در تو با `providers`"
+        },
+        {
+          "text": "ورودی `@Input` از نوع HTML رشته‌ای و `innerHTML`"
+        },
+        {
+          "text": "چند `<ng-content>` با `select` مثل `<ng-content select=\"[card-header]\" />` و یک `<ng-content />` پیش‌فرض",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "angular-forms-reactive-vs-template",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "تفاوت اصلی Reactive Forms و Template-driven Forms چیست؟",
+      "shortAnswer": "Reactive Forms مدل را در کد تعریف می‌کنند و نتیجه پیش‌بینی‌پذیرتر و قابل تست‌تر است؛ برای فرم‌های پیچیده، پویا و با اعتبارسنجی چندمرحله‌ای ترجیح داده می‌شوند.",
+      "explanation": "```ts\nform = inject(NonNullableFormBuilder).group({\n  email: ['', [Validators.required, Validators.email]],\n  password: ['', [Validators.required, Validators.minLength(8)]],\n});\nsubmit() { if (this.form.valid) save(this.form.getRawValue()); }\n```\nدر نسخه‌های جدید Signal Forms (تجربی از v21 و پایدار در v22) مدل فرم را مبتنی بر signal می‌کند و مسیر آینده‌ی فرم‌ها محسوب می‌شود؛ ولی Reactive Forms هنوز پشتیبانی می‌شوند و در پروژه‌های موجود رایج‌اند.",
+      "commonMistake": "ساختن فرم‌های پیچیده با `ngModel` و از دست دادن کنترل روی اعتبارسنجی و تست.",
+      "followUp": "چرا در Reactive Forms از `getRawValue()` استفاده می‌کنیم؟",
+      "estimatedSeconds": 60,
+      "minVersion": "17",
+      "tags": [
+        "forms",
+        "reactive-forms",
+        "template-driven"
+      ],
+      "choices": [
+        {
+          "text": "Reactive Forms فقط با RxJS کار می‌کنند و signal را پشتیبانی نمی‌کنند"
+        },
+        {
+          "text": "Template-driven Forms اعتبارسنجی ندارند"
+        },
+        {
+          "text": "در Reactive Forms مدل فرم (`FormGroup`/`FormControl`) صریحاً در کلاس ساخته و مدیریت می‌شود (تایپ‌دار، قابل تست و مناسب فرم‌های پویا)، ولی Template-driven بیشتر با دایرکتیوهایی مثل `ngModel` در قالب و برای فرم‌های ساده است",
+          "isCorrect": true
+        },
+        {
+          "text": "هر دو دقیقاً یکسانند و فقط اسمشان فرق دارد"
+        }
+      ]
+    },
+    {
+      "id": "angular-host-metadata",
+      "level": "Junior",
+      "type": "MultipleChoice",
+      "text": "برای bind کردن کلاس یا رویداد روی المان میزبان (host) کامپوننت، رویکرد پیشنهادی مدرن چیست؟",
+      "shortAnswer": "راهنمای رسمی Angular استفاده از `host` در متادیتا را به decoratorهای `@HostBinding`/`@HostListener` ترجیح می‌دهد؛ هر دو کار می‌کنند ولی `host` متمرکز و سازگار با signal است.",
+      "explanation": "```ts\n@Component({\n  selector: 'app-toggle',\n  host: {\n    'role': 'switch',\n    '[attr.aria-checked]': 'on()',\n    '[class.on]': 'on()',\n    '(click)': 'on.update(v => !v)',\n    '(keydown.space)': 'on.update(v => !v)',\n  },\n  template: `<ng-content />`,\n})\nexport class Toggle { on = signal(false); }\n```\nدستکاری مستقیم DOM (`nativeElement.classList`) در SSR مشکل ایجاد می‌کند و از مکانیزم change detection دور می‌زند؛ در صورت نیاز از `Renderer2` یا bindingهای host استفاده کن.",
+      "commonMistake": "دسترسی مستقیم به `ElementRef.nativeElement` برای کارهایی که با binding قابل انجام است.",
+      "followUp": "چرا دست‌کاری مستقیم DOM با `nativeElement` در SSR خطرناک است؟",
+      "estimatedSeconds": 55,
+      "minVersion": "17",
+      "tags": [
+        "host-bindings",
+        "components",
+        "style-guide"
+      ],
+      "choices": [
+        {
+          "text": "تعریف یک `ngOnInit` که `classList` را تغییر می‌دهد"
+        },
+        {
+          "text": "استفاده از property `host` در متادیتای `@Component`/`@Directive` مثل `host: { '[class.active]': 'active()', '(click)': 'toggle()' }`",
+          "isCorrect": true
+        },
+        {
+          "text": "فقط `@HostBinding` و `@HostListener` مجاز هستند"
+        },
+        {
+          "text": "دستکاری `document.querySelector` در constructor"
+        }
+      ]
+    },
+    {
+      "id": "angular-change-detection-onpush",
+      "level": "Mid",
+      "type": "Conceptual",
+      "text": "Change Detection در Angular چگونه کار می‌کند و `OnPush` چه فرقی با `Default` دارد؟",
+      "shortAnswer": "در حالت `Default` با هر رخداد (رویداد، timer، HTTP…) کل درخت کامپوننت‌ها از ریشه بررسی می‌شود. در `OnPush` یک کامپوننت فقط وقتی بررسی می‌شود که: reference یکی از ورودی‌هایش عوض شود، یک رویداد از داخل خودش/فرزندانش رخ دهد، `async` pipe مقدار جدید بدهد، یک signal که در قالبش خوانده شده تغییر کند، یا `markForCheck()` صدا زده شود.",
+      "explanation": "پیامد مهم: در `OnPush` تغییر **درجا** (mutation) یک شیء ورودی دیده نمی‌شود:\n```ts\nthis.user.name = 'Ali';           // ❌ reference همان است، view به‌روز نمی‌شود\nthis.user = { ...this.user, name: 'Ali' };  // ✅\n```\nبا signalها این دغدغه کم می‌شود چون خواندن signal در قالب وابستگی دقیق می‌سازد و Angular همان view را dirty می‌کند. توصیه‌ی امروز: `changeDetection: ChangeDetectionStrategy.OnPush` برای همه‌ی کامپوننت‌ها (در پروژه‌های جدید CLI زوج «zoneless + OnPush» پیش‌فرض/توصیه‌شده است) و state را با signal یا immutable نگه داشتن.\n\n`ChangeDetectorRef.markForCheck()` نمای مسیر را تا ریشه علامت می‌زند؛ `detectChanges()` همان لحظه فقط همین view و فرزندانش را بررسی می‌کند و باید با احتیاط استفاده شود.",
+      "commonMistake": "تغییر شیء/آرایه به‌صورت in-place در کامپوننت‌های OnPush و تعجب از اینکه UI به‌روز نمی‌شود.",
+      "followUp": "چطور می‌فهمی یک کامپوننت بیش از حد change detection می‌شود؟ (Angular DevTools profiler)",
+      "estimatedSeconds": 150,
+      "minVersion": "17",
+      "tags": [
+        "change-detection",
+        "onpush",
+        "performance"
+      ]
+    },
+    {
+      "id": "angular-computed-lazy-memo",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "درباره‌ی `computed` کدام گزینه درست است؟",
+      "shortAnswer": "`computed` وابستگی‌هایش را در اجرا ردیابی می‌کند (فقط signalهایی که واقعاً خوانده شده‌اند)، اگر کسی آن را نخواند اصلاً اجرا نمی‌شود، و اگر وابستگی عوض نشده باشد نتیجه‌ی cache را برمی‌گرداند.",
+      "explanation": "نمونه‌ی آزمایش‌شده:\n```ts\nlet runs = 0;\nconst a = signal(1), b = signal(2);\nconst sum = computed(() => { runs++; return a() + b(); });\n// runs === 0 (هنوز نخوانده‌ایم)\nsum(); sum();      // runs === 1 (دومی از cache)\na.set(10);         // runs === 1 (هنوز lazy)\nsum();             // runs === 2\n```\nنکته‌ها: `computed` باید **خالص** و بدون side effect باشد؛ وابستگی‌ها به‌صورت پویا ردیابی می‌شوند (شاخه‌ی `if` که خوانده نشود وابستگی نمی‌سازد)؛ و اگر نتیجه با `===` برابر مقدار قبلی باشد، مصرف‌کننده‌ها دوباره اجرا نمی‌شوند (glitch-free).",
+      "commonMistake": "نوشتن side effect (تغییر signal دیگر، لاگ، درخواست شبکه) داخل `computed`.",
+      "followUp": "چرا خواندن یک signal داخل `untracked` وابستگی نمی‌سازد و کجا کاربرد دارد؟",
+      "estimatedSeconds": 60,
+      "minVersion": "17",
+      "tags": [
+        "signals",
+        "computed",
+        "reactivity"
+      ],
+      "choices": [
+        {
+          "text": "بلافاصله بعد از ساخته شدن اجرا می‌شود و نتیجه را دائمی ذخیره می‌کند"
+        },
+        {
+          "text": "با هر تغییر هر signal برنامه دوباره اجرا می‌شود"
+        },
+        {
+          "text": "مقدار را lazy (فقط هنگام خواندن) محاسبه و تا وقتی وابستگی‌ها تغییر نکنند cache می‌کند",
+          "isCorrect": true
+        },
+        {
+          "text": "می‌تواند مستقیماً با `.set()` مقداردهی شود"
+        }
+      ]
+    },
+    {
+      "id": "angular-effect-usage",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "`effect()` را برای چه کاری استفاده می‌کنی؟",
+      "shortAnswer": "`effect` بعد از تغییر signalها (در فاز change detection) اجرا می‌شود و برای دنیای بیرون از گراف reactive است. اگر مقدارش را با `set` روی signal دیگر می‌نویسی معمولاً باید `computed` یا `linkedSignal` استفاده می‌کردی.",
+      "explanation": "```ts\nconstructor() {\n  effect(() => {\n    localStorage.setItem('theme', this.theme());    // side effect\n  });\n}\n```\nنکات: effect باید در injection context ساخته شود (constructor/field) و با destroy کامپوننت خودکار پاک می‌شود؛ وابستگی‌ها همان signalهایی هستند که در اجرا خوانده می‌شوند (برای نخواندن از `untracked` استفاده کن)؛ و اجرا asynchronous و coalesced است، نه لحظه‌ای. برای لود داده‌ی وابسته به signal از `resource`/`httpResource` استفاده کن نه effect + subscribe.",
+      "commonMistake": "استفاده از effect برای همگام‌سازی دو signal که باعث چرخه و state پراکنده می‌شود.",
+      "followUp": "تفاوت `effect` و `afterRenderEffect` چیست؟",
+      "estimatedSeconds": 60,
+      "minVersion": "17",
+      "tags": [
+        "signals",
+        "effect",
+        "reactivity"
+      ],
+      "choices": [
+        {
+          "text": "برای بارگذاری داده از API هنگام شروع کامپوننت"
+        },
+        {
+          "text": "برای ساختن مقدار مشتق از چند signal به‌جای `computed`"
+        },
+        {
+          "text": "برای جایگزینی `ngOnInit`"
+        },
+        {
+          "text": "برای side effectهایی که باید با تغییر signalها اجرا شوند (لاگ، sync با `localStorage`، دستکاری DOM/کتابخانه‌ی خارجی)، نه برای مشتق کردن state",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "angular-linked-signal",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "`linkedSignal` چه مشکلی را حل می‌کند؟",
+      "shortAnswer": "مثال کلاسیک: لیست گزینه‌ها تغییر می‌کند و انتخاب کاربر باید به‌طور پیش‌فرض اولین گزینه‌ی جدید شود، ولی کاربر هم بتواند دستی انتخاب کند.",
+      "explanation": "نتیجه‌ی اجرای آزمایشی:\n```ts\nconst src = signal('a');\nconst ls = linkedSignal(() => src().toUpperCase());\nls();            // 'A'\nls.set('MANUAL');// 'MANUAL'\nsrc.set('b');    // ls() → 'B'  (منبع عوض شد، دوباره مشتق شد)\n```\nشکل پیشرفته‌ی آن `linkedSignal({ source, computation })` است که مقدار قبلی را هم می‌دهد تا در صورت امکان انتخاب کاربر را حفظ کنی. جایگزین تمیز الگوی «effect که یک signal را از دیگری set می‌کند» است.",
+      "commonMistake": "ساختن `effect` برای ریست کردن state هنگام تغییر ورودی؛ `linkedSignal` همین کار را بدون race انجام می‌دهد.",
+      "followUp": "چطور `linkedSignal` انتخاب کاربر را در تغییر لیست حفظ می‌کند؟ (`previous`)",
+      "estimatedSeconds": 65,
+      "minVersion": "19",
+      "tags": [
+        "signals",
+        "linked-signal",
+        "reactivity"
+      ],
+      "choices": [
+        {
+          "text": "یک Observable را به signal تبدیل می‌کند"
+        },
+        {
+          "text": "signalی که مقدارش از یک منبع مشتق می‌شود (مثل computed) ولی می‌توان آن را دستی هم نوشت؛ با تغییر منبع دوباره به مقدار مشتق برمی‌گردد",
+          "isCorrect": true
+        },
+        {
+          "text": "دو signal مختلف را دائماً دوطرفه sync می‌کند"
+        },
+        {
+          "text": "فقط یک alias برای `computed` است"
+        }
+      ]
+    },
+    {
+      "id": "angular-rxjs-flattening",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "برای جستجوی همزمان با تایپ (typeahead) که فقط جواب آخرین کوئری مهم است کدام عملگر مناسب‌تر است؟",
+      "shortAnswer": "`switchMap` لغو، `mergeMap` موازی، `concatMap` صف‌بندی ترتیبی، `exhaustMap` نادیده گرفتن ورودی‌های جدید تا پایان جریان فعلی.",
+      "explanation": "راهنمای انتخاب:\n| سناریو | عملگر |\n|---|---|\n| جستجو با تایپ، navigation | `switchMap` |\n| ذخیره‌های مستقل که همه باید انجام شوند | `mergeMap` (با محدودیت concurrency) |\n| عملیات که ترتیبش مهم است (ویرایش‌های پشت‌سرهم) | `concatMap` |\n| دکمه‌ی submit/login که نباید دوبار زده شود | `exhaustMap` |\n\nمعمولاً همراه `debounceTime(300)` و `distinctUntilChanged()` می‌آید. `switchMap` درخواست HTTP را واقعاً abort می‌کند ولی روی سرور اثر جانبی (مثل POST) ممکن است انجام شده باشد؛ برای mutation ها `concatMap`/`exhaustMap` امن‌ترند.",
+      "commonMistake": "استفاده از `switchMap` برای درخواست‌های ذخیره (POST) که لغو شدن آنها می‌تواند داده را ناسازگار کند.",
+      "followUp": "چه فرقی است بین `switchMap` و `mergeMap` وقتی داخلی‌ها زود تمام می‌شوند؟",
+      "estimatedSeconds": 65,
+      "minVersion": "17",
+      "tags": [
+        "rxjs",
+        "operators",
+        "http"
+      ],
+      "choices": [
+        {
+          "text": "`mergeMap` چون همه‌ی درخواست‌ها را موازی اجرا می‌کند و ترتیب پاسخ‌ها مهم نیست"
+        },
+        {
+          "text": "`concatMap` چون درخواست‌ها را به‌ترتیب صف می‌کند"
+        },
+        {
+          "text": "`switchMap` چون با آمدن مقدار جدید، درخواست قبلی را لغو می‌کند",
+          "isCorrect": true
+        },
+        {
+          "text": "`exhaustMap` چون درخواست‌های جدید را تا پایان قبلی نادیده می‌گیرد"
+        }
+      ]
+    },
+    {
+      "id": "angular-takeuntildestroyed",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "چطور نشت subscription را در کامپوننت‌های مدرن جلوگیری می‌کنی؟",
+      "shortAnswer": "Angular subscribeهای دستی داخل کد را خودکار نمی‌بندد. `takeUntilDestroyed` از `@angular/core/rxjs-interop` است و با destroy شدن کامپوننت/سرویس زنجیره را تمام می‌کند.",
+      "explanation": "```ts\nexport class Feed {\n  private destroyRef = inject(DestroyRef);\n\n  constructor() {\n    this.socket$.pipe(takeUntilDestroyed()).subscribe(msg => this.add(msg));\n  }\n\n  later() {\n    // بیرون از injection context باید ref بدهی\n    this.other$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe();\n  }\n}\n```\nObservableهای HTTP خودشان تمام می‌شوند و نیازی به unsubscribe ندارند (ولی لغو در صورت destroy مفید است). جریان‌های بی‌پایان (interval, WebSocket, رویدادها, `valueChanges`) حتماً باید مدیریت شوند.",
+      "commonMistake": "صدا زدن `takeUntilDestroyed()` بدون آرگومان بیرون از injection context (خطای NG0203).",
+      "followUp": "چرا `async` pipe یا `toSignal` معمولاً نیاز به `takeUntilDestroyed` را حذف می‌کنند؟",
+      "estimatedSeconds": 60,
+      "minVersion": "17",
+      "tags": [
+        "rxjs",
+        "subscriptions",
+        "memory-leak"
+      ],
+      "choices": [
+        {
+          "text": "با `setTimeout` و unsubscribe بعد از چند ثانیه"
+        },
+        {
+          "text": "با `takeUntilDestroyed()` (در injection context یا با دادن `DestroyRef`) یا تبدیل به signal/`async` pipe",
+          "isCorrect": true
+        },
+        {
+          "text": "با ذخیره‌ی Observable در `window`"
+        },
+        {
+          "text": "با `ngOnDestroy` خالی، چون Angular خودش همه‌ی subscribeها را می‌بندد"
+        }
+      ]
+    },
+    {
+      "id": "angular-tosignal-toobservable",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "درباره‌ی `toSignal(obs$)` کدام گزینه درست است؟",
+      "shortAnswer": "`toSignal` پلی بین RxJS و signal است: آخرین مقدار emit‌شده به‌عنوان مقدار signal نگه داشته می‌شود. اگر Observable synchronous مقدار بدهد می‌توان `requireSync: true` گذاشت.",
+      "explanation": "```ts\nusers = toSignal(this.http.get<User[]>('/api/users'), { initialValue: [] });\nquery = signal('');\nresults = toSignal(\n  toObservable(this.query).pipe(debounceTime(300), switchMap(q => this.api.search(q))),\n  { initialValue: [] },\n);\n```\nاگر Observable خطا بدهد، خواندن signal همان خطا را throw می‌کند (خطا ساکت نمی‌شود). `toObservable` هم مقدار signal را از طریق effect منتشر می‌کند، پس ممکن است تغییرات پشت‌سرهم سریع coalesce شوند. `toSignal` باید در injection context صدا زده شود.",
+      "commonMistake": "ساختن `toSignal` داخل متدی که بارها صدا زده می‌شود و ایجاد subscription اضافی.",
+      "followUp": "در چه سناریویی Observable را به signal تبدیل نمی‌کنی و همان RxJS می‌مانی؟",
+      "estimatedSeconds": 60,
+      "minVersion": "17",
+      "tags": [
+        "rxjs-interop",
+        "signals",
+        "observables"
+      ],
+      "choices": [
+        {
+          "text": "فقط بعد از اولین خواندن signal subscribe می‌کند"
+        },
+        {
+          "text": "خطاهای Observable را ساکت نگه می‌دارد و مقدار قبلی را برمی‌گرداند"
+        },
+        {
+          "text": "فوراً subscribe می‌کند، با destroy شدن context خودکار unsubscribe می‌کند و اگر `initialValue` ندهی نوع نتیجه `T | undefined` است",
+          "isCorrect": true
+        },
+        {
+          "text": "همیشه مقدار اولیه‌ی `null` دارد"
+        }
+      ]
+    },
+    {
+      "id": "angular-defer-blocks",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "`@defer` چه کاری انجام می‌دهد؟",
+      "shortAnswer": "`@defer` (پایدار از Angular 18) با تقسیم کد در سطح قالب، بار اولیه را کم می‌کند. بخش‌های `@placeholder`, `@loading` و `@error` حالت‌های مختلف را نمایش می‌دهند.",
+      "explanation": "```html\n@defer (on viewport; prefetch on idle) {\n  <heavy-chart [data]=\"data()\" />\n} @placeholder (minimum 300ms) {\n  <div class=\"skeleton\"></div>\n} @loading (after 100ms; minimum 500ms) {\n  <spinner />\n} @error {\n  <p>بارگذاری ناموفق بود</p>\n}\n```\nTriggerها: `on idle` (پیش‌فرض)، `on viewport`، `on interaction`، `on hover`، `on timer(5s)`، `on immediate` و شرط `when expr`. شرط: کامپوننت‌های داخل بلوک باید standalone باشند و جای دیگر در همان فایل به‌صورت eager استفاده نشوند وگرنه chunk جدا نمی‌شود. برای LCP، کامپوننت‌های above-the-fold را defer نکن.",
+      "commonMistake": "defer کردن محتوای بالای صفحه که LCP را بدتر می‌کند.",
+      "followUp": "`prefetch` چه فرقی با خود trigger دارد؟",
+      "estimatedSeconds": 65,
+      "minVersion": "17",
+      "tags": [
+        "defer",
+        "performance",
+        "lazy-loading"
+      ],
+      "choices": [
+        {
+          "text": "جایگزین `@if` است و فقط شرط را کندتر ارزیابی می‌کند"
+        },
+        {
+          "text": "همه‌ی درخواست‌های HTTP کامپوننت را عقب می‌اندازد"
+        },
+        {
+          "text": "کد یک بخش قالب (کامپوننت‌ها/دایرکتیوها/pipeهای استفاده‌شده در آن) را در chunk جدا می‌گذارد و فقط با تحقق یک trigger (مثل `on viewport`) لود و رندر می‌کند",
+          "isCorrect": true
+        },
+        {
+          "text": "کامپوننت را فقط در SSR رندر می‌کند"
+        }
+      ]
+    },
+    {
+      "id": "angular-functional-guards",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "در گاردهای تابعی route چگونه کاربر را به صفحه‌ی ورود هدایت می‌کنی؟",
+      "shortAnswer": "گاردهای کلاسی قدیمی deprecated شده‌اند و امروز توابعی هستند که با `inject()` سرویس‌ها را می‌گیرند. برگرداندن `UrlTree` از ریدایرکت داخلی Angular استفاده می‌کند و با navigation جاری هماهنگ است.",
+      "explanation": "```ts\nexport const authGuard: CanActivateFn = (route, state) => {\n  const auth = inject(AuthService);\n  const router = inject(Router);\n  return auth.isLoggedIn()\n    ? true\n    : router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });\n};\n\n{ path: 'dashboard', canActivate: [authGuard], loadComponent: ... }\n```\nانواع: `canActivate`, `canActivateChild`, `canDeactivate` (خروج با تغییرات ذخیره‌نشده)، `canMatch` (برای انتخاب route براساس نقش/feature flag، حتی قبل از lazy load)، و resolverها (`ResolveFn`). گارد UI را «قفل» نمی‌کند: امنیت واقعی باید سمت سرور اعمال شود.",
+      "commonMistake": "تکیه‌ی امنیتی فقط بر گارد کلاینت.",
+      "followUp": "`canMatch` چه تفاوتی با `canActivate` دارد؟",
+      "estimatedSeconds": 60,
+      "minVersion": "17",
+      "tags": [
+        "routing",
+        "guards",
+        "authentication"
+      ],
+      "choices": [
+        {
+          "text": "با پرتاب یک `Error` به صفحه‌ی ورود می‌رود"
+        },
+        {
+          "text": "گارد با `window.location.href` ریدایرکت می‌کند و `false` برمی‌گرداند"
+        },
+        {
+          "text": "گارد فقط `boolean` برمی‌گرداند و ریدایرکت غیرممکن است"
+        },
+        {
+          "text": "تابع `CanActivateFn` مقدار `true` یا یک `UrlTree` (مثلاً `inject(Router).parseUrl('/login')`) برمی‌گرداند",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "angular-http-interceptors",
+      "level": "Mid",
+      "type": "ShortAnswer",
+      "text": "Interceptor در `HttpClient` چیست و یک نمونه‌ی کاربردی (افزودن توکن) را چطور می‌نویسی؟",
+      "shortAnswer": "Interceptor تابعی است که درخواست/پاسخ HTTP را قبل از رسیدن به سرور یا کامپوننت می‌گیرد؛ برای توکن، لاگ، مدیریت خطا و loading. امروز به‌صورت تابعی (`HttpInterceptorFn`) نوشته و با `provideHttpClient(withInterceptors([...]))` ثبت می‌شود. درخواست immutable است و باید `clone` شود.",
+      "explanation": "```ts\nexport const authInterceptor: HttpInterceptorFn = (req, next) => {\n  const token = inject(AuthService).token();\n  const authReq = token ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req;\n  return next(authReq).pipe(\n    catchError(err => {\n      if (err.status === 401) inject(Router).navigateByUrl('/login');\n      return throwError(() => err);\n    }),\n  );\n};\n\nprovideHttpClient(withInterceptors([authInterceptor, errorInterceptor]));\n```\nترتیب ثبت مهم است (درخواست از اول به آخر، پاسخ برعکس). توکن را فقط برای دامنه‌ی خودت اضافه کن تا به سرویس‌های ثالث نشت نکند. برای refresh token باید مراقب race (چند 401 همزمان) باشی و از یک جریان مشترک (`shareReplay`) استفاده کنی.",
+      "commonMistake": "ارسال توکن به همه‌ی دامنه‌ها و تلاش برای mutate کردن مستقیم `req`.",
+      "followUp": "چطور refresh token را بدون ارسال چند درخواست refresh همزمان پیاده می‌کنی؟",
+      "estimatedSeconds": 120,
+      "minVersion": "17",
+      "tags": [
+        "http",
+        "interceptors",
+        "authentication"
+      ]
+    },
+    {
+      "id": "angular-di-providers",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "برای تزریق پیکربندی (مثلاً `API_URL`) که کلاس نیست چه می‌کنی؟",
+      "shortAnswer": "interface در runtime وجود ندارد پس نمی‌تواند token باشد. `InjectionToken<T>` نوع را حمل می‌کند و در DI کلید یکتا است.",
+      "explanation": "```ts\nexport const API_URL = new InjectionToken<string>('API_URL', {\n  providedIn: 'root',\n  factory: () => 'https://api.example.com',\n});\n\n// override در تست یا محیط دیگر\nproviders: [{ provide: API_URL, useValue: 'http://localhost:3000' }]\n\nconst url = inject(API_URL);\n```\nانواع provider: `useClass` (جایگزینی پیاده‌سازی)، `useExisting` (alias)، `useFactory` (با `deps` یا `inject()` داخل factory)، `useValue`. با `multi: true` چند مقدار زیر یک token جمع می‌شوند (مثل plugin/validator). این همان الگوی DIP در Angular است.",
+      "commonMistake": "تلاش برای inject کردن `interface` یا type alias.",
+      "followUp": "`useClass` و `useExisting` چه فرقی دارند؟",
+      "estimatedSeconds": 60,
+      "minVersion": "17",
+      "tags": [
+        "dependency-injection",
+        "injection-token",
+        "providers"
+      ],
+      "choices": [
+        {
+          "text": "یک `InjectionToken` تعریف می‌کنی و با `useValue` یا `useFactory` فراهمش می‌کنی (یا `factory` روی خود token)",
+          "isCorrect": true
+        },
+        {
+          "text": "هر رشته را می‌توان بدون تعریف token تزریق کرد"
+        },
+        {
+          "text": "مقدار را در `window` می‌گذاری"
+        },
+        {
+          "text": "از یک `interface` به‌عنوان token استفاده می‌کنی چون در runtime هم وجود دارد"
+        }
+      ]
+    },
+    {
+      "id": "angular-hierarchical-injectors",
+      "level": "Mid",
+      "type": "Conceptual",
+      "text": "سلسله‌مراتب injectorها در Angular چگونه است و provider را کجا قرار می‌دهیم؟",
+      "shortAnswer": "دو درخت وجود دارد: injectorهای محیطی (environment: platform ← root ← route-level) و injectorهای المان (component/directive). جست‌وجو از injector المان جاری به پدرها می‌رود، بعد به environment injector و در نهایت platform؛ اگر نبود `NullInjectorError`.",
+      "explanation": "جای provider تعیین‌کننده‌ی طول عمر و اشتراک است:\n| جا | طول عمر |\n|---|---|\n| `providedIn: 'root'` | singleton کل برنامه |\n| `providers` در route | برای همان feature/route (و فرزندان) |\n| `providers` در کامپوننت | یک نمونه به ازای هر نمونه‌ی کامپوننت |\n| `viewProviders` | فقط برای view خود کامپوننت نه content projected |\n\nگزینه‌های `inject(Token, { optional: true, self: true, skipSelf: true, host: true })` مسیر جست‌وجو را کنترل می‌کنند. کاربرد: state محلی هر تب/ویجت، جدا کردن سرویس فرم بین چند نمونه، و override کردن سرویس در بخشی از درخت. توجه: در lazy route سرویس‌های ثبت‌شده در `providers` آن route یک injector جدید می‌سازند و ممکن است دو نمونه‌ی متفاوت از یک سرویس ایجاد شود.",
+      "commonMistake": "فراهم کردن سرویس state هم در `root` و هم در `providers` کامپوننت و کلافه شدن بین دو نمونه.",
+      "followUp": "چرا سرویس lazy route گاهی «دو بار ساخته می‌شود»؟",
+      "estimatedSeconds": 140,
+      "minVersion": "17",
+      "tags": [
+        "dependency-injection",
+        "injectors",
+        "architecture"
+      ]
+    },
+    {
+      "id": "angular-typed-forms-nonnullable",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "در Reactive Forms تایپ‌دار، نوع `new FormControl('')` و راه رفع مشکل آن چیست؟",
+      "shortAnswer": "از Angular 14 فرم‌ها تایپ‌دارند و برای کنترل با مقدار اولیه، نوع nullable پیش‌فرض است چون reset به مقدار پیش‌فرض برنمی‌گردد بلکه `null` می‌شود مگر `nonNullable`.",
+      "explanation": "```ts\nconst fb = inject(NonNullableFormBuilder);\nform = fb.group({\n  name: ['', Validators.required],\n  age: fb.control<number | null>(null),  // عمداً nullable\n});\nform.controls.name.value;   // string\nconst raw = form.getRawValue();  // شامل کنترل‌های disabled هم می‌شود\n```\n`form.value` نوع `Partial<...>` دارد چون کنترل‌های disabled در آن نیستند؛ `getRawValue()` نوع کامل را می‌دهد. برای آرایه‌های پویا `FormArray<FormControl<string>>` را تایپ کن.",
+      "commonMistake": "ساختن فرم‌ها با `any` و از دست دادن مزیت تایپ‌دار بودن.",
+      "followUp": "چرا `form.value` نوع `Partial` دارد؟",
+      "estimatedSeconds": 60,
+      "minVersion": "17",
+      "tags": [
+        "forms",
+        "typed-forms",
+        "reactive-forms"
+      ],
+      "choices": [
+        {
+          "text": "فقط با `FormGroup<any>` تایپ‌دار می‌شود"
+        },
+        {
+          "text": "نوعش `any` است و نمی‌شود تایپ‌دار کرد"
+        },
+        {
+          "text": "نوع مقدارش `string | null` است چون `reset()` مقدار را `null` می‌کند؛ با `nonNullable: true` یا `NonNullableFormBuilder` نوع `string` می‌شود",
+          "isCorrect": true
+        },
+        {
+          "text": "نوعش `string` است و هرگز `null` نمی‌شود"
+        }
+      ]
+    },
+    {
+      "id": "angular-signal-queries",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "`box = viewChild<ElementRef>('box')` چه نوعی برمی‌گرداند و چه زمانی مقدار دارد؟",
+      "shortAnswer": "Queryهای signal-محور (`viewChild`, `viewChildren`, `contentChild`, `contentChildren`) جایگزین decoratorها هستند. برای مقدار اجباری `viewChild.required` نوع بدون `undefined` می‌دهد و اگر نباشد هنگام خواندن خطا می‌دهد.",
+      "explanation": "```ts\nexport class Search {\n  input = viewChild.required<ElementRef<HTMLInputElement>>('q');\n\n  focus() { this.input().nativeElement.focus(); }\n\n  constructor() {\n    afterNextRender(() => this.input().nativeElement.focus());\n  }\n}\n```\nمزیت: نیازی به `ngAfterViewInit` نیست، نتیجه reactive است (اگر المان با `@if` ظاهر/محو شود signal به‌روز می‌شود) و با OnPush/zoneless هماهنگ است. مراقب باش المان‌های داخل `@if` یا `@defer` ممکن است هنوز وجود نداشته باشند.",
+      "commonMistake": "خواندن query در constructor قبل از رندر و دریافت `undefined`.",
+      "followUp": "تفاوت `viewChild` و `contentChild` چیست؟",
+      "estimatedSeconds": 55,
+      "minVersion": "17",
+      "tags": [
+        "signals",
+        "queries",
+        "view"
+      ],
+      "choices": [
+        {
+          "text": "`Signal<ElementRef | undefined>`؛ بعد از رندر view مقدار می‌گیرد و می‌توان آن را در `computed`/`effect` خواند",
+          "isCorrect": true
+        },
+        {
+          "text": "خود `ElementRef` بلافاصله در constructor"
+        },
+        {
+          "text": "یک `Observable<ElementRef>`"
+        },
+        {
+          "text": "یک آرایه‌ی `ElementRef[]`"
+        }
+      ]
+    },
+    {
+      "id": "angular-track-performance",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "در لیستی که کاربر می‌تواند آیتم‌ها را مرتب یا حذف کند، `track` را روی چه چیزی می‌گذاری؟",
+      "shortAnswer": "با track روی id، وقتی ترتیب عوض می‌شود Angular همان DOM node و state داخلی آن (فوکوس، مقدار input، انیمیشن) را جابه‌جا می‌کند.",
+      "explanation": "نمونه:\n```html\n@for (todo of todos(); track todo.id) {\n  <app-todo [todo]=\"todo\" />\n}\n```\nاگر روی `$index` track کنی و آیتم اول حذف شود، همه‌ی آیتم‌های بعد «تغییر یافته» فرض می‌شوند و کامپوننت‌ها دوباره bind می‌شوند و state محلی (مثل متن نیمه‌تایپ‌شده) به آیتم اشتباه می‌ماند. `track` با تابع/identity شیء هم در صورتی که سرور شیءهای جدید بدهد همه‌ی DOM را بازسازی می‌کند.",
+      "commonMistake": "track کردن روی `$index` یا identity شیء در لیست پویا.",
+      "followUp": "چه زمانی `track $index` قابل قبول است؟",
+      "estimatedSeconds": 50,
+      "minVersion": "17",
+      "tags": [
+        "control-flow",
+        "performance",
+        "for"
+      ],
+      "choices": [
+        {
+          "text": "لازم نیست، Angular خودش متوجه می‌شود"
+        },
+        {
+          "text": "روی `Math.random()` تا همیشه به‌روز شود"
+        },
+        {
+          "text": "روی `$index` چون سریع‌ترین است"
+        },
+        {
+          "text": "روی شناسه‌ی یکتای پایدار آیتم (مثل `item.id`) تا Angular بتواند DOM را جابه‌جا کند نه بازسازی",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "angular-ssr-hydration",
+      "level": "Mid",
+      "type": "Conceptual",
+      "text": "SSR و Hydration در Angular چه مشکلی را حل می‌کنند و چه مراقبت‌هایی در کد لازم است؟",
+      "shortAnswer": "SSR صفحه را روی سرور رندر می‌کند تا کاربر و موتورهای جستجو سریع HTML واقعی ببینند (بهبود LCP و SEO). Hydration به‌جای پاک و بازسازی DOM، همان DOM سرور را در مرورگر «زنده» می‌کند (listenerها و state را متصل می‌کند) و از پرش/فلیکر جلوگیری می‌کند. Event replay رویدادهای قبل از hydrate شدن را دوباره پخش می‌کند.",
+      "explanation": "پیکربندی: `provideClientHydration(withEventReplay())` (و در پروژه‌ی جدید با `ng new --ssr`). مراقبت‌ها:\n- به `window`, `document`, `localStorage` مستقیم در کد مشترک دسترسی نداشته باش؛ از `inject(DOCUMENT)`، `isPlatformBrowser` یا `afterNextRender` استفاده کن.\n- DOM را با `innerHTML`/دستکاری مستقیم تغییر نده؛ باعث hydration mismatch (خطاهای `NG05xx`) می‌شود.\n- داده‌ی HTTP سرور به‌طور خودکار در `TransferState` cache می‌شود تا در کلاینت دوباره فراخوانی نشود.\n- برای مسیرهای کاملاً استاتیک یا تعاملی‌محور می‌توانی render mode را per-route انتخاب کنی (SSR/SSG/CSR).",
+      "commonMistake": "دسترسی به `window` در constructor سرویس‌ها که سرور را crash می‌کند.",
+      "followUp": "incremental hydration (`@defer (hydrate on ...)`) چه می‌کند؟",
+      "estimatedSeconds": 140,
+      "minVersion": "17",
+      "tags": [
+        "ssr",
+        "hydration",
+        "performance"
+      ]
+    },
+    {
+      "id": "angular-input-transform-computed",
+      "level": "Mid",
+      "type": "MultipleChoice",
+      "text": "به‌جای `ngOnChanges`، وقتی می‌خواهی از یک ورودی signal مقدار مشتق‌شده بسازی چه می‌کنی؟",
+      "shortAnswer": "ورودی‌های signal به‌طور طبیعی reactive‌اند؛ هر مقدار مشتق را با `computed` تعریف کن و `transform` تبدیل ورودی‌های رشته‌ای HTML (`<app-x size=\"5\">`) را انجام می‌دهد.",
+      "explanation": "```ts\nexport class Pager {\n  page  = input(1, { transform: numberAttribute });\n  total = input.required<number>();\n  size  = input(10, { transform: numberAttribute });\n\n  pages = computed(() => Math.ceil(this.total() / this.size()));\n  hasNext = computed(() => this.page() < this.pages());\n}\n```\n`booleanAttribute` هم برای ورودی‌های مثل `<app-x disabled>` (بدون مقدار) مفید است. این الگو `ngOnChanges` و `SimpleChanges` را تقریباً بی‌مصرف می‌کند.",
+      "commonMistake": "نگه‌داشتن کپی ورودی در فیلد محلی و فراموش کردن همگام‌سازی با تغییرات بعدی.",
+      "followUp": "چرا `booleanAttribute` برای ورودی‌های flag لازم است؟",
+      "estimatedSeconds": 55,
+      "minVersion": "17.1",
+      "tags": [
+        "signals",
+        "inputs",
+        "computed"
+      ],
+      "choices": [
+        {
+          "text": "باز هم `ngOnChanges` می‌نویسی چون با input() کار نمی‌کند"
+        },
+        {
+          "text": "ورودی را در متغیر عمومی کپی می‌کنی"
+        },
+        {
+          "text": "از `computed()` (یا `linkedSignal`) روی خود signal ورودی استفاده می‌کنی و برای تبدیل نوع attribute از `transform` مثل `numberAttribute`",
+          "isCorrect": true
+        },
+        {
+          "text": "از `setInterval` برای بررسی تغییر استفاده می‌کنی"
+        }
+      ]
+    },
+    {
+      "id": "angular-testing-components",
+      "level": "Mid",
+      "type": "ShortAnswer",
+      "text": "یک کامپوننت را چطور تست می‌کنی؟ چه چیزهایی را mock می‌کنی؟",
+      "shortAnswer": "با `TestBed` کامپوننت standalone را با providerهای تست می‌سازیم، `fixture.detectChanges()` (یا `await fixture.whenStable()`) را می‌زنیم و رفتار قابل مشاهده (DOM و خروجی‌ها) را assert می‌کنیم. وابستگی‌های بیرونی (HTTP، سرویس‌ها) را با `provideHttpClientTesting()` یا mock جایگزین می‌کنیم. از Angular 21 اجراکننده‌ی پیش‌فرض تست Vitest است (Karma/Jasmine هنوز پشتیبانی می‌شوند).",
+      "explanation": "```ts\nit('نام کاربر را نشان می‌دهد', async () => {\n  await TestBed.configureTestingModule({\n    imports: [UserCard],\n    providers: [{ provide: UserApi, useValue: { get: () => of({ name: 'Sara' }) } }],\n  }).compileComponents();\n\n  const fixture = TestBed.createComponent(UserCard);\n  fixture.componentRef.setInput('id', 1);      // ورودی signal\n  await fixture.whenStable();\n\n  expect(fixture.nativeElement.textContent).toContain('Sara');\n});\n```\nنکات: ورودی signal را با `setInput` بده؛ به رفتار (متن، رویداد) تست بزن نه جزئیات پیاده‌سازی؛ برای تعامل با کامپوننت‌های Material/CDK از component harness استفاده کن؛ تست‌های سرویس بدون `TestBed` هم با `runInInjectionContext` یا ساخت مستقیم ممکن است.",
+      "commonMistake": "تست کردن متدهای private و جزئیات داخلی به‌جای رفتار کاربر.",
+      "followUp": "چطور HTTP را در تست verify می‌کنی؟ (`HttpTestingController`)",
+      "estimatedSeconds": 120,
+      "minVersion": "17",
+      "tags": [
+        "testing",
+        "testbed",
+        "vitest"
+      ]
+    },
+    {
+      "id": "angular-zoneless-cd",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "Zoneless چیست، چه مزایایی دارد و مهاجرت به آن چه الزاماتی دارد؟",
+      "shortAnswer": "به‌جای Zone.js که API‌های async مرورگر (setTimeout، Promise، رویدادها) را monkey-patch می‌کند تا بعد از هر کدام change detection اجرا شود، در حالت zoneless Angular فقط با «اعلان‌های صریح» تغییر را می‌فهمد: تغییر signal خوانده‌شده در قالب، رویداد template، `markForCheck()`، `async` pipe، `ComponentRef.setInput`، و اتصال/جداشدن view.",
+      "explanation": "مزایا: باندل کوچک‌تر (حذف zone.js)، stack traceهای تمیزتر، سازگاری با `async/await` بومی، کارایی بهتر (CD فقط جاهای لازم) و اجتناب از CD اضافه. `provideZonelessChangeDetection()` از v20.2 پایدار است و از Angular 21 اپلیکیشن‌های جدید به‌صورت پیش‌فرض zoneless هستند.\n\nالزامات مهاجرت:\n1. همه‌ی کامپوننت‌ها با OnPush سازگار باشند (state در signal یا immutable).\n2. mutation مخفی بعد از async (مثلاً `setTimeout(() => this.x = 1)`) را به signal تبدیل کن؛ وگرنه UI به‌روز نمی‌شود.\n3. وابستگی به `NgZone.onStable/run` و کتابخانه‌های وابسته به zone را بررسی کن.\n4. zone.js را از polyfillها و تست‌ها حذف کن (با `provideZonelessChangeDetection` در TestBed).\n\nخطاهای رایج: «UI با تاخیر/هرگز آپدیت نمی‌شود» به‌معنی تغییر state بدون اعلان است. Angular DevTools و مقایسه‌ی رفتار قبل/بعد کمک می‌کند.",
+      "commonMistake": "حذف zone.js بدون تبدیل state به signal و دیدن UI «قفل‌شده».",
+      "followUp": "چطور کتابخانه‌ای که به Zone وابسته است را در برنامه‌ی zoneless سازگار می‌کنی؟",
+      "estimatedSeconds": 170,
+      "minVersion": "20",
+      "tags": [
+        "zoneless",
+        "change-detection",
+        "signals"
+      ]
+    },
+    {
+      "id": "angular-signal-forms-benefit",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "مزیت اصلی Signal Forms نسبت به Reactive Forms چیست؟",
+      "shortAnswer": "Signal Forms (از `@angular/forms/signals`) در Angular 21 به‌صورت تجربی معرفی شد و در Angular 22 پایدار است (تابع `form()` در typingهای v22 با `@publicApi 22.0` علامت خورده). فرم بر پایه‌ی یک `WritableSignal` ساخته می‌شود.",
+      "explanation": "تعریف مدل و قواعد (نام‌های `required`, `email`, `minLength` در API v22 وجود دارند):\n```ts\nimport { form, required, email, minLength } from '@angular/forms/signals';\n\nmodel = signal({ email: '', password: '' });\n\nloginForm = form(this.model, (path) => {\n  required(path.email);\n  email(path.email);\n  minLength(path.password, 8);\n});\n```\nنتیجه‌ی این طراحی: هم‌راستایی با بقیه‌ی برنامه‌ی signal-محور، کد کمتر برای فیلد شرطی و اعتبارسنجی بین‌فیلدی، و ساخت کنترل‌های سفارشی ساده‌تر بدون پیاده‌سازی `ControlValueAccessor`. ملاحظات: جزئیات API (نحوه‌ی اتصال فیلد به template و خواندن state) را از مستندات نسخه‌ی هدف بخوان؛ Reactive Forms همچنان پشتیبانی می‌شوند و لازم نیست فوراً بازنویسی شوند؛ و کتابخانه‌های UI ثالث باید پشتیبانی کنند.",
+      "commonMistake": "ادعا کردن جزئیات API از حفظ بدون بررسی مستندات؛ این API در نسخه‌های اول تجربی چند بار تغییر کرد.",
+      "followUp": "چرا `ControlValueAccessor` به‌عنوان مکانیزم پل بین فرم و کنترل سفارشی پیچیده است؟",
+      "estimatedSeconds": 80,
+      "minVersion": "21",
+      "tags": [
+        "forms",
+        "signal-forms",
+        "signals"
+      ],
+      "choices": [
+        {
+          "text": "باعث می‌شوند اعتبارسنجی حذف شود"
+        },
+        {
+          "text": "فقط برای فرم‌های تک‌فیلدی مناسب‌اند"
+        },
+        {
+          "text": "مدل داده خودش یک signal است و وضعیت فرم از آن به‌صورت reactive و type-safe مشتق می‌شود؛ قواعد اعتبارسنجی به‌صورت schema روی مدل تعریف می‌شوند، بدون `FormControl` جدا",
+          "isCorrect": true
+        },
+        {
+          "text": "فقط سرعت رندر HTML را بیشتر می‌کنند"
+        }
+      ]
+    },
+    {
+      "id": "angular-resource-api",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "`resource()` و `httpResource()` چه کاری می‌کنند؟",
+      "shortAnswer": "`resource` برای بارگذاری داده‌ی وابسته به signal است و جایگزین الگوی «effect + subscribe + set signal» می‌شود. `httpResource` نسخه‌ی مبتنی بر `HttpClient` است (interceptorها اعمال می‌شوند). هر دو در Angular 19 تا 21 تجربی/پیش‌نمایش بودند و در Angular 22 پایدار شده‌اند (`@publicApi 22.0`).",
+      "explanation": "نمونه:\n```ts\nid = input.required<string>();\nuser = httpResource<User>(() => `/api/users/${this.id()}`);\n\n// در قالب\n@if (user.isLoading()) { <spinner /> }\n@else if (user.error()) { <p>خطا</p> }\n@else { {{ user.value()?.name }} }\n```\nبا تغییر `id` درخواست قبلی لغو و درخواست جدید ارسال می‌شود (شبیه `switchMap`)؛ `reload()` دستی هم دارد. برای mutationها (POST/PUT) مناسب نیست؛ آنجا از `HttpClient` مستقیم استفاده کن. اگر پروژه روی نسخه‌ی قدیمی‌تر از 22 است وضعیت پایداری را در مستندات همان نسخه بررسی کن.",
+      "commonMistake": "استفاده از `resource` برای عملیات نوشتن (mutation) و انتظار رفتار ذخیره‌ی خودکار.",
+      "followUp": "چطور مقدار قبلی را هنگام reload نشان می‌دهی تا UI نپرد؟",
+      "estimatedSeconds": 75,
+      "minVersion": "19",
+      "tags": [
+        "resource",
+        "http",
+        "signals"
+      ],
+      "choices": [
+        {
+          "text": "جایگزین کامل `HttpClient` و interceptorها هستند"
+        },
+        {
+          "text": "درخواست را فقط یک‌بار در عمر برنامه اجرا می‌کنند و هرگز reload نمی‌شوند"
+        },
+        {
+          "text": "فقط یک wrapper برای `setTimeout` هستند"
+        },
+        {
+          "text": "درخواست/عملیات async را به‌صورت signal مدل می‌کنند (`value`, `status`, `error`, `isLoading`) و وقتی signalهای پارامترشان عوض شود دوباره بارگذاری (و اجرای قبلی را لغو) می‌کنند",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "angular-expression-changed",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "خطای `ExpressionChangedAfterItHasBeenCheckedError` چیست، چرا رخ می‌دهد و چطور اصولی رفعش می‌کنی؟",
+      "shortAnswer": "در حالت dev، Angular بعد از هر change detection یک دور «verify» اجرا می‌کند و اگر مقدار یک binding بین دو دور عوض شده باشد این خطا را می‌دهد؛ یعنی state در حین رندر تغییر کرده و جریان داده یک‌طرفه (بالا به پایین) نقض شده است.",
+      "explanation": "علت‌های رایج: فرزند در `ngAfterViewInit`/`ngOnInit` state والد را عوض می‌کند، یک getter که هر بار مقدار متفاوت برمی‌گرداند (`Date.now()`, `Math.random()`)، یا سرویس مشترکی که وسط CD تغییر می‌کند.\n\nرفع اصولی:\n1. state را به جای مشترک بالاتر ببر یا از signal + `computed` برای مشتق‌ها استفاده کن (خطای مشابه در signalها هم گزارش می‌شود اگر داخل قالب `set` شود).\n2. برای کار DOM بعد از رندر از `afterNextRender` استفاده کن.\n3. جریان داده را یک‌طرفه کن (ورودی پایین، رویداد بالا).\n\nراه‌حل‌های تسکینی مثل `setTimeout(...)`، `Promise.resolve().then(...)` یا `cdr.detectChanges()` علامت طراحی مشکل‌دار است و فقط در حالت ناچاری و با توضیح مناسب. این خطا در production نمایش داده نمی‌شود ولی باگ UI (نمایش مقدار قدیمی) واقعی است.",
+      "commonMistake": "پنهان کردن خطا با `setTimeout` و بی‌توجهی به اینکه ریشه‌ی آن جریان دوطرفه‌ی داده است.",
+      "followUp": "چرا این خطا در build production نمایش داده نمی‌شود؟",
+      "estimatedSeconds": 140,
+      "minVersion": "17",
+      "tags": [
+        "change-detection",
+        "debugging",
+        "errors"
+      ]
+    },
+    {
+      "id": "angular-rxjs-vs-signals",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "RxJS و Signals را در Angular مدرن چطور تقسیم‌کار می‌دهی؟",
+      "shortAnswer": "Signal برای «state و مقدار مشتق‌شده‌ی همزمان» (UI state، ورودی‌ها، computed) که همیشه مقدار جاری دارد. RxJS برای «جریان رویداد در زمان» (debounce، retry، ترکیب چند جریان، WebSocket، لغو) که عملگرهای زمان‌محور می‌خواهند. با `toSignal`/`toObservable` بینشان پل می‌زنیم.",
+      "explanation": "قاعده‌ی سرانگشتی:\n- خواندن/نمایش مقدار در قالب و state محلی ← signal.\n- Async یک‌باره‌ی وابسته به signal ← `resource`/`httpResource`.\n- رویدادهای پیچیده‌ی زمانی (typeahead، polling با backoff، race between streams) ← RxJS، سپس `toSignal` برای مصرف در قالب.\n- HTTP هنوز Observable برمی‌گرداند و interceptorها RxJS هستند.\n\nSignal هیچ مفهوم «زمان» ندارد: دو `set` پشت‌سرهم فقط آخرین مقدار را می‌بیند (glitch-free)، در حالی که Observable هر emit را منتشر می‌کند. از تبدیل رفت‌وبرگشتی بی‌دلیل بین دو دنیا پرهیز کن و مرز را در سرویس‌ها نگه دار.",
+      "commonMistake": "نوشتن همه‌چیز با RxJS یا همه‌چیز با signal بدون توجه به ماهیت مسئله.",
+      "followUp": "چرا `toObservable` مقدارهای میانی را ممکن است نبیند؟",
+      "estimatedSeconds": 130,
+      "minVersion": "17",
+      "tags": [
+        "rxjs",
+        "signals",
+        "architecture"
+      ]
+    },
+    {
+      "id": "angular-dynamic-components",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "برای ساخت دینامیک یک کامپوننت با ورودی signal (مثل `input.required()`) و مقداردهی ورودی از بیرون چه می‌کنی؟",
+      "shortAnswer": "ورودی‌های signal فقط‌خواندنی‌اند و از بیرون به‌صورت assign قابل تنظیم نیستند؛ `setInput` مسیر رسمی است و change detection را هم درست علامت می‌زند.",
+      "explanation": "```ts\nexport class Host {\n  vcr = viewChild.required('slot', { read: ViewContainerRef });\n\n  async open() {\n    const { Chart } = await import('./chart');\n    const ref = this.vcr().createComponent(Chart);\n    ref.setInput('data', this.data());\n    ref.instance.selected.subscribe(...);   // خروجی‌ها\n  }\n}\n```\nیا اعلانی در قالب:\n```html\n<ng-container *ngComponentOutlet=\"cmp(); inputs: { data: data() }\" />\n```\nنکات: نمونه‌ی ساخته‌شده را با `ref.destroy()` (یا با پاک کردن VCR) نابود کن؛ کامپوننت lazy را با dynamic `import()` بارگذاری کن؛ و برای تزریق provider خاص `injector`/`environmentInjector` بده.",
+      "commonMistake": "فراموش کردن destroy کامپوننت‌های ساخته‌شده و نشت حافظه.",
+      "followUp": "چه زمانی به‌جای dynamic component از `@switch` یا `@defer` استفاده می‌کنی؟",
+      "estimatedSeconds": 80,
+      "minVersion": "17",
+      "tags": [
+        "dynamic-components",
+        "viewcontainerref",
+        "signals"
+      ],
+      "choices": [
+        {
+          "text": "با `document.createElement` و `appendChild`"
+        },
+        {
+          "text": "با `ViewContainerRef.createComponent` یا `NgComponentOutlet` و برای ورودی‌ها `componentRef.setInput('name', value)` (یا `ngComponentOutletInputs`)",
+          "isCorrect": true
+        },
+        {
+          "text": "مستقیماً `componentRef.instance.name = value` چون ورودی signal یک property ساده است"
+        },
+        {
+          "text": "ورودی‌ها را فقط از طریق constructor می‌دهی"
+        }
+      ]
+    },
+    {
+      "id": "angular-angular-performance",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "برنامه‌ی Angular کند است؛ چطور تحلیل و بهینه می‌کنی؟",
+      "shortAnswer": "ابتدا اندازه‌گیری کن: Lighthouse/Web Vitals (LCP، INP، CLS)، Angular DevTools Profiler برای change detection، و ابزار تحلیل باندل (`source-map-explorer`, esbuild bundle stats). سپس بر اساس گلوگاه: اندازه‌ی باندل اولیه، رندر/CD، یا شبکه.",
+      "explanation": "ابزارها:\n- **باندل:** lazy route، `@defer`، حذف وابستگی‌های سنگین، budgets در `angular.json`، استفاده از builder مبتنی بر esbuild/Vite.\n- **رندر:** `OnPush`/signals/zoneless، `track` درست در `@for`، حذف متدهای سنگین از قالب، virtual scroll (`cdk-virtual-scroll`) برای لیست‌های بزرگ.\n- **بارگذاری:** SSR + hydration، `NgOptimizedImage` (lazy، `priority` برای LCP، srcset)، preload/prefetch استراتژی route، فونت‌های بهینه.\n- **شبکه:** cache/`shareReplay`، cancel با `switchMap`، `HttpClient` با `withFetch` در SSR.\n- **پایدار:** performance budget در CI تا رگرسیون گرفته شود.\n\nاولویت‌بندی با داده انجام می‌شود: معمولاً بزرگ‌ترین برد از کاهش JS اولیه و بهبود LCP می‌آید نه ریزبهینه‌سازی کد.",
+      "commonMistake": "بهینه‌سازی حدسی بدون profiler و اثبات قبل/بعد.",
+      "followUp": "INP را چطور در برنامه‌ی Angular بهبود می‌دهی؟",
+      "estimatedSeconds": 150,
+      "minVersion": "17",
+      "tags": [
+        "performance",
+        "bundle-size",
+        "web-vitals"
+      ]
+    },
+    {
+      "id": "angular-cva-control-value-accessor",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "برای اینکه یک کامپوننت سفارشی با `formControlName`/`ngModel` کار کند چه چیزی را پیاده‌سازی می‌کنی؟",
+      "shortAnswer": "CVA پل بین API فرم‌ها و کنترل سفارشی است: `writeValue` مقدار مدل را به view می‌رساند، `registerOnChange` تابعی است که باید هنگام تغییر مقدار از سمت کاربر صدا بزنی، و `registerOnTouched` برای وضعیت touched.",
+      "explanation": "```ts\n@Component({\n  selector: 'app-rating',\n  providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => Rating), multi: true }],\n  template: `...`,\n})\nexport class Rating implements ControlValueAccessor {\n  value = signal(0);\n  disabled = signal(false);\n  private onChange: (v: number) => void = () => {};\n  private onTouched: () => void = () => {};\n\n  writeValue(v: number) { this.value.set(v ?? 0); }\n  registerOnChange(fn: (v: number) => void) { this.onChange = fn; }\n  registerOnTouched(fn: () => void) { this.onTouched = fn; }\n  setDisabledState(d: boolean) { this.disabled.set(d); }\n\n  pick(n: number) { this.value.set(n); this.onChange(n); this.onTouched(); }\n}\n```\nنکته: `writeValue` نباید `onChange` را صدا بزند (حلقه). با Signal Forms این بویلرپلیت کمتر می‌شود.",
+      "commonMistake": "صدا زدن `onChange` داخل `writeValue` و ایجاد حلقه‌ی بی‌نهایت.",
+      "followUp": "چرا `forwardRef` لازم است؟",
+      "estimatedSeconds": 90,
+      "minVersion": "17",
+      "tags": [
+        "forms",
+        "control-value-accessor",
+        "custom-controls"
+      ],
+      "choices": [
+        {
+          "text": "باید `FormControl` را extend کنی"
+        },
+        {
+          "text": "اینترفیس `ControlValueAccessor` (`writeValue`, `registerOnChange`, `registerOnTouched`, و اختیاری `setDisabledState`) و ثبت آن با توکن `NG_VALUE_ACCESSOR`",
+          "isCorrect": true
+        },
+        {
+          "text": "فقط یک `@Input() value` و `@Output() valueChange` کافی است و هیچ اینترفیسی لازم نیست"
+        },
+        {
+          "text": "فقط `ngOnChanges` را پیاده‌سازی می‌کنی"
+        }
+      ]
+    },
+    {
+      "id": "angular-feature-architecture",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "ساختار پروژه‌ی Angular بزرگ را چطور طراحی می‌کنی؟",
+      "shortAnswer": "به‌صورت feature-محور (نه نوع‌محور): هر feature پوشه‌ی خودش با route، کامپوننت‌ها، سرویس‌ها و state. لایه‌ها: `core` (singletonها)، `shared` (UI و ابزار بدون وابستگی به feature)، `features/*` (lazy) و مرز‌های وابستگی با ESLint/Nx تحمیل می‌شوند (feature نباید به feature دیگر مستقیم وابسته باشد).",
+      "explanation": "الگوها:\n- کامپوننت‌های «smart/container» (دسترسی به state و سرویس) و «presentational» (ورودی/خروجی، OnPush).\n- API عمومی هر feature با یک `index.ts`؛ بقیه private.\n- providerهای feature در `routes` همان feature (route-level providers) نه root.\n- کد مشترک به کتابخانه‌های داخلی (Nx libs) شکسته شود تا cache و affected-build کار کند.\n- نام‌گذاری و راهنمای سبک یکسان و lint/format خودکار.\n\nاز `shared` عظیم که هر چیز را قورت می‌دهد (امروز هم `SharedModule` بزرگ) پرهیز کن؛ باعث چرخه و باندل بزرگ می‌شود. معماری باید به تیم و اندازه‌ی محصول بخورد؛ در پروژه‌ی کوچک Nx و لایه‌بندی سنگین overkill است.",
+      "commonMistake": "ساختار نوع‌محور (`components/`, `services/`, `pipes/` سراسری) که با رشد پروژه وابستگی‌ها را گم می‌کند.",
+      "followUp": "چطور جلوی import کردن غیرمجاز بین featureها را می‌گیری؟",
+      "estimatedSeconds": 140,
+      "minVersion": "17",
+      "tags": [
+        "architecture",
+        "project-structure",
+        "nx"
+      ]
+    },
+    {
+      "id": "angular-state-management-choice",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "مدیریت state را در Angular چطور انتخاب می‌کنی؟ چه زمانی NgRx لازم است؟",
+      "shortAnswer": "از ساده به پیچیده: state محلی با signal در کامپوننت ← سرویس با signal برای state مشترک feature ← NgRx SignalStore (ساختار و قرارداد بدون boilerplate) ← NgRx Store کلاسیک (action/reducer/effect) برای state بزرگ، جریان‌های رویدادمحور، نیاز به DevTools/time-travel و تیم‌های بزرگ.",
+      "explanation": "معیار تصمیم:\n| نیاز | انتخاب |\n|---|---|\n| state فقط داخل یک کامپوننت | `signal`/`linkedSignal` |\n| اشتراک بین چند کامپوننت یک feature | سرویس با signal |\n| state ساختاریافته با متدها و computed، بدون boilerplate | SignalStore |\n| رویدادمحور، audit، undo، نیاز به devtools | NgRx Store + Effects |\n\nداده‌ی سرور را «state کلاینت» نکن: با `resource`/کش کوئری (مثل TanStack Query برای Angular) مدیریتش کن. مدل فکری: state را کم و normalized نگه دار، مقدار مشتق را با computed بساز و تغییرات را فقط از طریق API مشخص انجام بده. اضافه کردن NgRx به یک برنامه‌ی کوچک بویلرپلیت بی‌دلیل است.",
+      "commonMistake": "شروع پروژه‌ی ساده با NgRx Store کامل «برای اینکه استاندارد است».",
+      "followUp": "چرا نگه‌داشتن کپی داده‌ی سرور در store اغلب مشکل ایجاد می‌کند؟",
+      "estimatedSeconds": 130,
+      "minVersion": "17",
+      "tags": [
+        "state-management",
+        "ngrx",
+        "signals"
+      ]
+    },
+    {
+      "id": "angular-injection-context",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "چرا `inject(Service)` داخل یک متد که بعداً (مثلاً با کلیک) صدا زده می‌شود خطای `NG0203` می‌دهد و راه‌حل چیست؟",
+      "shortAnswer": "`inject()` به injector «جاری» متکی است که فقط هنگام ساخت (instantiation) یا در متدهای خاصی مثل factoryها و guardها تنظیم است.",
+      "explanation": "```ts\nexport class Panel {\n  private injector = inject(Injector);\n  private api = inject(Api);              // ✅ field initializer\n\n  onClick() {\n    // const x = inject(Other);           // ❌ NG0203\n    runInInjectionContext(this.injector, () => {\n      const x = inject(Other);            // ✅\n    });\n  }\n}\n```\nتوابعی که داخل خود `inject()` دارند (مثل `takeUntilDestroyed()`, `toSignal()`, `effect()`) هم همین محدودیت را دارند؛ یا در field/constructor بساز یا `injector` بده (`effect(..., { injector })`). این طراحی کد قابل‌ترکیب و تست‌پذیر را ممکن می‌کند (توابع helper می‌توانند inject کنند).",
+      "commonMistake": "صدا زدن `inject()` داخل callback یا `setTimeout`.",
+      "followUp": "چطور تابع کمکی قابل استفاده‌ی مجدد می‌نویسی که داخلش `inject()` دارد؟",
+      "estimatedSeconds": 65,
+      "minVersion": "17",
+      "tags": [
+        "dependency-injection",
+        "inject",
+        "injection-context"
+      ],
+      "choices": [
+        {
+          "text": "چون `inject` فقط در سرویس‌های root کار می‌کند"
+        },
+        {
+          "text": "این خطا فقط در حالت production رخ می‌دهد"
+        },
+        {
+          "text": "چون باید حتماً با `new` صدا زده شود"
+        },
+        {
+          "text": "چون `inject()` فقط در injection context (constructor، field initializer، factory) مجاز است؛ راه‌حل: در field بگیر یا با `runInInjectionContext(injector, ...)` اجرا کن",
+          "isCorrect": true
+        }
+      ]
+    },
+    {
+      "id": "angular-after-render",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "`afterNextRender` چه کاربردی دارد؟",
+      "shortAnswer": "`afterNextRender` (و `afterEveryRender`، `afterRenderEffect` در نسخه‌های اخیر) فقط در پلتفرم مرورگر اجرا می‌شوند، پس برای اندازه‌گیری DOM، فوکوس، مقداردهی کتابخانه‌هایی مثل chart ایمن‌اند.",
+      "explanation": "```ts\nconstructor() {\n  afterNextRender(() => {\n    this.chart = new Chart(this.canvas().nativeElement, config);\n  });\n}\n```\nمزیت نسبت به `ngAfterViewInit`: در SSR اجرا نمی‌شود (دسترسی به `window` خطا نمی‌دهد) و مرحله‌ی (phase) `read`/`write` را می‌توان مشخص کرد تا از layout thrashing جلوگیری شود. نسخه‌ی مبتنی بر signal (`afterRenderEffect`) برای واکنش به تغییر signal بعد از رندر است. برای پاک‌سازی از `DestroyRef` استفاده کن.",
+      "commonMistake": "استفاده از `setTimeout(..., 0)` برای «صبر تا رندر شدن DOM».",
+      "followUp": "phaseهای `earlyRead`, `write`, `mixedReadWrite`, `read` برای چیست؟",
+      "estimatedSeconds": 65,
+      "minVersion": "19",
+      "tags": [
+        "lifecycle",
+        "ssr",
+        "dom"
+      ],
+      "choices": [
+        {
+          "text": "اجرای دوباره‌ی کد در هر تغییر signal"
+        },
+        {
+          "text": "جایگزین `ngOnDestroy` برای پاک‌سازی"
+        },
+        {
+          "text": "اجرای کد یک‌بار بعد از اینکه Angular DOM را رندر کرد و فقط در مرورگر؛ مناسب کار با DOM/کتابخانه‌های خارجی به‌صورت امن در حضور SSR",
+          "isCorrect": true
+        },
+        {
+          "text": "اجرای کد قبل از constructor کامپوننت"
+        }
+      ]
+    },
+    {
+      "id": "angular-global-error-handling",
+      "level": "Senior",
+      "type": "ShortAnswer",
+      "text": "مدیریت خطای سراسری را در برنامه‌ی Angular چطور طراحی می‌کنی؟",
+      "shortAnswer": "در چند لایه: خطاهای UI/کد با `ErrorHandler` سفارشی (لاگ به سرویس مانیتورینگ مثل Sentry و نمایش پیام مناسب)، خطاهای HTTP با interceptor (تبدیل به پیام قابل فهم، retry با backoff برای خطاهای گذرا، ریدایرکت 401)، و مرز خطا در سطح route/feature. رویدادهای سراسری مرورگر (`error`, `unhandledrejection`) هم باید ثبت شوند.",
+      "explanation": "```ts\n@Injectable()\nexport class AppErrorHandler implements ErrorHandler {\n  private log = inject(LogService);\n  handleError(error: unknown) {\n    this.log.report(error);                 // Sentry/Application Insights\n    inject(ToastService).show('مشکلی پیش آمد');\n  }\n}\nproviders: [{ provide: ErrorHandler, useClass: AppErrorHandler }]\n```\nنکات: خطای مورد انتظار (مثل 404 یا اعتبارسنجی) را در همان جا مدیریت کن نه سراسری؛ اطلاعات حساس را لاگ نکن؛ یک correlation id برای ردیابی سمت سرور اضافه کن؛ و در SSR خطاها باید سمت سرور هم لاگ شوند. در پروژه‌های جدید CLI پیکربندی مربوط به شنیدن خطاهای سراسری مرورگر (`provideBrowserGlobalErrorListeners`) در `app.config` وجود دارد.",
+      "commonMistake": "قورت دادن خطاها در `catchError(() => EMPTY)` که مشکل واقعی را پنهان می‌کند.",
+      "followUp": "چه خطاهایی را نباید retry کرد؟",
+      "estimatedSeconds": 110,
+      "minVersion": "17",
+      "tags": [
+        "error-handling",
+        "monitoring",
+        "http"
+      ]
+    },
+    {
+      "id": "angular-security-sanitizer",
+      "level": "Senior",
+      "type": "MultipleChoice",
+      "text": "استفاده از `DomSanitizer.bypassSecurityTrustHtml(userInput)` چه معنایی دارد؟",
+      "shortAnswer": "Angular به‌صورت پیش‌فرض مقدارهای bind‌شده را escape/sanitize می‌کند (`{{ }}`، `[innerHTML]`، `[href]`). `bypassSecurityTrust*` به کامپایلر می‌گوید «این مقدار امن است» و اگر ورودی کاربر باشد راه XSS باز می‌شود.",
+      "explanation": "ملاحظات امنیتی:\n- تا حد ممکن `bypassSecurityTrust*` را استفاده نکن؛ در صورت نیاز (مثلاً URL ویدیوی امن) آن را فقط روی مقدارهای allow-list‌شده استفاده کن.\n- `[innerHTML]` مقدار را sanitize می‌کند ولی نه برای همه‌ی سناریوها؛ HTML کاربر را با کتابخانه‌ی sanitizer معتبر (DOMPurify) پاک‌سازی کن.\n- Content Security Policy و Trusted Types لایه‌ی دفاعی اضافه‌اند.\n- توکن‌ها را در `httpOnly` cookie نگه دار نه `localStorage` (در برابر XSS).\n- CSRF برای cookie-based auth: از XSRF token مکانیزم `HttpClient` (`withXsrfConfiguration`) استفاده کن.",
+      "commonMistake": "فراخوانی `bypassSecurityTrustUrl` برای رفع خطای «unsafe:» بدون بررسی منبع URL.",
+      "followUp": "چرا نگه‌داشتن JWT در `localStorage` ریسک دارد؟",
+      "estimatedSeconds": 70,
+      "minVersion": "17",
+      "tags": [
+        "security",
+        "xss",
+        "sanitization"
+      ],
+      "choices": [
+        {
+          "text": "فقط تگ `script` را حذف می‌کند"
+        },
+        {
+          "text": "sanitization داخلی Angular را برای آن مقدار خاموش می‌کنی و مسئولیت جلوگیری از XSS کاملاً با توست",
+          "isCorrect": true
+        },
+        {
+          "text": "Angular مقدار را قوی‌تر پاک‌سازی می‌کند"
+        },
+        {
+          "text": "بی‌خطر است چون Angular همه چیز را escape می‌کند"
+        }
+      ]
+    },
+    {
+      "id": "angular-upgrade-strategy",
+      "level": "Senior",
+      "type": "ShortAnswer",
+      "text": "پروژه‌ای از Angular 17 به 22 مهاجرت می‌کند؛ چطور پیش می‌روی؟",
+      "shortAnswer": "نسخه به نسخه (یک major در هر بار) با `ng update @angular/core @angular/cli`، خواندن راهنمای رسمی Update Guide برای هر نسخه، اجرای schematicهای مهاجرت، بررسی وابستگی‌های ثالث (peer dependency) و اجرای کامل تست/CI بعد از هر گام. هر گام یک PR جدا تا رگرسیون پیدا شود.",
+      "explanation": "نکات:\n1. پیش از شروع: کامیت تمیز، تست سبز، به‌روزرسانی Node/TypeScript سازگار با نسخه‌ی هدف.\n2. schematicهای مفید: تبدیل به control flow (`ng generate @angular/core:control-flow`)، standalone، `inject()`، signal inputs/outputs/queries؛ اینها اختیاری ولی ارزشمندند.\n3. کتابخانه‌های ثالث (Material, NgRx, ...) را همراه به‌روز کن؛ اگر منتشر نشده بود جایگزین یا fork موقت.\n4. پرچم‌های رفتار جدید (مثل zoneless) را مستقل از ارتقا و با feature flag فعال کن.\n5. بعد از ارتقا تحلیل باندل و پرفورمنس تا رگرسیون غیرمنتظره نباشد.\n\nپرش چند نسخه‌ای در `ng update` پشتیبانی نمی‌شود. از v22 به بعد چرخه‌ی major سالی یک‌بار اعلام شده که برنامه‌ریزی ارتقا را ساده‌تر می‌کند.",
+      "commonMistake": "ارتقای همزمان چند major و تغییر همزمان معماری، که پیدا کردن منشأ باگ را غیرممکن می‌کند.",
+      "followUp": "چه چیزی را قبل از ارتقا در CI اضافه می‌کنی تا اعتماد به تغییرات بیشتر شود؟",
+      "estimatedSeconds": 120,
+      "minVersion": "17",
+      "tags": [
+        "upgrade",
+        "migration",
+        "ng-update"
+      ]
+    },
+    {
+      "id": "angular-incremental-hydration",
+      "level": "Senior",
+      "type": "Conceptual",
+      "text": "Incremental hydration چیست و چه فرقی با hydration معمولی دارد؟",
+      "shortAnswer": "در hydration معمولی کل صفحه‌ی SSR شده در مرورگر hydrate می‌شود و JS همه‌ی کامپوننت‌ها باید دانلود و اجرا شود. در incremental hydration بخش‌هایی که با `@defer (hydrate on ...)` علامت خورده‌اند به‌صورت HTML استاتیک می‌مانند و فقط وقتی trigger (مثل viewport، interaction، hover، idle) فعال شد JS آنها لود و hydrate می‌شود.",
+      "explanation": "```html\n@defer (hydrate on viewport) {\n  <product-reviews [productId]=\"id()\" />\n} @placeholder { <p>نظرات</p> }\n\n@defer (hydrate on interaction) { <comment-form /> }\n```\nنتیجه: JS اولیه کمتر، TTI/INP بهتر برای صفحات محتوا-محور. رویدادهای کاربر روی بخش hydrate‌نشده با event replay ذخیره و بعداً اجرا می‌شوند. الزام‌ها: SSR فعال، `withIncrementalHydration()`، و کامپوننت‌های داخل بلوک باید standalone باشند و از DOM سرور مطابق قالب استفاده کنند (بدون دستکاری مستقیم). برای بخش‌های تعاملی حیاتی above-the-fold از hydrate زودهنگام استفاده کن.",
+      "commonMistake": "defer کردن hydration بخشی که کاربر بلافاصله با آن تعامل می‌کند و ایجاد حس «تأخیر» در UI.",
+      "followUp": "چه ریسکی دارد اگر محتوای SSR و رندر کلاینت ناهمخوان باشند؟",
+      "estimatedSeconds": 120,
+      "minVersion": "19",
+      "tags": [
+        "ssr",
+        "hydration",
+        "defer"
+      ]
+    }
+  ]
+}
