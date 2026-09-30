@@ -29,6 +29,13 @@ public class ContentTests
     }
 
     [Fact]
+    public void Question_bank_covers_all_six_technologies()
+    {
+        var slugs = ContentSeeder.LoadFiles(ContentDirectory()).Select(f => f.Technology.Slug).Order().ToArray();
+        Assert.Equal(["angular", "dotnet", "javascript", "nextjs", "react", "typescript"], slugs);
+    }
+
+    [Fact]
     public void Every_technology_has_at_least_50_questions_across_all_levels()
     {
         foreach (var file in ContentSeeder.LoadFiles(ContentDirectory()))
