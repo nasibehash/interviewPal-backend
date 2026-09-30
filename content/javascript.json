@@ -429,7 +429,7 @@
           "text": "هر دو دقیقاً یک کار را می‌کنند و تنها تفاوت‌شان در سینتکس و نام‌گذاری است و رفتار یکسانی دارند"
         },
         {
-          "text": "`for...in` روی کلیدهای enumerable (شامل ارثی‌ها) و `for...of` روی مقدارهای iterable",
+          "text": "`for...in` روی کلیدهای enumerable شیء (شامل ارثی‌ها) و `for...of` روی مقدارهای یک iterable پیمایش می‌کند",
           "isCorrect": true
         }
       ]
@@ -557,7 +557,7 @@
           "text": "`allSettled` هرگز resolve نمی‌شود اگر حتی یکی از promiseها reject شود و `all` نتیجه‌ی جزئی و ناقص برمی‌گرداند"
         },
         {
-          "text": "`all` با اولین reject بلافاصله reject می‌شود؛ `allSettled` صبر می‌کند و نتیجه‌ی همه را گزارش می‌دهد",
+          "text": "`all` با اولین reject بلافاصله reject می‌شود؛ `allSettled` صبر می‌کند و وضعیت و نتیجه‌ی همه‌ی promiseها را گزارش می‌دهد",
           "isCorrect": true
         },
         {
@@ -654,7 +654,7 @@
       ],
       "choices": [
         {
-          "text": "`call` و `apply` تابع را همان لحظه اجرا می‌کنند و `bind` تابع جدیدی با `this` ثابت برمی‌گرداند",
+          "text": "`call` و `apply` تابع را همان لحظه اجرا می‌کنند و `bind` تابع جدیدی با `this` ثابت برمی‌گرداند که بعداً صدا زده می‌شود",
           "isCorrect": true
         },
         {
@@ -689,7 +689,7 @@
           "text": "فقط یک کپی سطحی می‌سازد و اشیای تو در تو بین دو نسخه مشترک می‌مانند، درست مثل عملگر spread"
         },
         {
-          "text": "Date، Map، Set و ارجاع دایره‌ای را کپی می‌کند ولی روی تابع `DataCloneError` می‌دهد",
+          "text": "Date، Map، Set و ارجاع دایره‌ای را درست کپی می‌کند ولی روی تابع `DataCloneError` می‌دهد و prototype را حفظ نمی‌کند",
           "isCorrect": true
         },
         {
@@ -1172,7 +1172,7 @@
           "text": "فقط برای شبیه‌سازی private field در کلاس‌های قدیمی که `#` ندارند"
         },
         {
-          "text": "برای رهگیری عملیات شیء (reactivity، validation) و استفاده از `Reflect` برای رفتار پیش‌فرض در trapها",
+          "text": "برای رهگیری عملیات شیء (reactivity، validation) و استفاده از `Reflect` برای رفتار پیش‌فرض در trapها تا semantics درست بماند",
           "isCorrect": true
         }
       ]
@@ -1444,7 +1444,7 @@
       ],
       "choices": [
         {
-          "text": "در Node پیش‌فرض process با خطا متوقف می‌شود و در مرورگر رویداد `unhandledrejection` ثبت می‌شود",
+          "text": "در Node پیش‌فرض process با خطا متوقف می‌شود و در مرورگر رویداد `unhandledrejection` روی window ثبت می‌شود و برنامه ادامه می‌دهد",
           "isCorrect": true
         },
         {
