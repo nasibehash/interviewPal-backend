@@ -28,7 +28,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-else
+else if (builder.Configuration.GetValue("HttpsRedirection:Enabled", true))
 {
     app.UseHttpsRedirection();
 }
