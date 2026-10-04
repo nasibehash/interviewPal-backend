@@ -45,7 +45,20 @@ In Development the OpenAPI document is served at `/openapi/v1.json`.
 |---|---|---|
 | `ConnectionStrings:Default` | `Data Source=interviewpal.db` | SQLite database |
 | `Content:Path` | `<output>/content` | Directory containing the question JSON files |
+| `HttpsRedirection:Enabled` | `true` | Redirect HTTP to HTTPS outside Development (the Docker image turns it off) |
 | `Cors:AllowedOrigins` | `["http://localhost:4200"]` | Origins allowed to call the API (the Angular dev server) |
+
+## Docker
+
+```bash
+docker build -t interviewpal-api .
+docker run -p 8080:8080 -v interviewpal-data:/data interviewpal-api
+# http://localhost:8080/health
+```
+
+The image is multi-stage (SDK to ASP.NET runtime), runs as a non-root user and keeps the SQLite database in the `/data`
+volume. Settings are environment variables, for example `Cors__AllowedOrigins__0=https://app.example.com` or
+`ConnectionStrings__Default="Data Source=/data/other.db"`.
 
 ## API
 
