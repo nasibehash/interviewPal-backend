@@ -6,6 +6,9 @@ and the follow-up question an interviewer usually asks next.
 
 The question content is written in Persian; technical terms and code stay in English.
 
+**Live app:** https://interview-pal-frontend-sable.vercel.app (frontend: [interviewPal-frontend](https://github.com/nasibehash/interviewPal-frontend))
+· **API:** https://interviewpal-backend.onrender.com (`/health`, `/api/technologies`)
+
 > Status: **Phase 1 (MVP)** – question bank + practice sessions. No login yet: the client keeps the
 > learner's progress in the browser. See [Roadmap](#roadmap).
 
