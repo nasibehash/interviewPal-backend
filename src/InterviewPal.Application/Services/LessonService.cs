@@ -4,7 +4,7 @@ using InterviewPal.Domain;
 
 namespace InterviewPal.Application.Services;
 
-public class LessonService(ILessonCatalog catalog)
+public class LessonService(ILessonCatalog catalog, ProgressService progress, ICurrentUser currentUser)
 {
     public IReadOnlyList<LessonSummaryDto> List(string? kind, string? level, string? category, string? technology)
     {
@@ -55,13 +55,16 @@ public class LessonService(ILessonCatalog catalog)
                 e.Choices.Select(c => new ChoiceDto(c.Id, c.Text)).ToList())).ToList());
     }
 
-    public CheckExerciseResult Check(string id, string exerciseId, CheckExerciseRequest request)
+    public async Task<CheckExerciseResult> CheckAsync(string id, string exerciseId, CheckExerciseRequest request, CancellationToken ct)
     {
         var exercise = Find(id).Exercises.FirstOrDefault(e => e.Id == exerciseId)
                        ?? throw new NotFoundException($"Exercise '{exerciseId}' was not found in lesson '{id}'.");
         var choice = exercise.Choices.FirstOrDefault(c => c.Id == request.ChoiceId)
                      ?? throw new RequestValidationException($"Choice {request.ChoiceId} does not exist.");
         var correct = exercise.Choices.Single(c => c.IsCorrect);
+        if (currentUser.Id is { } userId)
+            await progress.RecordLessonAnswerAsync(userId, id, exercise.Id, choice.IsCorrect, ct);
+
         return new CheckExerciseResult(exercise.Id, choice.IsCorrect, correct.Id, exercise.Explanation);
     }
 
