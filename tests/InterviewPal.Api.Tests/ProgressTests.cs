@@ -243,6 +243,7 @@ public class MigrationTests
     [Theory]
     [InlineData("postgres://user:p%40ss@db.example.com:5432/shop", "Host=db.example.com;Port=5432;Database=shop;Username=user;Password=p@ss;SSL Mode=Require")]
     [InlineData("postgresql://u:pw@host/db?sslmode=disable", "Host=host;Port=5432;Database=db;Username=u;Password=pw;SSL Mode=Disable")]
+    [InlineData("postgresql://u:pw@h-pooler.neon.tech/neondb?sslmode=require&channel_binding=require", "Host=h-pooler.neon.tech;Port=5432;Database=neondb;Username=u;Password=pw;SSL Mode=Require;Channel Binding=Require")]
     [InlineData("Host=x;Database=y", "Host=x;Database=y")]
     public void Hosted_database_urls_become_connection_strings(string url, string expected) =>
         Assert.Equal(expected, PostgresConnection.Normalize(url));

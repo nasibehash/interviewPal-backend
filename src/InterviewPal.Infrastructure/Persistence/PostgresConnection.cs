@@ -30,7 +30,11 @@ public static class PostgresConnection
         foreach (var pair in uri.Query.TrimStart('?').Split('&', StringSplitOptions.RemoveEmptyEntries))
         {
             var kv = pair.Split('=', 2);
-            if (kv.Length == 2) builder[Uri.UnescapeDataString(kv[0])] = Uri.UnescapeDataString(kv[1]);
+            if (kv.Length != 2) continue;
+            var key = Uri.UnescapeDataString(kv[0]);
+            // Neon adds channel_binding=require; Npgsql spells that keyword "Channel Binding"
+            if (key.Equals("channel_binding", StringComparison.OrdinalIgnoreCase)) key = "Channel Binding";
+            builder[key] = Uri.UnescapeDataString(kv[1]);
         }
 
         return builder.ConnectionString;
