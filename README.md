@@ -131,7 +131,8 @@ src/
   InterviewPal.Api             controllers, error handling, composition root
 tests/
   InterviewPal.Api.Tests       integration tests (WebApplicationFactory) + content validation
-content/                       the question bank, one JSON file per technology
+content/                       the question bank, one JSON file per technology; lessons/ holds the 24 lessons
+docs/                          implementation document (backend.md) and its PDF
 ```
 
 Dependencies point inwards: `Api → Application ← Infrastructure`, `Application → Domain`.
@@ -211,3 +212,9 @@ real question bank in `content/`.
 2. **Phase 2** – accounts, server-side history, timed interview mode, weak-topic report, ≥ 100 questions per technology.
 3. **Phase 3** – spaced repetition, admin panel for questions, short coding questions.
 4. **Phase 4** – AI interviewer: free-text/voice answers with feedback and follow-up questions.
+
+## Documentation
+
+The implementation document lives in [`docs/backend.md`](docs/backend.md) and is also available as a PDF:
+[`docs/InterviewPal-Backend.pdf`](docs/InterviewPal-Backend.pdf). Update both together with the README when a change
+affects how the API works.
