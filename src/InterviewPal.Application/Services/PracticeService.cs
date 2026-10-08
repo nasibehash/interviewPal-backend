@@ -4,7 +4,7 @@ using InterviewPal.Domain;
 
 namespace InterviewPal.Application.Services;
 
-public class PracticeService(IQuestionRepository questions)
+public class PracticeService(IQuestionRepository questions, ProgressService progress, ICurrentUser currentUser)
 {
     private const int WeakTagThresholdPercent = 60;
 
@@ -66,7 +66,7 @@ public class PracticeService(IQuestionRepository questions)
             .OrderBy(b => b.Percent).ThenByDescending(b => b.Total)
             .ToList();
 
-        return new EvaluationResult(
+        var result = new EvaluationResult(
             total,
             correct,
             Percent(correct, total),
@@ -79,6 +79,12 @@ public class PracticeService(IQuestionRepository questions)
             weakTags,
             graded.Where(g => !g.Result.IsCorrect).Select(g => g.Question.Id).ToList(),
             graded.Select(g => g.Result).ToList());
+
+        // a logged-in learner's result is kept on the server; an anonymous one is only returned
+        if (currentUser.Id is { } userId)
+            await progress.RecordPracticeAsync(userId, request.Mode, result, ct);
+
+        return result;
     }
 
     private static CheckAnswerResult Grade(Question q, int? choiceId, bool? knewIt)

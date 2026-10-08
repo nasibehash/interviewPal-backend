@@ -9,8 +9,8 @@ The question content is written in Persian; technical terms and code stay in Eng
 **Live app:** https://interview-pal-frontend-sable.vercel.app (frontend: [interviewPal-frontend](https://github.com/nasibehash/interviewPal-frontend))
 · **API:** https://interviewpal-backend.onrender.com (`/health`, `/api/technologies`)
 
-> Status: **Phase 1 (MVP)** – question bank + practice sessions. No login yet: the client keeps the
-> learner's progress in the browser. See [Roadmap](#roadmap).
+> Status: **Phase 2** – question bank, practice sessions, lessons and **user accounts** with server-side progress.
+> Accounts are optional: the client still works without logging in. See [Roadmap](#roadmap).
 
 ## What is in the box
 
@@ -50,6 +50,22 @@ In Development the OpenAPI document is served at `/openapi/v1.json`.
 | `Content:Path` | `<output>/content` | Directory containing the question JSON files |
 | `HttpsRedirection:Enabled` | `true` | Redirect HTTP to HTTPS outside Development (the Docker image turns it off) |
 | `Cors:AllowedOrigins` | `["http://localhost:4200"]` | Origins allowed to call the API (the Angular dev server) |
+| `Database:Provider` | `Sqlite` | `Sqlite` or `Postgres` (production) |
+| `Auth:JwtKey` | dev-only default | JWT signing key; **required outside Development, at least 32 characters** (the app refuses to start otherwise) |
+| `Auth:AccessTokenMinutes` / `RefreshTokenDays` | `15` / `30` | Token lifetimes |
+| `Auth:MaxFailedLogins` / `LockoutMinutes` | `5` / `15` | Temporary account lockout |
+| `Auth:RequestsPerMinute` | `30` | Per-IP limit on the auth endpoints |
+
+## Database
+
+SQLite (default) is created with `EnsureCreated` and is meant for development and tests. For production set
+`Database__Provider=Postgres` and `ConnectionStrings__Default` to a `key=value` string or a
+`postgres://user:pass@host/db` URL (the URL form requires SSL); EF Core migrations are applied on startup. Add a
+migration with:
+
+```bash
+dotnet ef migrations add <Name> -p src/InterviewPal.Infrastructure -s src/InterviewPal.Api -o Persistence/Migrations
+```
 
 ## Docker
 
@@ -61,7 +77,10 @@ docker run -p 8080:8080 -v interviewpal-data:/data interviewpal-api
 
 The image is multi-stage (SDK to ASP.NET runtime), runs as a non-root user and keeps the SQLite database in the `/data`
 volume. Settings are environment variables, for example `Cors__AllowedOrigins__0=https://app.example.com` or
-`ConnectionStrings__Default="Data Source=/data/other.db"`.
+`ConnectionStrings__Default="Data Source=/data/other.db"`. Outside Development `Auth__JwtKey` is required.
+
+On Render the free disk is ephemeral, so accounts need a persistent PostgreSQL database (Neon, Supabase or Render
+Postgres): set `Database__Provider=Postgres`, `ConnectionStrings__Default` and `Auth__JwtKey` on the service.
 
 ## API
 
@@ -77,9 +96,27 @@ volume. Settings are environment variables, for example `Cors__AllowedOrigins__0
 | POST | `/api/practice/evaluate` | Grade a whole session (interview mode) and get scores per technology, level and weak tags |
 | GET | `/api/lessons` | Algorithm and design-pattern lessons – filters: `kind` (`Algorithm`/`DesignPattern`), `level`, `category`, `technology` |
 | GET | `/api/lessons/{id}?technology=react` | One lesson with the real-world scenario, explanation, the implementation written for the chosen technology and its exercises (without answers) |
-| POST | `/api/lessons/{id}/exercises/{exerciseId}/check` | Grade one exercise of a lesson (`{ "choiceId": 1 }`) |
+| POST | `/api/lessons/{id}/exercises/{exerciseId}/check` | Grade one exercise of a lesson (`{ "choiceId": 1 }`); stored for a logged-in learner |
+| POST | `/api/auth/register`, `/api/auth/login` | Create an account / log in. Returns the access token; the refresh token is set as a cookie |
+| POST | `/api/auth/refresh`, `/api/auth/logout` | Rotate the refresh token / end the session |
+| GET | `/api/auth/me` | Current user (bearer token) |
+| POST | `/api/auth/change-password`, `/api/auth/delete-account` | Change the password (ends every session) / delete the account and its data |
+| GET, DELETE | `/api/me/progress` | History, per-question stats and lesson results of the logged-in learner / clear them |
+| POST | `/api/me/progress/import` | One-time import of what the browser collected before the account existed |
 
 Errors are returned as RFC 7807 `ProblemDetails`.
+
+### Accounts
+
+- Access token: JWT (HS256), 15 minutes, sent as `Authorization: Bearer`. Refresh token: random value in an
+  `httpOnly`, `SameSite=Strict` cookie scoped to `/api/auth` (`Secure` behind HTTPS), rotated on every refresh; only its
+  hash is stored. Reusing a rotated token revokes all of that user's sessions.
+- Passwords use PBKDF2 (ASP.NET `PasswordHasher`), 8 to 128 characters. Login errors do not reveal whether the email
+  exists; five wrong passwords lock the account for 15 minutes and every IP is limited per minute on the auth routes.
+- Because the cookie is `SameSite=Strict`, the browser must see the app and the API on one origin. The frontend does that
+  with a proxy (`/api` is rewritten by Vercel, nginx and the dev server).
+- While the request carries a valid token, `POST /api/practice/evaluate` and the lesson `check` record the result;
+  without a token they behave as before.
 
 ### Practice flow
 
@@ -127,7 +164,7 @@ order is shuffled deterministically (seeded by the exercise id) so authors do no
 src/
   InterviewPal.Domain          entities and enums (no dependencies)
   InterviewPal.Application     contracts (DTOs), services, repository interfaces
-  InterviewPal.Infrastructure  EF Core (SQLite), repositories, JSON content seeder + validator
+  InterviewPal.Infrastructure  EF Core (SQLite / PostgreSQL + migrations), repositories, password and token services, content seeder
   InterviewPal.Api             controllers, error handling, composition root
 tests/
   InterviewPal.Api.Tests       integration tests (WebApplicationFactory) + content validation
@@ -140,8 +177,7 @@ Application services depend on repository interfaces only.
 
 Notes:
 
-- The database is created with `EnsureCreated` for the MVP. EF Core migrations arrive together with the
-  user/history tables in Phase 2.
+- SQLite is created with `EnsureCreated`; PostgreSQL uses EF Core migrations (see [Database](#database)).
 - The question bank is data, not code. The seeder upserts by question id and stores a content hash, so
   unchanged questions keep their choice ids across restarts, changed questions are updated, and questions
   removed from the files are deleted.
@@ -203,13 +239,15 @@ dotnet test
 ```
 
 The suite starts the real application against an isolated SQLite file and covers the endpoints
-(filters, paging, grading, evaluation, reports, validation and error responses) plus the integrity of the
-real question bank in `content/`.
+(filters, paging, grading, evaluation, reports, validation and error responses), the account flows (registration,
+login, lockout, token rotation and reuse detection, password change, deletion, progress and import) plus the integrity of
+the real question bank in `content/`. Set `TEST_POSTGRES_ADMIN` to a connection string to run the same suite on PostgreSQL.
 
 ## Roadmap
 
-1. **Phase 1 (this repo)** – question bank, practice sessions, evaluation, reports.
-2. **Phase 2** – accounts, server-side history, timed interview mode, weak-topic report, ≥ 100 questions per technology.
+1. **Phase 1** – question bank, practice sessions, evaluation, reports.
+2. **Phase 2 (this repo, in progress)** – accounts and server-side history are done; timed interview mode, weak-topic report and ≥ 100 questions per technology remain.
+   Email verification and password reset are not implemented yet.
 3. **Phase 3** – spaced repetition, admin panel for questions, short coding questions.
 4. **Phase 4** – AI interviewer: free-text/voice answers with feedback and follow-up questions.
 

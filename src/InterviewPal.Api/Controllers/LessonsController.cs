@@ -20,6 +20,6 @@ public class LessonsController(LessonService lessons) : ControllerBase
 
     /// <summary>Grade one exercise of a lesson.</summary>
     [HttpPost("{id}/exercises/{exerciseId}/check")]
-    public CheckExerciseResult Check(string id, string exerciseId, CheckExerciseRequest request) =>
-        lessons.Check(id, exerciseId, request);
+    public async Task<CheckExerciseResult> Check(string id, string exerciseId, CheckExerciseRequest request, CancellationToken ct) =>
+        await lessons.CheckAsync(id, exerciseId, request, ct);
 }

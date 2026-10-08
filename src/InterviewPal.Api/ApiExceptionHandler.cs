@@ -14,6 +14,9 @@ public class ApiExceptionHandler(IProblemDetailsService problemDetails, ILogger<
         {
             NotFoundException => (StatusCodes.Status404NotFound, "Not found"),
             RequestValidationException => (StatusCodes.Status400BadRequest, "Invalid request"),
+            UnauthorizedException => (StatusCodes.Status401Unauthorized, "Unauthorized"),
+            ConflictException => (StatusCodes.Status409Conflict, "Conflict"),
+            TooManyRequestsException => (StatusCodes.Status429TooManyRequests, "Too many requests"),
             _ => (StatusCodes.Status500InternalServerError, "Unexpected error")
         };
 

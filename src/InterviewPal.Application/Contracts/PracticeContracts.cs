@@ -65,6 +65,9 @@ public record EvaluatePracticeRequest
 {
     [Required, MinLength(1), MaxLength(100)]
     public List<SubmittedAnswer> Answers { get; init; } = [];
+
+    /// <summary>Mode of the session, stored in the history of a logged-in learner.</summary>
+    public PracticeMode Mode { get; init; } = PracticeMode.Learning;
 }
 
 public record ScoreBreakdown(string Key, int Total, int Correct, int Percent);
