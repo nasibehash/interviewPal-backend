@@ -1,4 +1,5 @@
 using InterviewPal.Api;
+using InterviewPal.Api.Auth;
 using InterviewPal.Application;
 using InterviewPal.Infrastructure;
 
@@ -11,6 +12,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 
 builder.Services.AddApplication();
+builder.Services.AddAccounts();
 builder.Services.AddInfrastructure();
 
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
@@ -23,6 +25,7 @@ var contentDirectory = builder.Configuration["Content:Path"]
                        ?? Path.Combine(AppContext.BaseDirectory, "content");
 await app.Services.InitializeDatabaseAsync(contentDirectory);
 
+app.UseForwardedHeaders();
 app.UseExceptionHandler();
 if (app.Environment.IsDevelopment())
 {
@@ -34,6 +37,9 @@ else if (builder.Configuration.GetValue("HttpsRedirection:Enabled", true))
 }
 
 app.UseCors();
+app.UseRateLimiter();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
