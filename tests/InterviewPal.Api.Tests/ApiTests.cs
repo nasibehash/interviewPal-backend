@@ -8,7 +8,7 @@ namespace InterviewPal.Api.Tests;
 
 public class ApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
 {
-    private readonly HttpClient _client = factory.CreateClient();
+    private readonly HttpClient _client = Accounts.LoggedInClient(factory);
 
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
 

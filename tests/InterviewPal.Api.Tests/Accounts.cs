@@ -39,6 +39,14 @@ public static class Accounts
     public static HttpClient NewClient(ApiFactory factory) =>
         factory.CreateClient(new() { HandleCookies = false, AllowAutoRedirect = false });
 
+    /// <summary>A client of a fresh account that sends its access token with every request.</summary>
+    public static HttpClient LoggedInClient(ApiFactory factory)
+    {
+        var session = Register(factory).GetAwaiter().GetResult();
+        session.Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", session.AccessToken);
+        return session.Client;
+    }
+
     public static async Task<Session> Register(ApiFactory factory, string? password = null)
     {
         var client = NewClient(factory);

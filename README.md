@@ -10,7 +10,7 @@ The question content is written in Persian; technical terms and code stay in Eng
 · **API:** https://interviewpal-backend.onrender.com (`/health`, `/api/technologies`)
 
 > Status: **Phase 2** – question bank, practice sessions, lessons and **user accounts** with server-side progress.
-> Accounts are optional: the client still works without logging in. See [Roadmap](#roadmap).
+> Everything except `/health` and the register/login/refresh endpoints requires a login. See [Roadmap](#roadmap).
 
 ## What is in the box
 
@@ -115,8 +115,8 @@ Errors are returned as RFC 7807 `ProblemDetails`.
   exists; five wrong passwords lock the account for 15 minutes and every IP is limited per minute on the auth routes.
 - Because the cookie is `SameSite=Strict`, the browser must see the app and the API on one origin. The frontend does that
   with a proxy (`/api` is rewritten by Vercel, nginx and the dev server).
-- While the request carries a valid token, `POST /api/practice/evaluate` and the lesson `check` record the result;
-  without a token they behave as before.
+- Questions, technologies, lessons and practice endpoints require a bearer token (`401` without one). Only `/health`
+  and `/api/auth/register`, `login`, `refresh`, `logout` are public. `evaluate` and the lesson `check` record the result for the user.
 
 ### Practice flow
 
