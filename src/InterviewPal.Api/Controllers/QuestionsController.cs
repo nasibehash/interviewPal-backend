@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using InterviewPal.Application.Abstractions;
 using InterviewPal.Application.Contracts;
 using InterviewPal.Application.Services;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InterviewPal.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/questions")]
 public class QuestionsController(QuestionService questions, ReportService reports) : ControllerBase
 {

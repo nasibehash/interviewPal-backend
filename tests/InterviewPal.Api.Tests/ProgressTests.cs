@@ -10,9 +10,9 @@ namespace InterviewPal.Api.Tests;
 public class ProgressTests(ApiFactory factory) : IClassFixture<ApiFactory>
 {
     /// <summary>A valid evaluation request: the real id of a choice of the multiple-choice question, and a self-assessment.</summary>
-    private static async Task<object> Answers(HttpClient client, bool knewIt)
+    private static async Task<object> Answers(Session session, bool knewIt)
     {
-        var detail = await client.GetFromJsonAsync<JsonElement>("/api/questions/sample-mcq-junior");
+        var detail = await session.GetJson("/api/questions/sample-mcq-junior");
         var choiceId = detail.GetProperty("question").GetProperty("choices")[0].GetProperty("id").GetInt32();
         return new
         {
@@ -39,15 +39,29 @@ public class ProgressTests(ApiFactory factory) : IClassFixture<ApiFactory>
         Assert.Equal(HttpStatusCode.Unauthorized, (await client.DeleteAsync("/api/me/progress")).StatusCode);
     }
 
-    [Fact]
-    public async Task An_anonymous_evaluation_is_returned_but_not_stored()
+    [Theory]
+    [InlineData("GET", "/api/technologies")]
+    [InlineData("GET", "/api/questions")]
+    [InlineData("GET", "/api/questions/sample-mcq-junior")]
+    [InlineData("GET", "/api/lessons")]
+    [InlineData("GET", "/api/lessons/sample-lesson?technology=javascript")]
+    [InlineData("POST", "/api/practice/sessions")]
+    [InlineData("POST", "/api/practice/evaluate")]
+    [InlineData("POST", "/api/practice/questions/sample-mcq-junior/check")]
+    [InlineData("POST", "/api/lessons/sample-lesson/exercises/e1/check")]
+    public async Task Practice_and_content_need_a_login(string method, string url)
     {
         var client = Accounts.NewClient(factory);
-        var before = await factory.WithDbAsync(db => db.PracticeHistory.CountAsync());
-        var response = await client.PostAsJsonAsync("/api/practice/evaluate", await Answers(client, true));
+        var response = await client.SendAsync(new HttpRequestMessage(new HttpMethod(method), url));
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
 
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Equal(before, await factory.WithDbAsync(db => db.PracticeHistory.CountAsync()));
+    [Fact]
+    public async Task Health_and_auth_stay_public()
+    {
+        var client = Accounts.NewClient(factory);
+        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/health")).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/auth/me")).StatusCode);
     }
 
     [Fact]
@@ -86,8 +100,8 @@ public class ProgressTests(ApiFactory factory) : IClassFixture<ApiFactory>
     public async Task Stats_accumulate_and_the_latest_answer_decides_lastCorrect()
     {
         var session = await Accounts.Register(factory);
-        await session.Send(HttpMethod.Post, "/api/practice/evaluate", await Answers(session.Client, false));
-        await session.Send(HttpMethod.Post, "/api/practice/evaluate", await Answers(session.Client, true));
+        await session.Send(HttpMethod.Post, "/api/practice/evaluate", await Answers(session, false));
+        await session.Send(HttpMethod.Post, "/api/practice/evaluate", await Answers(session, true));
 
         var progress = await session.GetJson("/api/me/progress");
         Assert.Equal(2, progress.GetProperty("history").GetArrayLength());
@@ -102,7 +116,7 @@ public class ProgressTests(ApiFactory factory) : IClassFixture<ApiFactory>
     {
         var a = await Accounts.Register(factory);
         var b = await Accounts.Register(factory);
-        await a.Send(HttpMethod.Post, "/api/practice/evaluate", await Answers(a.Client, true));
+        await a.Send(HttpMethod.Post, "/api/practice/evaluate", await Answers(a, true));
 
         Assert.Equal(1, (await a.GetJson("/api/me/progress")).GetProperty("history").GetArrayLength());
         Assert.Equal(0, (await b.GetJson("/api/me/progress")).GetProperty("history").GetArrayLength());
@@ -126,16 +140,6 @@ public class ProgressTests(ApiFactory factory) : IClassFixture<ApiFactory>
         await session.Send(HttpMethod.Post, "/api/lessons/sample-lesson/exercises/e1/check", new { choiceId = right });
         var second = (await session.GetJson("/api/me/progress")).GetProperty("lessons")[0];
         Assert.True(second.GetProperty("answers").GetProperty("e1").GetBoolean());
-    }
-
-    [Fact]
-    public async Task An_anonymous_lesson_check_stores_nothing()
-    {
-        var before = await factory.WithDbAsync(db => db.LessonProgress.CountAsync());
-        var response = await Accounts.NewClient(factory)
-            .PostAsJsonAsync("/api/lessons/sample-lesson/exercises/e1/check", new { choiceId = 0 });
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Equal(before, await factory.WithDbAsync(db => db.LessonProgress.CountAsync()));
     }
 
     private static object LocalProgress(string at = "2026-03-01T10:00:00.000Z") => new
@@ -213,7 +217,7 @@ public class ProgressTests(ApiFactory factory) : IClassFixture<ApiFactory>
     public async Task Clear_removes_the_progress_but_not_the_account()
     {
         var session = await Accounts.Register(factory);
-        await session.Send(HttpMethod.Post, "/api/practice/evaluate", await Answers(session.Client, true));
+        await session.Send(HttpMethod.Post, "/api/practice/evaluate", await Answers(session, true));
         await session.Send(HttpMethod.Post, "/api/lessons/sample-lesson/exercises/e1/check", new { choiceId = 0 });
 
         Assert.Equal(HttpStatusCode.NoContent, (await session.Send(HttpMethod.Delete, "/api/me/progress")).StatusCode);
